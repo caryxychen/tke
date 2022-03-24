@@ -52,7 +52,7 @@ func (Strategy) DefaultGarbageCollectionPolicy(ctx context.Context) rest.Garbage
 
 // NamespaceScoped is false for namespaceSets
 func (Strategy) NamespaceScoped() bool {
-	return false
+	return true
 }
 
 // Export strips fields that can not be set by the user.

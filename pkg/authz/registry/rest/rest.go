@@ -60,8 +60,8 @@ func (*StorageProvider) GroupName() string {
 func (s *StorageProvider) v1Storage(apiResourceConfigSource serverstorage.APIResourceConfigSource, restOptionsGetter generic.RESTOptionsGetter) map[string]rest.Storage {
 	storageMap := make(map[string]rest.Storage)
 	{
-		configMapREST := roletemplatestorage.NewStorage(restOptionsGetter)
-		storageMap["roletemplates"] = configMapREST.RoleTemplate
+		roletemplateREST := roletemplatestorage.NewStorage(restOptionsGetter)
+		storageMap["roletemplates"] = roletemplateREST.RoleTemplate
 	}
 	return storageMap
 }
