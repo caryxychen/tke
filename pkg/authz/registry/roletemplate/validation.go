@@ -24,22 +24,20 @@ import (
 	"tkestack.io/tke/api/authz"
 )
 
-// ValidateName is a ValidateNameFunc for names that must be a DNS
-// subdomain.
-var ValidateName = apimachineryvalidation.ValidateNamespaceName
+var ValidateRoleTemplateName = apimachineryvalidation.NameIsDNSLabel
 
 // ValidateRoleTemplate tests if required fields in the cluster are set.
-func ValidateRoleTemplate(configmap *authz.RoleTemplate) field.ErrorList {
-	allErrs := apimachineryvalidation.ValidateObjectMeta(&configmap.ObjectMeta, false, ValidateName, field.NewPath("metadata"))
+func ValidateRoleTemplate(roleTemplate *authz.RoleTemplate) field.ErrorList {
+	allErrs := apimachineryvalidation.ValidateObjectMeta(&roleTemplate.ObjectMeta, true, ValidateRoleTemplateName, field.NewPath("metadata"))
 
 	return allErrs
 }
 
 // ValidateRoleTemplateUpdate tests if required fields in the namespace set are
 // set during an update.
-func ValidateRoleTemplateUpdate(configmap *authz.RoleTemplate, old *authz.RoleTemplate) field.ErrorList {
-	allErrs := apimachineryvalidation.ValidateObjectMetaUpdate(&configmap.ObjectMeta, &old.ObjectMeta, field.NewPath("metadata"))
-	allErrs = append(allErrs, ValidateRoleTemplate(configmap)...)
+func ValidateRoleTemplateUpdate(roleTemplate *authz.RoleTemplate, old *authz.RoleTemplate) field.ErrorList {
+	allErrs := apimachineryvalidation.ValidateObjectMetaUpdate(&roleTemplate.ObjectMeta, &old.ObjectMeta, field.NewPath("metadata"))
+	allErrs = append(allErrs, ValidateRoleTemplate(roleTemplate)...)
 
 	return allErrs
 }
