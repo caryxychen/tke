@@ -28,6 +28,7 @@ import (
 	"tkestack.io/tke/api/authz"
 	authzv1 "tkestack.io/tke/api/authz/v1"
 	"tkestack.io/tke/pkg/apiserver/storage"
+	configmapstorage "tkestack.io/tke/pkg/authz/registry/configmap/storage"
 	roletemplatestorage "tkestack.io/tke/pkg/authz/registry/roletemplate/storage"
 )
 
@@ -60,8 +61,10 @@ func (*StorageProvider) GroupName() string {
 func (s *StorageProvider) v1Storage(apiResourceConfigSource serverstorage.APIResourceConfigSource, restOptionsGetter generic.RESTOptionsGetter) map[string]rest.Storage {
 	storageMap := make(map[string]rest.Storage)
 	{
+		configmapREST := configmapstorage.NewStorage(restOptionsGetter)
 		roletemplateREST := roletemplatestorage.NewStorage(restOptionsGetter)
 		storageMap["roletemplates"] = roletemplateREST.RoleTemplate
+		storageMap["configmaps"] = configmapREST.ConfigMap
 	}
 	return storageMap
 }

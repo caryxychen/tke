@@ -27,12 +27,17 @@ import (
 
 type AuthzInterface interface {
 	RESTClient() rest.Interface
+	ConfigMapsGetter
 	RoleTemplatesGetter
 }
 
 // AuthzClient is used to interact with features provided by the authz.tkestack.io group.
 type AuthzClient struct {
 	restClient rest.Interface
+}
+
+func (c *AuthzClient) ConfigMaps() ConfigMapInterface {
+	return newConfigMaps(c)
 }
 
 func (c *AuthzClient) RoleTemplates(namespace string) RoleTemplateInterface {

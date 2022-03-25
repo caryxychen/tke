@@ -20,6 +20,10 @@
 
 package internalversion
 
+// ConfigMapListerExpansion allows custom methods to be added to
+// ConfigMapLister.
+type ConfigMapListerExpansion interface{}
+
 // RoleTemplateListerExpansion allows custom methods to be added to
 // RoleTemplateLister.
 type RoleTemplateListerExpansion interface{}

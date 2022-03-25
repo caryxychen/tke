@@ -50,6 +50,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
 		&RoleTemplate{},
 		&RoleTemplateList{},
+		&ConfigMap{},
+		&ConfigMapList{},
 	)
 
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)

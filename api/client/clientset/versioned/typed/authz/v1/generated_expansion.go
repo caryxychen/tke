@@ -20,4 +20,6 @@
 
 package v1
 
+type ConfigMapExpansion interface{}
+
 type RoleTemplateExpansion interface{}

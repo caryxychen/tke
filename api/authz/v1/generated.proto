@@ -29,6 +29,37 @@ import "k8s.io/apimachinery/pkg/runtime/schema/generated.proto";
 // Package-wide variables from generator "generated".
 option go_package = "v1";
 
+// ConfigMap holds configuration data for tke to consume.
+message ConfigMap {
+  // +optional
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
+
+  // Data contains the configuration data.
+  // Each key must consist of alphanumeric characters, '-', '_' or '.'.
+  // Values with non-UTF-8 byte sequences must use the BinaryData field.
+  // The keys stored in Data must not overlap with the keys in
+  // the BinaryData field, this is enforced during validation process.
+  // +optional
+  map<string, string> data = 2;
+
+  // BinaryData contains the binary data.
+  // Each key must consist of alphanumeric characters, '-', '_' or '.'.
+  // BinaryData can contain byte sequences that are not in the UTF-8 range.
+  // The keys stored in BinaryData must not overlap with the ones in
+  // the Data field, this is enforced during validation process.
+  // +optional
+  map<string, bytes> binaryData = 3;
+}
+
+// ConfigMapList is a resource containing a list of ConfigMap objects.
+message ConfigMapList {
+  // +optional
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
+
+  // Items is the list of ConfigMaps.
+  repeated ConfigMap items = 2;
+}
+
 // PolicyRule holds information that describes a policy rule, but does not contain information
 // about who the rule applies to or which namespace the rule applies to.
 message PolicyRule {

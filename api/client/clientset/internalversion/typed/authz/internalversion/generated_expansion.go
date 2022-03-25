@@ -20,4 +20,6 @@
 
 package internalversion
 
+type ConfigMapExpansion interface{}
+
 type RoleTemplateExpansion interface{}

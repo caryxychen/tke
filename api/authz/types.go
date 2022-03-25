@@ -86,3 +86,42 @@ type RoleTemplateList struct {
 	// List of bootstraps
 	Items []RoleTemplate
 }
+
+// +genclient
+// +genclient:nonNamespaced
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+// ConfigMap holds configuration data for tke to consume.
+type ConfigMap struct {
+	metav1.TypeMeta `json:",inline"`
+	// +optional
+	metav1.ObjectMeta
+
+	// Data contains the configuration data.
+	// Each key must consist of alphanumeric characters, '-', '_' or '.'.
+	// Values with non-UTF-8 byte sequences must use the BinaryData field.
+	// The keys stored in Data must not overlap with the keys in
+	// the BinaryData field, this is enforced during validation process.
+	// +optional
+	Data map[string]string
+
+	// BinaryData contains the binary data.
+	// Each key must consist of alphanumeric characters, '-', '_' or '.'.
+	// BinaryData can contain byte sequences that are not in the UTF-8 range.
+	// The keys stored in BinaryData must not overlap with the ones in
+	// the Data field, this is enforced during validation process.
+	// +optional
+	BinaryData map[string][]byte
+}
+
+// +genclient:nonNamespaced
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+// ConfigMapList is a resource containing a list of ConfigMap objects.
+type ConfigMapList struct {
+	metav1.TypeMeta
+	// +optional
+	metav1.ListMeta
+	// Items is the list of ConfigMaps.
+	Items []ConfigMap
+}

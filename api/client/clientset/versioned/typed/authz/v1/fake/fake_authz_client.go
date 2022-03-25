@@ -30,6 +30,10 @@ type FakeAuthzV1 struct {
 	*testing.Fake
 }
 
+func (c *FakeAuthzV1) ConfigMaps() v1.ConfigMapInterface {
+	return &FakeConfigMaps{c}
+}
+
 func (c *FakeAuthzV1) RoleTemplates(namespace string) v1.RoleTemplateInterface {
 	return &FakeRoleTemplates{c, namespace}
 }

@@ -26,6 +26,8 @@ import (
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
+	// ConfigMaps returns a ConfigMapInformer.
+	ConfigMaps() ConfigMapInformer
 	// RoleTemplates returns a RoleTemplateInformer.
 	RoleTemplates() RoleTemplateInformer
 }
@@ -39,6 +41,11 @@ type version struct {
 // New returns a new Interface.
 func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakListOptions internalinterfaces.TweakListOptionsFunc) Interface {
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
+}
+
+// ConfigMaps returns a ConfigMapInformer.
+func (v *version) ConfigMaps() ConfigMapInformer {
+	return &configMapInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
 
 // RoleTemplates returns a RoleTemplateInformer.
