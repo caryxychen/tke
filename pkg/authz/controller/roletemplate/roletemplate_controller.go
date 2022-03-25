@@ -98,6 +98,10 @@ func NewController(
 				},
 				DeleteFunc: controller.enqueue,
 			},
+			// TODO
+			FilterFunc: func(obj interface{}) bool {
+				return true
+			},
 		},
 		resyncPeriod,
 	)
