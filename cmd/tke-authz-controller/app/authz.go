@@ -21,6 +21,7 @@ package app
 import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"net/http"
+	"time"
 	authzv1 "tkestack.io/tke/api/authz/v1"
 	"tkestack.io/tke/pkg/authz/controller/roletemplate"
 )
@@ -33,7 +34,7 @@ func startRoleTemplateController(ctx ControllerContext) (http.Handler, bool, err
 		ctx.ClientBuilder.ClientOrDie("roletemplate-controller"),
 		ctx.PlatformClient,
 		ctx.InformerFactory.Authz().V1().RoleTemplates(),
-		5,
+		5 * time.Second,
 	)
 	go ctrl.Run(4, ctx.Stop)
 	return nil, true, nil
