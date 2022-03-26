@@ -35,6 +35,7 @@ import (
 	platformversionedclient "tkestack.io/tke/api/client/clientset/versioned/typed/platform/v1"
 	authzv1informer "tkestack.io/tke/api/client/informers/externalversions/authz/v1"
 	authzv1 "tkestack.io/tke/api/client/listers/authz/v1"
+	authzprovider "tkestack.io/tke/pkg/authz/provider"
 	controllerutil "tkestack.io/tke/pkg/controller"
 	clusterprovider "tkestack.io/tke/pkg/platform/provider/cluster"
 	"tkestack.io/tke/pkg/util/log"
@@ -207,13 +208,27 @@ func (c *Controller) syncItem(key string) error {
 			log.String("name", name), log.Err(err))
 		return err
 	default:
-		// TODO Provider
+		provider, err := authzprovider.GetProvider(&roletemplate.ObjectMeta)
+		if err != nil {
+			log.Warn("Unable to retrieve provider",
+				log.String("namespace", clusterName),
+				log.String("name", name), log.Err(err))
+			return err
+		}
+		err = provider.ReconcileRoleTemplate(roletemplate, c.platformClient)
+		if err != nil {
+			return err
+		}
+		// 更新Status
+		_, err = c.client.AuthzV1().RoleTemplates(clusterName).UpdateStatus(context.Background(), roletemplate, metav1.UpdateOptions{})
+		return err
+
+		// ========================= TODO remove ===========================
 		cluster, err := c.platformClient.Clusters().Get(context.Background(), clusterName, metav1.GetOptions{})
 		if err != nil {
 			log.Warnf("Unable to retrieve cluster '%s'", clusterName)
 			return err
 		}
-		// TODO 修改userName
 		v1Cluster, err := clusterprovider.GetV1Cluster(context.Background(), c.platformClient, cluster, clusterprovider.AdminUsername)
 		if err != nil {
 			log.Warnf("Unable to retrieve cluster '%s'", clusterName)
@@ -239,25 +254,16 @@ func (c *Controller) syncItem(key string) error {
 			return err
 		}
 		_, err = client.RbacV1().ClusterRoles().Update(context.Background(), expected, metav1.UpdateOptions{})
+		return err
+		// ========================= TODO remove ===========================
 	}
-	return err
 }
 
 func convertClusterRole(template *apiauthzv1.RoleTemplate) *v1.ClusterRole {
-	rules := []v1.PolicyRule{}
-	for _, rul := range template.Spec.Rules {
-		rules = append(rules, v1.PolicyRule{
-			Verbs:           rul.Verbs,
-			APIGroups:       rul.APIGroups,
-			Resources:       rul.Resources,
-			ResourceNames:   rul.ResourceNames,
-			NonResourceURLs: rul.NonResourceURLs,
-		})
-	}
 	return &v1.ClusterRole{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: template.Name,
 		},
-		Rules: rules,
+		Rules: template.Spec.Rules,
 	}
 }

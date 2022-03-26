@@ -48,19 +48,6 @@ func (ConfigMapList) SwaggerDoc() map[string]string {
 	return map_ConfigMapList
 }
 
-var map_PolicyRule = map[string]string{
-	"":                "PolicyRule holds information that describes a policy rule, but does not contain information about who the rule applies to or which namespace the rule applies to.",
-	"verbs":           "Verbs is a list of Verbs that apply to ALL the ResourceKinds and AttributeRestrictions contained in this rule. '*' represents all verbs.",
-	"apiGroups":       "APIGroups is the name of the APIGroup that contains the resources.  If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed.",
-	"resources":       "Resources is a list of resources this rule applies to. '*' represents all resources.",
-	"resourceNames":   "ResourceNames is an optional white list of names that the rule applies to.  An empty set means that everything is allowed.",
-	"nonResourceURLs": "NonResourceURLs is a set of partial urls that a user should have access to.  *s are allowed, but only as the full, final step in the path Since non-resource URLs are not namespaced, this field is only applicable for ClusterRoles referenced from a ClusterRoleBinding. Rules can either apply to API resources (such as \"pods\" or \"secrets\") or non-resource URL paths (such as \"/api\"),  but not both.",
-}
-
-func (PolicyRule) SwaggerDoc() map[string]string {
-	return map_PolicyRule
-}
-
 var map_RoleTemplate = map[string]string{
 	"": "RoleTemplate is a rbac template in TKE.",
 }
@@ -76,6 +63,17 @@ var map_RoleTemplateList = map[string]string{
 
 func (RoleTemplateList) SwaggerDoc() map[string]string {
 	return map_RoleTemplateList
+}
+
+var map_RoleTemplateStatus = map[string]string{
+	"phase":              "Phase the release is in, one of ('Installing', 'Succeeded', 'Failed')",
+	"lastTransitionTime": "The last time the condition transitioned from one status to another.",
+	"reason":             "The reason for the condition's last transition.",
+	"message":            "A human readable message indicating details about the transition.",
+}
+
+func (RoleTemplateStatus) SwaggerDoc() map[string]string {
+	return map_RoleTemplateStatus
 }
 
 // AUTO-GENERATED FUNCTIONS END HERE

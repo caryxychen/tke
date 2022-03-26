@@ -64,6 +64,7 @@ func (s *StorageProvider) v1Storage(apiResourceConfigSource serverstorage.APIRes
 		configmapREST := configmapstorage.NewStorage(restOptionsGetter)
 		roletemplateREST := roletemplatestorage.NewStorage(restOptionsGetter)
 		storageMap["roletemplates"] = roletemplateREST.RoleTemplate
+		storageMap["roletemplates/status"] = roletemplateREST.Status
 		storageMap["configmaps"] = configmapREST.ConfigMap
 	}
 	return storageMap

@@ -42,6 +42,7 @@ type RoleTemplatesGetter interface {
 type RoleTemplateInterface interface {
 	Create(ctx context.Context, roleTemplate *v1.RoleTemplate, opts metav1.CreateOptions) (*v1.RoleTemplate, error)
 	Update(ctx context.Context, roleTemplate *v1.RoleTemplate, opts metav1.UpdateOptions) (*v1.RoleTemplate, error)
+	UpdateStatus(ctx context.Context, roleTemplate *v1.RoleTemplate, opts metav1.UpdateOptions) (*v1.RoleTemplate, error)
 	Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error
 	Get(ctx context.Context, name string, opts metav1.GetOptions) (*v1.RoleTemplate, error)
 	List(ctx context.Context, opts metav1.ListOptions) (*v1.RoleTemplateList, error)
@@ -129,6 +130,22 @@ func (c *roleTemplates) Update(ctx context.Context, roleTemplate *v1.RoleTemplat
 		Namespace(c.ns).
 		Resource("roletemplates").
 		Name(roleTemplate.Name).
+		VersionedParams(&opts, scheme.ParameterCodec).
+		Body(roleTemplate).
+		Do(ctx).
+		Into(result)
+	return
+}
+
+// UpdateStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+func (c *roleTemplates) UpdateStatus(ctx context.Context, roleTemplate *v1.RoleTemplate, opts metav1.UpdateOptions) (result *v1.RoleTemplate, err error) {
+	result = &v1.RoleTemplate{}
+	err = c.client.Put().
+		Namespace(c.ns).
+		Resource("roletemplates").
+		Name(roleTemplate.Name).
+		SubResource("status").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(roleTemplate).
 		Do(ctx).

@@ -20,7 +20,6 @@ package storage
 
 import (
 	"context"
-
 	metainternal "k8s.io/apimachinery/pkg/apis/meta/internalversion"
 	"k8s.io/apimachinery/pkg/runtime"
 	genericregistry "k8s.io/apiserver/pkg/registry/generic"
@@ -35,6 +34,7 @@ import (
 // Storage includes storage for configmap and all sub resources.
 type Storage struct {
 	RoleTemplate *REST
+	Status   *StatusREST
 }
 
 // NewStorage returns a Storage object that will work against configmap.
@@ -58,8 +58,12 @@ func NewStorage(optsGetter genericregistry.RESTOptionsGetter) *Storage {
 		log.Panic("Failed to create configmap etcd rest storage", log.Err(err))
 	}
 
+	statusStore := *store
+	statusStore.UpdateStrategy = roletemplate.NewStatusStrategy(strategy)
+
 	return &Storage{
 		RoleTemplate: &REST{store},
+		Status: &StatusREST{&statusStore},
 	}
 }
 
@@ -80,3 +84,14 @@ func (r *REST) List(ctx context.Context, options *metainternal.ListOptions) (run
 	wrappedOptions := apiserverutil.PredicateListOptions(ctx, options)
 	return r.Store.List(ctx, wrappedOptions)
 }
+
+// StatusREST implements the GenericREST endpoint for changing the status of a roletemplate request.
+type StatusREST struct {
+	store *registry.Store
+}
+
+// New returns an empty object that can be used with Create and Update after request data has been put into it.
+func (r *StatusREST) New() runtime.Object {
+	return r.store.New()
+}
+

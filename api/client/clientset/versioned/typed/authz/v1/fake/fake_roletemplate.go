@@ -104,6 +104,18 @@ func (c *FakeRoleTemplates) Update(ctx context.Context, roleTemplate *authzv1.Ro
 	return obj.(*authzv1.RoleTemplate), err
 }
 
+// UpdateStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+func (c *FakeRoleTemplates) UpdateStatus(ctx context.Context, roleTemplate *authzv1.RoleTemplate, opts v1.UpdateOptions) (*authzv1.RoleTemplate, error) {
+	obj, err := c.Fake.
+		Invokes(testing.NewUpdateSubresourceAction(roletemplatesResource, "status", c.ns, roleTemplate), &authzv1.RoleTemplate{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*authzv1.RoleTemplate), err
+}
+
 // Delete takes name of the roleTemplate and deletes it. Returns an error if one occurs.
 func (c *FakeRoleTemplates) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.

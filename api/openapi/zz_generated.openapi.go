@@ -906,10 +906,10 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"tkestack.io/tke/api/auth/v1.UserSpec":                                        schema_tke_api_auth_v1_UserSpec(ref),
 		"tkestack.io/tke/api/authz/v1.ConfigMap":                                      schema_tke_api_authz_v1_ConfigMap(ref),
 		"tkestack.io/tke/api/authz/v1.ConfigMapList":                                  schema_tke_api_authz_v1_ConfigMapList(ref),
-		"tkestack.io/tke/api/authz/v1.PolicyRule":                                     schema_tke_api_authz_v1_PolicyRule(ref),
 		"tkestack.io/tke/api/authz/v1.RoleTemplate":                                   schema_tke_api_authz_v1_RoleTemplate(ref),
 		"tkestack.io/tke/api/authz/v1.RoleTemplateList":                               schema_tke_api_authz_v1_RoleTemplateList(ref),
 		"tkestack.io/tke/api/authz/v1.RoleTemplateSpec":                               schema_tke_api_authz_v1_RoleTemplateSpec(ref),
+		"tkestack.io/tke/api/authz/v1.RoleTemplateStatus":                             schema_tke_api_authz_v1_RoleTemplateStatus(ref),
 		"tkestack.io/tke/api/business/v1.ChartGroup":                                  schema_tke_api_business_v1_ChartGroup(ref),
 		"tkestack.io/tke/api/business/v1.ChartGroupList":                              schema_tke_api_business_v1_ChartGroupList(ref),
 		"tkestack.io/tke/api/business/v1.ChartGroupSpec":                              schema_tke_api_business_v1_ChartGroupSpec(ref),
@@ -45635,95 +45635,6 @@ func schema_tke_api_authz_v1_ConfigMapList(ref common.ReferenceCallback) common.
 	}
 }
 
-func schema_tke_api_authz_v1_PolicyRule(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "PolicyRule holds information that describes a policy rule, but does not contain information about who the rule applies to or which namespace the rule applies to.",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"verbs": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Verbs is a list of Verbs that apply to ALL the ResourceKinds and AttributeRestrictions contained in this rule. '*' represents all verbs.",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: "",
-										Type:    []string{"string"},
-										Format:  "",
-									},
-								},
-							},
-						},
-					},
-					"apiGroups": {
-						SchemaProps: spec.SchemaProps{
-							Description: "APIGroups is the name of the APIGroup that contains the resources.  If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed.",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: "",
-										Type:    []string{"string"},
-										Format:  "",
-									},
-								},
-							},
-						},
-					},
-					"resources": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Resources is a list of resources this rule applies to. '*' represents all resources.",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: "",
-										Type:    []string{"string"},
-										Format:  "",
-									},
-								},
-							},
-						},
-					},
-					"resourceNames": {
-						SchemaProps: spec.SchemaProps{
-							Description: "ResourceNames is an optional white list of names that the rule applies to.  An empty set means that everything is allowed.",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: "",
-										Type:    []string{"string"},
-										Format:  "",
-									},
-								},
-							},
-						},
-					},
-					"nonResourceURLs": {
-						SchemaProps: spec.SchemaProps{
-							Description: "NonResourceURLs is a set of partial urls that a user should have access to.  *s are allowed, but only as the full, final step in the path Since non-resource URLs are not namespaced, this field is only applicable for ClusterRoles referenced from a ClusterRoleBinding. Rules can either apply to API resources (such as \"pods\" or \"secrets\") or non-resource URL paths (such as \"/api\"),  but not both.",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: "",
-										Type:    []string{"string"},
-										Format:  "",
-									},
-								},
-							},
-						},
-					},
-				},
-				Required: []string{"verbs"},
-			},
-		},
-	}
-}
-
 func schema_tke_api_authz_v1_RoleTemplate(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -45757,11 +45668,17 @@ func schema_tke_api_authz_v1_RoleTemplate(ref common.ReferenceCallback) common.O
 							Ref:     ref("tkestack.io/tke/api/authz/v1.RoleTemplateSpec"),
 						},
 					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("tkestack.io/tke/api/authz/v1.RoleTemplateStatus"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta", "tkestack.io/tke/api/authz/v1.RoleTemplateSpec"},
+			"k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta", "tkestack.io/tke/api/authz/v1.RoleTemplateSpec", "tkestack.io/tke/api/authz/v1.RoleTemplateStatus"},
 	}
 }
 
@@ -45856,7 +45773,7 @@ func schema_tke_api_authz_v1_RoleTemplateSpec(ref common.ReferenceCallback) comm
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Default: map[string]interface{}{},
-										Ref:     ref("tkestack.io/tke/api/authz/v1.PolicyRule"),
+										Ref:     ref("k8s.io/api/rbac/v1.PolicyRule"),
 									},
 								},
 							},
@@ -45867,7 +45784,52 @@ func schema_tke_api_authz_v1_RoleTemplateSpec(ref common.ReferenceCallback) comm
 			},
 		},
 		Dependencies: []string{
-			"tkestack.io/tke/api/authz/v1.PolicyRule"},
+			"k8s.io/api/rbac/v1.PolicyRule"},
+	}
+}
+
+func schema_tke_api_authz_v1_RoleTemplateStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"phase": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Phase the release is in, one of ('Installing', 'Succeeded', 'Failed')",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"lastTransitionTime": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The last time the condition transitioned from one status to another.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
+						},
+					},
+					"reason": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The reason for the condition's last transition.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"message": {
+						SchemaProps: spec.SchemaProps{
+							Description: "A human readable message indicating details about the transition.",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
 	}
 }
 

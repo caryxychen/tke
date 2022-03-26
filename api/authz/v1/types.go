@@ -19,6 +19,7 @@
 package v1
 
 import (
+	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -34,6 +35,9 @@ type RoleTemplate struct {
 
 	// +optional
 	Spec RoleTemplateSpec `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
+
+	// +optional
+	Status RoleTemplateStatus `json:"status,omitempty" protobuf:"bytes,3,opt,name=status"`
 }
 
 type Scope string
@@ -49,32 +53,31 @@ type RoleTemplateSpec struct {
 	// +optional
 	Description string `json:"description" protobuf:"bytes,3,opt,name=description"`
 	// +optional
-	Scope Scope        `json:"scope" protobuf:"bytes,4,opt,name=scope"`
-	Rules []PolicyRule `json:"rules" protobuf:"bytes,5,rep,name=rules"`
+	Scope Scope               `json:"scope" protobuf:"bytes,4,opt,name=scope"`
+	Rules []rbacv1.PolicyRule `json:"rules" protobuf:"bytes,5,rep,name=rules"`
 }
 
-// PolicyRule holds information that describes a policy rule, but does not contain information
-// about who the rule applies to or which namespace the rule applies to.
-type PolicyRule struct {
-	// Verbs is a list of Verbs that apply to ALL the ResourceKinds and AttributeRestrictions contained in this rule. '*' represents all verbs.
-	Verbs []string `json:"verbs" protobuf:"bytes,1,rep,name=verbs"`
+type RoleTemplatePhase string
 
-	// APIGroups is the name of the APIGroup that contains the resources.  If multiple API groups are specified, any action requested against one of
-	// the enumerated resources in any API group will be allowed.
-	// +optional
-	APIGroups []string `json:"apiGroups,omitempty" protobuf:"bytes,2,rep,name=apiGroups"`
-	// Resources is a list of resources this rule applies to. '*' represents all resources.
-	// +optional
-	Resources []string `json:"resources,omitempty" protobuf:"bytes,3,rep,name=resources"`
-	// ResourceNames is an optional white list of names that the rule applies to.  An empty set means that everything is allowed.
-	// +optional
-	ResourceNames []string `json:"resourceNames,omitempty" protobuf:"bytes,4,rep,name=resourceNames"`
+const (
+	Installing RoleTemplatePhase = "Installing"
+	Succeeded  RoleTemplatePhase = "Succeeded"
+	Failed     RoleTemplatePhase = "Failed"
+)
 
-	// NonResourceURLs is a set of partial urls that a user should have access to.  *s are allowed, but only as the full, final step in the path
-	// Since non-resource URLs are not namespaced, this field is only applicable for ClusterRoles referenced from a ClusterRoleBinding.
-	// Rules can either apply to API resources (such as "pods" or "secrets") or non-resource URL paths (such as "/api"),  but not both.
+type RoleTemplateStatus struct {
+	// Phase the release is in, one of ('Installing', 'Succeeded', 'Failed')
 	// +optional
-	NonResourceURLs []string `json:"nonResourceURLs,omitempty" protobuf:"bytes,5,rep,name=nonResourceURLs"`
+	Phase RoleTemplatePhase `json:"phase" protobuf:"bytes,1,opt,name=phase"`
+	// The last time the condition transitioned from one status to another.
+	// +optional
+	LastTransitionTime metav1.Time `json:"lastTransitionTime" protobuf:"bytes,2,opt,name=lastTransitionTime"`
+	// The reason for the condition's last transition.
+	// +optional
+	Reason string `json:"reason" protobuf:"bytes,3,opt,name=reason"`
+	// A human readable message indicating details about the transition.
+	// +optional
+	Message string `json:"message" protobuf:"bytes,4,opt,name=message"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

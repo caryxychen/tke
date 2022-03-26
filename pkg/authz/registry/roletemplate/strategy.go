@@ -20,7 +20,6 @@ package roletemplate
 
 import (
 	"context"
-
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/apiserver/pkg/registry/rest"
@@ -106,4 +105,33 @@ func (Strategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) fie
 // WarningsOnUpdate returns warnings for the given update.
 func (Strategy) WarningsOnUpdate(ctx context.Context, obj, old runtime.Object) []string {
 	return nil
+}
+
+// StatusStrategy implements verification logic for status of roletemplate request.
+type StatusStrategy struct {
+	*Strategy
+}
+
+var _ rest.RESTUpdateStrategy = &StatusStrategy{}
+
+// NewStatusStrategy create the StatusStrategy object by given strategy.
+func NewStatusStrategy(strategy *Strategy) *StatusStrategy {
+	return &StatusStrategy{strategy}
+}
+
+// PrepareForUpdate is invoked on update before validation to normalize
+// the object.  For example: remove fields that are not to be persisted,
+// sort order-insensitive list fields, etc.  This should not remove fields
+// whose presence would be considered a validation error.
+func (StatusStrategy) PrepareForUpdate(_ context.Context, obj, old runtime.Object) {
+	newRoleTemplate := obj.(*authz.RoleTemplate)
+	oldRoleTemplate := old.(*authz.RoleTemplate)
+	newRoleTemplate.Spec = oldRoleTemplate.Spec
+}
+
+// ValidateUpdate is invoked after default fields in the object have been
+// filled in before the object is persisted.  This method should not mutate
+// the object.
+func (s *StatusStrategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
+	return ValidateRoleTemplateUpdate(obj.(*authz.RoleTemplate), old.(*authz.RoleTemplate))
 }
