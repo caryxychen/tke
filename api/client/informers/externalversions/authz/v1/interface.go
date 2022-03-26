@@ -26,6 +26,8 @@ import (
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
+	// ClusterRoleTemplateBindings returns a ClusterRoleTemplateBindingInformer.
+	ClusterRoleTemplateBindings() ClusterRoleTemplateBindingInformer
 	// ConfigMaps returns a ConfigMapInformer.
 	ConfigMaps() ConfigMapInformer
 	// RoleTemplates returns a RoleTemplateInformer.
@@ -41,6 +43,11 @@ type version struct {
 // New returns a new Interface.
 func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakListOptions internalinterfaces.TweakListOptionsFunc) Interface {
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
+}
+
+// ClusterRoleTemplateBindings returns a ClusterRoleTemplateBindingInformer.
+func (v *version) ClusterRoleTemplateBindings() ClusterRoleTemplateBindingInformer {
+	return &clusterRoleTemplateBindingInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // ConfigMaps returns a ConfigMapInformer.

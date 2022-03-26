@@ -20,6 +20,14 @@
 
 package internalversion
 
+// ClusterRoleTemplateBindingListerExpansion allows custom methods to be added to
+// ClusterRoleTemplateBindingLister.
+type ClusterRoleTemplateBindingListerExpansion interface{}
+
+// ClusterRoleTemplateBindingNamespaceListerExpansion allows custom methods to be added to
+// ClusterRoleTemplateBindingNamespaceLister.
+type ClusterRoleTemplateBindingNamespaceListerExpansion interface{}
+
 // ConfigMapListerExpansion allows custom methods to be added to
 // ConfigMapLister.
 type ConfigMapListerExpansion interface{}

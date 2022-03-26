@@ -102,6 +102,8 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Auth().V1().Users().Informer()}, nil
 
 		// Group=authz.tkestack.io, Version=v1
+	case authzv1.SchemeGroupVersion.WithResource("clusterroletemplatebindings"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Authz().V1().ClusterRoleTemplateBindings().Informer()}, nil
 	case authzv1.SchemeGroupVersion.WithResource("configmaps"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Authz().V1().ConfigMaps().Informer()}, nil
 	case authzv1.SchemeGroupVersion.WithResource("roletemplates"):

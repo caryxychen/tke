@@ -30,6 +30,75 @@ import "k8s.io/apimachinery/pkg/runtime/schema/generated.proto";
 // Package-wide variables from generator "generated".
 option go_package = "v1";
 
+message ClusterRoleTemplateBinding {
+  // +optional
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
+
+  optional ClusterRoleTemplateBindingSpec spec = 2;
+
+  optional ClusterRoleTemplateBindingStatus status = 3;
+}
+
+// ClusterRoleTemplateBindingList is a resource containing a list of ClusterRoleTemplateBinding objects.
+message ClusterRoleTemplateBindingList {
+  // +optional
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
+
+  // Items is the list of ConfigMaps.
+  repeated ConfigMap items = 2;
+}
+
+message ClusterRoleTemplateBindingSpec {
+  // +optional
+  optional string userName = 1;
+
+  // +optional
+  optional string groupName = 2;
+
+  optional string roleTemplateName = 3;
+
+  repeated string clusters = 4;
+}
+
+message ClusterRoleTemplateBindingStatus {
+  // Phase the release is in, one of ('Installing', 'Succeeded', 'Failed')
+  // +optional
+  optional string phase = 1;
+
+  // The last time the condition transitioned from one status to another.
+  // +optional
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time lastTransitionTime = 2;
+
+  // The reason for the condition's last transition.
+  // +optional
+  optional string reason = 3;
+
+  // A human readable message indicating details about the transition.
+  // +optional
+  optional string message = 4;
+
+  // +optional
+  repeated ClusterRoleTemplateBindingStatusItem clusters = 5;
+}
+
+message ClusterRoleTemplateBindingStatusItem {
+  // Phase the release is in, one of ('Installing', 'Succeeded', 'Failed')
+  // +optional
+  optional string phase = 1;
+
+  // The last time the condition transitioned from one status to another.
+  // +optional
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time lastTransitionTime = 2;
+
+  // The reason for the condition's last transition.
+  // +optional
+  optional string reason = 3;
+
+  // A human readable message indicating details about the transition.
+  // +optional
+  optional string message = 4;
+}
+
 // ConfigMap holds configuration data for tke to consume.
 message ConfigMap {
   // +optional

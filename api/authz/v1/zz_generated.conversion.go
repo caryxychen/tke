@@ -38,6 +38,56 @@ func init() {
 // RegisterConversions adds conversion functions to the given scheme.
 // Public to allow building arbitrary schemes.
 func RegisterConversions(s *runtime.Scheme) error {
+	if err := s.AddGeneratedConversionFunc((*ClusterRoleTemplateBinding)(nil), (*authz.ClusterRoleTemplateBinding)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1_ClusterRoleTemplateBinding_To_authz_ClusterRoleTemplateBinding(a.(*ClusterRoleTemplateBinding), b.(*authz.ClusterRoleTemplateBinding), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*authz.ClusterRoleTemplateBinding)(nil), (*ClusterRoleTemplateBinding)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_authz_ClusterRoleTemplateBinding_To_v1_ClusterRoleTemplateBinding(a.(*authz.ClusterRoleTemplateBinding), b.(*ClusterRoleTemplateBinding), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*ClusterRoleTemplateBindingList)(nil), (*authz.ClusterRoleTemplateBindingList)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1_ClusterRoleTemplateBindingList_To_authz_ClusterRoleTemplateBindingList(a.(*ClusterRoleTemplateBindingList), b.(*authz.ClusterRoleTemplateBindingList), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*authz.ClusterRoleTemplateBindingList)(nil), (*ClusterRoleTemplateBindingList)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_authz_ClusterRoleTemplateBindingList_To_v1_ClusterRoleTemplateBindingList(a.(*authz.ClusterRoleTemplateBindingList), b.(*ClusterRoleTemplateBindingList), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*ClusterRoleTemplateBindingSpec)(nil), (*authz.ClusterRoleTemplateBindingSpec)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1_ClusterRoleTemplateBindingSpec_To_authz_ClusterRoleTemplateBindingSpec(a.(*ClusterRoleTemplateBindingSpec), b.(*authz.ClusterRoleTemplateBindingSpec), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*authz.ClusterRoleTemplateBindingSpec)(nil), (*ClusterRoleTemplateBindingSpec)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_authz_ClusterRoleTemplateBindingSpec_To_v1_ClusterRoleTemplateBindingSpec(a.(*authz.ClusterRoleTemplateBindingSpec), b.(*ClusterRoleTemplateBindingSpec), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*ClusterRoleTemplateBindingStatus)(nil), (*authz.ClusterRoleTemplateBindingStatus)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1_ClusterRoleTemplateBindingStatus_To_authz_ClusterRoleTemplateBindingStatus(a.(*ClusterRoleTemplateBindingStatus), b.(*authz.ClusterRoleTemplateBindingStatus), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*authz.ClusterRoleTemplateBindingStatus)(nil), (*ClusterRoleTemplateBindingStatus)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_authz_ClusterRoleTemplateBindingStatus_To_v1_ClusterRoleTemplateBindingStatus(a.(*authz.ClusterRoleTemplateBindingStatus), b.(*ClusterRoleTemplateBindingStatus), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*ClusterRoleTemplateBindingStatusItem)(nil), (*authz.ClusterRoleTemplateBindingStatusItem)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1_ClusterRoleTemplateBindingStatusItem_To_authz_ClusterRoleTemplateBindingStatusItem(a.(*ClusterRoleTemplateBindingStatusItem), b.(*authz.ClusterRoleTemplateBindingStatusItem), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddGeneratedConversionFunc((*authz.ClusterRoleTemplateBindingStatusItem)(nil), (*ClusterRoleTemplateBindingStatusItem)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_authz_ClusterRoleTemplateBindingStatusItem_To_v1_ClusterRoleTemplateBindingStatusItem(a.(*authz.ClusterRoleTemplateBindingStatusItem), b.(*ClusterRoleTemplateBindingStatusItem), scope)
+	}); err != nil {
+		return err
+	}
 	if err := s.AddGeneratedConversionFunc((*ConfigMap)(nil), (*authz.ConfigMap)(nil), func(a, b interface{}, scope conversion.Scope) error {
 		return Convert_v1_ConfigMap_To_authz_ConfigMap(a.(*ConfigMap), b.(*authz.ConfigMap), scope)
 	}); err != nil {
@@ -99,6 +149,140 @@ func RegisterConversions(s *runtime.Scheme) error {
 		return err
 	}
 	return nil
+}
+
+func autoConvert_v1_ClusterRoleTemplateBinding_To_authz_ClusterRoleTemplateBinding(in *ClusterRoleTemplateBinding, out *authz.ClusterRoleTemplateBinding, s conversion.Scope) error {
+	out.ObjectMeta = in.ObjectMeta
+	if err := Convert_v1_ClusterRoleTemplateBindingSpec_To_authz_ClusterRoleTemplateBindingSpec(&in.Spec, &out.Spec, s); err != nil {
+		return err
+	}
+	if err := Convert_v1_ClusterRoleTemplateBindingStatus_To_authz_ClusterRoleTemplateBindingStatus(&in.Status, &out.Status, s); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Convert_v1_ClusterRoleTemplateBinding_To_authz_ClusterRoleTemplateBinding is an autogenerated conversion function.
+func Convert_v1_ClusterRoleTemplateBinding_To_authz_ClusterRoleTemplateBinding(in *ClusterRoleTemplateBinding, out *authz.ClusterRoleTemplateBinding, s conversion.Scope) error {
+	return autoConvert_v1_ClusterRoleTemplateBinding_To_authz_ClusterRoleTemplateBinding(in, out, s)
+}
+
+func autoConvert_authz_ClusterRoleTemplateBinding_To_v1_ClusterRoleTemplateBinding(in *authz.ClusterRoleTemplateBinding, out *ClusterRoleTemplateBinding, s conversion.Scope) error {
+	out.ObjectMeta = in.ObjectMeta
+	if err := Convert_authz_ClusterRoleTemplateBindingSpec_To_v1_ClusterRoleTemplateBindingSpec(&in.Spec, &out.Spec, s); err != nil {
+		return err
+	}
+	if err := Convert_authz_ClusterRoleTemplateBindingStatus_To_v1_ClusterRoleTemplateBindingStatus(&in.Status, &out.Status, s); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Convert_authz_ClusterRoleTemplateBinding_To_v1_ClusterRoleTemplateBinding is an autogenerated conversion function.
+func Convert_authz_ClusterRoleTemplateBinding_To_v1_ClusterRoleTemplateBinding(in *authz.ClusterRoleTemplateBinding, out *ClusterRoleTemplateBinding, s conversion.Scope) error {
+	return autoConvert_authz_ClusterRoleTemplateBinding_To_v1_ClusterRoleTemplateBinding(in, out, s)
+}
+
+func autoConvert_v1_ClusterRoleTemplateBindingList_To_authz_ClusterRoleTemplateBindingList(in *ClusterRoleTemplateBindingList, out *authz.ClusterRoleTemplateBindingList, s conversion.Scope) error {
+	out.ListMeta = in.ListMeta
+	out.Items = *(*[]authz.ConfigMap)(unsafe.Pointer(&in.Items))
+	return nil
+}
+
+// Convert_v1_ClusterRoleTemplateBindingList_To_authz_ClusterRoleTemplateBindingList is an autogenerated conversion function.
+func Convert_v1_ClusterRoleTemplateBindingList_To_authz_ClusterRoleTemplateBindingList(in *ClusterRoleTemplateBindingList, out *authz.ClusterRoleTemplateBindingList, s conversion.Scope) error {
+	return autoConvert_v1_ClusterRoleTemplateBindingList_To_authz_ClusterRoleTemplateBindingList(in, out, s)
+}
+
+func autoConvert_authz_ClusterRoleTemplateBindingList_To_v1_ClusterRoleTemplateBindingList(in *authz.ClusterRoleTemplateBindingList, out *ClusterRoleTemplateBindingList, s conversion.Scope) error {
+	out.ListMeta = in.ListMeta
+	out.Items = *(*[]ConfigMap)(unsafe.Pointer(&in.Items))
+	return nil
+}
+
+// Convert_authz_ClusterRoleTemplateBindingList_To_v1_ClusterRoleTemplateBindingList is an autogenerated conversion function.
+func Convert_authz_ClusterRoleTemplateBindingList_To_v1_ClusterRoleTemplateBindingList(in *authz.ClusterRoleTemplateBindingList, out *ClusterRoleTemplateBindingList, s conversion.Scope) error {
+	return autoConvert_authz_ClusterRoleTemplateBindingList_To_v1_ClusterRoleTemplateBindingList(in, out, s)
+}
+
+func autoConvert_v1_ClusterRoleTemplateBindingSpec_To_authz_ClusterRoleTemplateBindingSpec(in *ClusterRoleTemplateBindingSpec, out *authz.ClusterRoleTemplateBindingSpec, s conversion.Scope) error {
+	out.UserName = in.UserName
+	out.GroupName = in.GroupName
+	out.RoleTemplateName = in.RoleTemplateName
+	out.Clusters = *(*[]string)(unsafe.Pointer(&in.Clusters))
+	return nil
+}
+
+// Convert_v1_ClusterRoleTemplateBindingSpec_To_authz_ClusterRoleTemplateBindingSpec is an autogenerated conversion function.
+func Convert_v1_ClusterRoleTemplateBindingSpec_To_authz_ClusterRoleTemplateBindingSpec(in *ClusterRoleTemplateBindingSpec, out *authz.ClusterRoleTemplateBindingSpec, s conversion.Scope) error {
+	return autoConvert_v1_ClusterRoleTemplateBindingSpec_To_authz_ClusterRoleTemplateBindingSpec(in, out, s)
+}
+
+func autoConvert_authz_ClusterRoleTemplateBindingSpec_To_v1_ClusterRoleTemplateBindingSpec(in *authz.ClusterRoleTemplateBindingSpec, out *ClusterRoleTemplateBindingSpec, s conversion.Scope) error {
+	out.UserName = in.UserName
+	out.GroupName = in.GroupName
+	out.RoleTemplateName = in.RoleTemplateName
+	out.Clusters = *(*[]string)(unsafe.Pointer(&in.Clusters))
+	return nil
+}
+
+// Convert_authz_ClusterRoleTemplateBindingSpec_To_v1_ClusterRoleTemplateBindingSpec is an autogenerated conversion function.
+func Convert_authz_ClusterRoleTemplateBindingSpec_To_v1_ClusterRoleTemplateBindingSpec(in *authz.ClusterRoleTemplateBindingSpec, out *ClusterRoleTemplateBindingSpec, s conversion.Scope) error {
+	return autoConvert_authz_ClusterRoleTemplateBindingSpec_To_v1_ClusterRoleTemplateBindingSpec(in, out, s)
+}
+
+func autoConvert_v1_ClusterRoleTemplateBindingStatus_To_authz_ClusterRoleTemplateBindingStatus(in *ClusterRoleTemplateBindingStatus, out *authz.ClusterRoleTemplateBindingStatus, s conversion.Scope) error {
+	out.Phase = authz.RoleTemplatePhase(in.Phase)
+	out.LastTransitionTime = in.LastTransitionTime
+	out.Reason = in.Reason
+	out.Message = in.Message
+	out.Clusters = *(*[]authz.ClusterRoleTemplateBindingStatusItem)(unsafe.Pointer(&in.Clusters))
+	return nil
+}
+
+// Convert_v1_ClusterRoleTemplateBindingStatus_To_authz_ClusterRoleTemplateBindingStatus is an autogenerated conversion function.
+func Convert_v1_ClusterRoleTemplateBindingStatus_To_authz_ClusterRoleTemplateBindingStatus(in *ClusterRoleTemplateBindingStatus, out *authz.ClusterRoleTemplateBindingStatus, s conversion.Scope) error {
+	return autoConvert_v1_ClusterRoleTemplateBindingStatus_To_authz_ClusterRoleTemplateBindingStatus(in, out, s)
+}
+
+func autoConvert_authz_ClusterRoleTemplateBindingStatus_To_v1_ClusterRoleTemplateBindingStatus(in *authz.ClusterRoleTemplateBindingStatus, out *ClusterRoleTemplateBindingStatus, s conversion.Scope) error {
+	out.Phase = RoleTemplatePhase(in.Phase)
+	out.LastTransitionTime = in.LastTransitionTime
+	out.Reason = in.Reason
+	out.Message = in.Message
+	out.Clusters = *(*[]ClusterRoleTemplateBindingStatusItem)(unsafe.Pointer(&in.Clusters))
+	return nil
+}
+
+// Convert_authz_ClusterRoleTemplateBindingStatus_To_v1_ClusterRoleTemplateBindingStatus is an autogenerated conversion function.
+func Convert_authz_ClusterRoleTemplateBindingStatus_To_v1_ClusterRoleTemplateBindingStatus(in *authz.ClusterRoleTemplateBindingStatus, out *ClusterRoleTemplateBindingStatus, s conversion.Scope) error {
+	return autoConvert_authz_ClusterRoleTemplateBindingStatus_To_v1_ClusterRoleTemplateBindingStatus(in, out, s)
+}
+
+func autoConvert_v1_ClusterRoleTemplateBindingStatusItem_To_authz_ClusterRoleTemplateBindingStatusItem(in *ClusterRoleTemplateBindingStatusItem, out *authz.ClusterRoleTemplateBindingStatusItem, s conversion.Scope) error {
+	out.Phase = authz.RoleTemplatePhase(in.Phase)
+	out.LastTransitionTime = in.LastTransitionTime
+	out.Reason = in.Reason
+	out.Message = in.Message
+	return nil
+}
+
+// Convert_v1_ClusterRoleTemplateBindingStatusItem_To_authz_ClusterRoleTemplateBindingStatusItem is an autogenerated conversion function.
+func Convert_v1_ClusterRoleTemplateBindingStatusItem_To_authz_ClusterRoleTemplateBindingStatusItem(in *ClusterRoleTemplateBindingStatusItem, out *authz.ClusterRoleTemplateBindingStatusItem, s conversion.Scope) error {
+	return autoConvert_v1_ClusterRoleTemplateBindingStatusItem_To_authz_ClusterRoleTemplateBindingStatusItem(in, out, s)
+}
+
+func autoConvert_authz_ClusterRoleTemplateBindingStatusItem_To_v1_ClusterRoleTemplateBindingStatusItem(in *authz.ClusterRoleTemplateBindingStatusItem, out *ClusterRoleTemplateBindingStatusItem, s conversion.Scope) error {
+	out.Phase = RoleTemplatePhase(in.Phase)
+	out.LastTransitionTime = in.LastTransitionTime
+	out.Reason = in.Reason
+	out.Message = in.Message
+	return nil
+}
+
+// Convert_authz_ClusterRoleTemplateBindingStatusItem_To_v1_ClusterRoleTemplateBindingStatusItem is an autogenerated conversion function.
+func Convert_authz_ClusterRoleTemplateBindingStatusItem_To_v1_ClusterRoleTemplateBindingStatusItem(in *authz.ClusterRoleTemplateBindingStatusItem, out *ClusterRoleTemplateBindingStatusItem, s conversion.Scope) error {
+	return autoConvert_authz_ClusterRoleTemplateBindingStatusItem_To_v1_ClusterRoleTemplateBindingStatusItem(in, out, s)
 }
 
 func autoConvert_v1_ConfigMap_To_authz_ConfigMap(in *ConfigMap, out *authz.ConfigMap, s conversion.Scope) error {

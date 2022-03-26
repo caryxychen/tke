@@ -20,6 +20,8 @@
 
 package internalversion
 
+type ClusterRoleTemplateBindingExpansion interface{}
+
 type ConfigMapExpansion interface{}
 
 type RoleTemplateExpansion interface{}

@@ -30,6 +30,10 @@ type FakeAuthzV1 struct {
 	*testing.Fake
 }
 
+func (c *FakeAuthzV1) ClusterRoleTemplateBindings(namespace string) v1.ClusterRoleTemplateBindingInterface {
+	return &FakeClusterRoleTemplateBindings{c, namespace}
+}
+
 func (c *FakeAuthzV1) ConfigMaps() v1.ConfigMapInterface {
 	return &FakeConfigMaps{c}
 }

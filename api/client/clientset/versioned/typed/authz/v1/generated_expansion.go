@@ -20,6 +20,8 @@
 
 package v1
 
+type ClusterRoleTemplateBindingExpansion interface{}
+
 type ConfigMapExpansion interface{}
 
 type RoleTemplateExpansion interface{}

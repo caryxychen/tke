@@ -90,12 +90,77 @@ type RoleTemplateList struct {
 }
 
 // +genclient
+// +genclient:skipVerbs=deleteCollection
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+type ClusterRoleTemplateBinding struct {
+	metav1.TypeMeta
+	// +optional
+	metav1.ObjectMeta
+	Spec ClusterRoleTemplateBindingSpec
+	Status ClusterRoleTemplateBindingStatus
+}
+
+type ClusterRoleTemplateBindingSpec struct {
+	// +optional
+	UserName         string
+	// +optional
+	GroupName        string
+	RoleTemplateName string
+	Clusters         []string
+}
+
+type ClusterRoleTemplateBindingStatus struct {
+	// Phase the release is in, one of ('Installing', 'Succeeded', 'Failed')
+	// +optional
+	Phase RoleTemplatePhase
+	// The last time the condition transitioned from one status to another.
+	// +optional
+	LastTransitionTime metav1.Time
+	// The reason for the condition's last transition.
+	// +optional
+	Reason string
+	// A human readable message indicating details about the transition.
+	// +optional
+	Message string
+	// +optional
+	Clusters []ClusterRoleTemplateBindingStatusItem
+}
+
+type ClusterRoleTemplateBindingStatusItem struct {
+	// Phase the release is in, one of ('Installing', 'Succeeded', 'Failed')
+	// +optional
+	Phase RoleTemplatePhase
+	// The last time the condition transitioned from one status to another.
+	// +optional
+	LastTransitionTime metav1.Time
+	// The reason for the condition's last transition.
+	// +optional
+	Reason string
+	// A human readable message indicating details about the transition.
+	// +optional
+	Message string
+}
+
+// +genclient:nonNamespaced
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+// ClusterRoleTemplateBindingList is a resource containing a list of ClusterRoleTemplateBinding objects.
+type ClusterRoleTemplateBindingList struct {
+	metav1.TypeMeta
+	// +optional
+	metav1.ListMeta
+	// Items is the list of ConfigMaps.
+	Items []ConfigMap
+}
+
+// +genclient
 // +genclient:nonNamespaced
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // ConfigMap holds configuration data for tke to consume.
 type ConfigMap struct {
-	metav1.TypeMeta `json:",inline"`
+	metav1.TypeMeta
 	// +optional
 	metav1.ObjectMeta
 

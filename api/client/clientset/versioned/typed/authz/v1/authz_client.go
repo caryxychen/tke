@@ -28,6 +28,7 @@ import (
 
 type AuthzV1Interface interface {
 	RESTClient() rest.Interface
+	ClusterRoleTemplateBindingsGetter
 	ConfigMapsGetter
 	RoleTemplatesGetter
 }
@@ -35,6 +36,10 @@ type AuthzV1Interface interface {
 // AuthzV1Client is used to interact with features provided by the authz.tkestack.io group.
 type AuthzV1Client struct {
 	restClient rest.Interface
+}
+
+func (c *AuthzV1Client) ClusterRoleTemplateBindings(namespace string) ClusterRoleTemplateBindingInterface {
+	return newClusterRoleTemplateBindings(c, namespace)
 }
 
 func (c *AuthzV1Client) ConfigMaps() ConfigMapInterface {

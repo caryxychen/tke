@@ -52,6 +52,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&RoleTemplateList{},
 		&ConfigMap{},
 		&ConfigMapList{},
+		&ClusterRoleTemplateBinding{},
+		&ClusterRoleTemplateBindingList{},
 	)
 
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)

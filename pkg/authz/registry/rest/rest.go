@@ -28,6 +28,7 @@ import (
 	"tkestack.io/tke/api/authz"
 	authzv1 "tkestack.io/tke/api/authz/v1"
 	"tkestack.io/tke/pkg/apiserver/storage"
+	clusterroletemplatebindinstorage "tkestack.io/tke/pkg/authz/registry/clusterroletemplatebinding/storage"
 	configmapstorage "tkestack.io/tke/pkg/authz/registry/configmap/storage"
 	roletemplatestorage "tkestack.io/tke/pkg/authz/registry/roletemplate/storage"
 )
@@ -63,9 +64,13 @@ func (s *StorageProvider) v1Storage(apiResourceConfigSource serverstorage.APIRes
 	{
 		configmapREST := configmapstorage.NewStorage(restOptionsGetter)
 		roletemplateREST := roletemplatestorage.NewStorage(restOptionsGetter)
+		clusterroletemplatebindinstorageREST := clusterroletemplatebindinstorage.NewStorage(restOptionsGetter)
+
 		storageMap["roletemplates"] = roletemplateREST.RoleTemplate
 		storageMap["roletemplates/status"] = roletemplateREST.Status
 		storageMap["configmaps"] = configmapREST.ConfigMap
+		storageMap["clusterroletemplatebindinstorage"] = clusterroletemplatebindinstorageREST.RoleTemplate
+		storageMap["clusterroletemplatebindinstorage/status"] = clusterroletemplatebindinstorageREST.Status
 	}
 	return storageMap
 }
