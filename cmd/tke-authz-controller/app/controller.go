@@ -48,6 +48,7 @@ func KnownControllers() []string {
 func NewControllerInitializers() map[string]InitFunc {
 	controllers := map[string]InitFunc{}
 	controllers["roletemplate"] = startRoleTemplateController
+	controllers["clusterroletemplatebinding"] = startClusterRoleTemplateBindingController
 	return controllers
 }
 

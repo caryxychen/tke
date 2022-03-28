@@ -16,10 +16,11 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package roletemplate
+package clusterroletemplatebinding
 
 import (
 	"context"
+	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/runtime"
@@ -35,6 +36,7 @@ import (
 	authzv1 "tkestack.io/tke/api/client/listers/authz/v1"
 	authzprovider "tkestack.io/tke/pkg/authz/provider"
 	controllerutil "tkestack.io/tke/pkg/controller"
+	clusterprovider "tkestack.io/tke/pkg/platform/provider/cluster"
 	"tkestack.io/tke/pkg/util/log"
 	"tkestack.io/tke/pkg/util/metrics"
 )
@@ -50,16 +52,18 @@ const (
 )
 
 const (
-	controllerName = "roletemplate-controller"
+	controllerName = "clusterroletemplatebinding-controller"
 )
 
 type Controller struct {
-	client         clientset.Interface
-	platformClient platformversionedclient.PlatformV1Interface
-	queue          workqueue.RateLimitingInterface
-	lister         authzv1.RoleTemplateLister
-	listerSynced   cache.InformerSynced
-	stopCh         <-chan struct{}
+	client             clientset.Interface
+	platformClient     platformversionedclient.PlatformV1Interface
+	queue              workqueue.RateLimitingInterface
+	roleTemplateLister authzv1.RoleTemplateLister
+	bindingLister      authzv1.ClusterRoleTemplateBindingLister
+	roleTemplateSynced cache.InformerSynced
+	bindingSynced      cache.InformerSynced
+	stopCh             <-chan struct{}
 }
 
 // NewController creates a new Controller object.
@@ -67,6 +71,7 @@ func NewController(
 	client clientset.Interface,
 	platformClient platformversionedclient.PlatformV1Interface,
 	roletemplateInformer authzv1informer.RoleTemplateInformer,
+	bindingInformer authzv1informer.ClusterRoleTemplateBindingInformer,
 	resyncPeriod time.Duration,
 ) *Controller {
 	// create the controller so we can inject the enqueue function
@@ -75,7 +80,6 @@ func NewController(
 		platformClient: platformClient,
 		queue:          workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), controllerName),
 	}
-
 	if client != nil &&
 		client.AuthzV1().RESTClient() != nil &&
 		!reflect.ValueOf(client.AuthzV1().RESTClient()).IsNil() &&
@@ -83,13 +87,13 @@ func NewController(
 		_ = metrics.RegisterMetricAndTrackRateLimiterUsage(controllerName, client.AuthzV1().RESTClient().GetRateLimiter())
 	}
 
-	roletemplateInformer.Informer().AddEventHandlerWithResyncPeriod(
+	bindingInformer.Informer().AddEventHandlerWithResyncPeriod(
 		cache.FilteringResourceEventHandler{
 			Handler: cache.ResourceEventHandlerFuncs{
 				AddFunc: controller.enqueue,
 				UpdateFunc: func(oldObj, newObj interface{}) {
-					old, ok1 := oldObj.(*apiauthzv1.RoleTemplate)
-					cur, ok2 := newObj.(*apiauthzv1.RoleTemplate)
+					old, ok1 := oldObj.(*apiauthzv1.ClusterRoleTemplateBinding)
+					cur, ok2 := newObj.(*apiauthzv1.ClusterRoleTemplateBinding)
 					if ok1 && ok2 && controller.needsUpdate(old, cur) {
 						controller.enqueue(newObj)
 					}
@@ -103,8 +107,10 @@ func NewController(
 		},
 		resyncPeriod,
 	)
-	controller.lister = roletemplateInformer.Lister()
-	controller.listerSynced = roletemplateInformer.Informer().HasSynced
+	controller.bindingLister = bindingInformer.Lister()
+	controller.bindingSynced = bindingInformer.Informer().HasSynced
+	controller.roleTemplateLister = roletemplateInformer.Lister()
+	controller.roleTemplateSynced = roletemplateInformer.Informer().HasSynced
 	return controller
 }
 
@@ -117,7 +123,7 @@ func (c *Controller) enqueue(obj interface{}) {
 	c.queue.AddAfter(key, appDeletionGracePeriod)
 }
 
-func (c *Controller) needsUpdate(old *apiauthzv1.RoleTemplate, new *apiauthzv1.RoleTemplate) bool {
+func (c *Controller) needsUpdate(old *apiauthzv1.ClusterRoleTemplateBinding, new *apiauthzv1.ClusterRoleTemplateBinding) bool {
 	if old.UID != new.UID {
 		return true
 	}
@@ -137,7 +143,7 @@ func (c *Controller) Run(workers int, stopCh <-chan struct{}) {
 	log.Info("Starting app controller")
 	defer log.Info("Shutting down app controller")
 
-	if ok := cache.WaitForCacheSync(stopCh, c.listerSynced); !ok {
+	if ok := cache.WaitForCacheSync(stopCh, c.bindingSynced, c.roleTemplateSynced); !ok {
 		log.Error("Failed to wait for app caches to sync")
 		return
 	}
@@ -186,38 +192,67 @@ func (c *Controller) worker() {
 func (c *Controller) syncItem(key string) error {
 	startTime := time.Now()
 	defer func() {
-		log.Info("Finished syncing rt", log.String("rt", key), log.Duration("processTime", time.Since(startTime)))
+		log.Info("Finished syncing roletemplate", log.String("roletemplate", key), log.Duration("processTime", time.Since(startTime)))
 	}()
-	clusterName, name, err := cache.SplitMetaNamespaceKey(key)
+	ns, name, err := cache.SplitMetaNamespaceKey(key)
 	if err != nil {
 		return err
 	}
-	rt, err := c.lister.RoleTemplates(clusterName).Get(name)
-	switch {
-	case errors.IsNotFound(err):
-		log.Info("App has been deleted. Attempting to cleanup resources",
-			log.String("namespace", clusterName),
-			log.String("name", name))
-		return nil
-	case err != nil:
+
+	crtb, err := c.bindingLister.ClusterRoleTemplateBindings(ns).Get(name)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			log.Info("App has been deleted. Attempting to cleanup resources",
+				log.String("namespace", ns),
+				log.String("name", name))
+			return nil
+		}
 		log.Warn("Unable to retrieve app from store",
-			log.String("namespace", clusterName),
+			log.String("namespace", ns),
 			log.String("name", name), log.Err(err))
 		return err
-	default:
-		provider, err := authzprovider.GetProvider(&rt.ObjectMeta)
-		if err != nil {
-			log.Warn("Unable to retrieve provider",
-				log.String("namespace", clusterName),
-				log.String("name", name), log.Err(err))
-			return err
-		}
-		newRt, err := provider.ReconcileRoleTemplate(*rt, c.platformClient)
-		if err != nil {
-			return err
-		}
-		// 更新Status
-		_, err = c.client.AuthzV1().RoleTemplates(clusterName).UpdateStatus(context.Background(), newRt, metav1.UpdateOptions{})
+	}
+
+	rt, err := c.roleTemplateLister.RoleTemplates(ns).Get(crtb.Spec.RoleTemplateName)
+	if err != nil {
+		log.Warn("Unable to retrieve app from store",
+			log.String("namespace", ns),
+			log.String("name", name), log.Err(err))
 		return err
 	}
+
+	provider, err := authzprovider.GetProvider(&rt.ObjectMeta)
+	if err != nil {
+		log.Warn("Unable to retrieve provider",
+			log.String("namespace", ns),
+			log.String("name", name), log.Err(err))
+		return err
+	}
+
+	// 获取user在各个cluster内的subject
+	clusterSubjects := map[string]*rbacv1.Subject{}
+	for _, cls := range crtb.Spec.Clusters {
+		cluster, err := clusterprovider.GetV1ClusterByName(context.Background(), c.platformClient, cls, crtb.Spec.UserName)
+		if err != nil {
+			log.Warnf("Unable to retrieve cluster '%s'", ns)
+			return err
+		}
+		subject, err := provider.GetClusterRoleBindingSubject(crtb.Spec.UserName, crtb.Spec.GroupName, cluster)
+		if err != nil {
+			log.Warnf("Unable to retrieve cluster '%s'", ns)
+			return err
+		}
+		clusterSubjects[cls] = subject
+	}
+
+	// 执行权限分发
+	status, err := provider.DispatchClusterRoleBindings(c.platformClient, rt, crtb, clusterSubjects)
+	if err != nil {
+		log.Warnf("Unable to retrieve cluster '%s'", ns)
+	}
+	newCrtb := *crtb
+	newCrtb.Status = status
+	// 更新Status
+	_, err = c.client.AuthzV1().ClusterRoleTemplateBindings(ns).UpdateStatus(context.Background(), &newCrtb, metav1.UpdateOptions{})
+	return err
 }

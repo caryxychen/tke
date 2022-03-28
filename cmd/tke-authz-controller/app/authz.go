@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"time"
 	authzv1 "tkestack.io/tke/api/authz/v1"
+	"tkestack.io/tke/pkg/authz/controller/clusterroletemplatebinding"
 	"tkestack.io/tke/pkg/authz/controller/roletemplate"
 )
 
@@ -34,6 +35,21 @@ func startRoleTemplateController(ctx ControllerContext) (http.Handler, bool, err
 		ctx.ClientBuilder.ClientOrDie("roletemplate-controller"),
 		ctx.PlatformClient,
 		ctx.InformerFactory.Authz().V1().RoleTemplates(),
+		5 * time.Second,
+	)
+	go ctrl.Run(4, ctx.Stop)
+	return nil, true, nil
+}
+
+func startClusterRoleTemplateBindingController(ctx ControllerContext) (http.Handler, bool, error) {
+	if !ctx.AvailableResources[schema.GroupVersionResource{Group: authzv1.GroupName, Version: "v1", Resource: "clusterroletemplatebindings"}] {
+		return nil, false, nil
+	}
+	ctrl := clusterroletemplatebinding.NewController(
+		ctx.ClientBuilder.ClientOrDie("clusterroletemplatebinding-controller"),
+		ctx.PlatformClient,
+		ctx.InformerFactory.Authz().V1().RoleTemplates(),
+		ctx.InformerFactory.Authz().V1().ClusterRoleTemplateBindings(),
 		5 * time.Second,
 	)
 	go ctrl.Run(4, ctx.Stop)
