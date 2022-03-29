@@ -219,6 +219,9 @@ func (c *Controller) syncItem(key string) error {
 		}
 		// 更新Status
 		_, err = c.client.AuthzV1().RoleTemplates(clusterName).UpdateStatus(context.Background(), newRt, metav1.UpdateOptions{})
+		if err != nil {
+			log.Warnf("Failed to update roletemplate '%s', err: '%#v'", rt.Name, err)
+		}
 		return err
 	}
 }
