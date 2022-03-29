@@ -212,6 +212,7 @@ func (c *Controller) syncItem(key string) error {
 			log.String("name", name), log.Err(err))
 		return err
 	}
+	crtb = crtb.DeepCopy()
 
 	rt, err := c.roleTemplateLister.RoleTemplates(ns).Get(crtb.Spec.RoleTemplateName)
 	if err != nil {
@@ -239,20 +240,20 @@ func (c *Controller) syncItem(key string) error {
 		}
 		subject, err := provider.GetClusterRoleBindingSubject(crtb.Spec.UserName, crtb.Spec.GroupName, cluster)
 		if err != nil {
-			log.Warnf("Unable to retrieve cluster '%s'", ns)
+			log.Warnf("Unable to get cluster rolebinding subject '%s'", ns)
 			return err
 		}
 		clusterSubjects[cls] = subject
 	}
 
 	// 执行权限分发
-	status, err := provider.DispatchClusterRoleBindings(c.platformClient, rt, crtb, clusterSubjects)
+	err = provider.DispatchClusterRoleBindings(c.platformClient, rt, crtb, clusterSubjects)
 	if err != nil {
 		log.Warnf("Unable to retrieve cluster '%s'", ns)
 	}
-	newCrtb := *crtb
-	newCrtb.Status = status
 	// 更新Status
-	_, err = c.client.AuthzV1().ClusterRoleTemplateBindings(ns).UpdateStatus(context.Background(), &newCrtb, metav1.UpdateOptions{})
+	if _, err = c.client.AuthzV1().ClusterRoleTemplateBindings(ns).Update(context.Background(), crtb, metav1.UpdateOptions{}); err != nil {
+		log.Warnf("Failed to update cluster roletemplate binding '%s'", crtb.Name)
+	}
 	return err
 }

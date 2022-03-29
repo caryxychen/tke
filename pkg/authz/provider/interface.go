@@ -13,7 +13,7 @@ type Provider interface {
 	Name() string
 	ReconcileRoleTemplate(rt *authzv1.RoleTemplate, platformClient platformversionedclient.PlatformV1Interface) error
 	GetClusterRoleBindingSubject(platformUser string, platformGroup string, cluster *platformv1.Cluster) (*rbacv1.Subject, error)
-	DispatchClusterRoleBindings(platformClient platformversionedclient.PlatformV1Interface, rt *authzv1.RoleTemplate, crtb *authzv1.ClusterRoleTemplateBinding, clusterSubjects map[string]*rbacv1.Subject) (authzv1.ClusterRoleTemplateBindingStatus, error)
+	DispatchClusterRoleBindings(platformClient platformversionedclient.PlatformV1Interface, rt *authzv1.RoleTemplate, crtb *authzv1.ClusterRoleTemplateBinding, clusterSubjects map[string]*rbacv1.Subject) error
 }
 
 var _ Provider = &DelegateProvider{}
@@ -22,8 +22,8 @@ type DelegateProvider struct {
 	ProviderName string
 }
 
-func (p *DelegateProvider) DispatchClusterRoleBindings(platformClient platformversionedclient.PlatformV1Interface, rt *authzv1.RoleTemplate, crtb *authzv1.ClusterRoleTemplateBinding, clusterSubjects map[string]*rbacv1.Subject) (authzv1.ClusterRoleTemplateBindingStatus, error) {
-	return authzv1.ClusterRoleTemplateBindingStatus{}, nil
+func (p *DelegateProvider) DispatchClusterRoleBindings(platformClient platformversionedclient.PlatformV1Interface, rt *authzv1.RoleTemplate, crtb *authzv1.ClusterRoleTemplateBinding, clusterSubjects map[string]*rbacv1.Subject) error {
+	return nil
 }
 
 func (p *DelegateProvider) GetClusterRoleBindingSubject(platformUser string, platformGroup string, cluster *platformv1.Cluster) (*rbacv1.Subject, error) {
