@@ -142,7 +142,6 @@ type ClusterRoleTemplateBindingStatusItem struct {
 	Message string
 }
 
-// +genclient:nonNamespaced
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // ClusterRoleTemplateBindingList is a resource containing a list of ClusterRoleTemplateBinding objects.
@@ -151,7 +150,7 @@ type ClusterRoleTemplateBindingList struct {
 	// +optional
 	metav1.ListMeta
 	// Items is the list of ConfigMaps.
-	Items []ConfigMap
+	Items []ClusterRoleTemplateBinding
 }
 
 // +genclient

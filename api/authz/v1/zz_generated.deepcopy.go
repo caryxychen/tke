@@ -62,7 +62,7 @@ func (in *ClusterRoleTemplateBindingList) DeepCopyInto(out *ClusterRoleTemplateB
 	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
-		*out = make([]ConfigMap, len(*in))
+		*out = make([]ClusterRoleTemplateBinding, len(*in))
 		for i := range *in {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}

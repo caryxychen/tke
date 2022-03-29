@@ -45606,7 +45606,7 @@ func schema_tke_api_authz_v1_ClusterRoleTemplateBindingList(ref common.Reference
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Default: map[string]interface{}{},
-										Ref:     ref("tkestack.io/tke/api/authz/v1.ConfigMap"),
+										Ref:     ref("tkestack.io/tke/api/authz/v1.ClusterRoleTemplateBinding"),
 									},
 								},
 							},
@@ -45617,7 +45617,7 @@ func schema_tke_api_authz_v1_ClusterRoleTemplateBindingList(ref common.Reference
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta", "tkestack.io/tke/api/authz/v1.ConfigMap"},
+			"k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta", "tkestack.io/tke/api/authz/v1.ClusterRoleTemplateBinding"},
 	}
 }
 

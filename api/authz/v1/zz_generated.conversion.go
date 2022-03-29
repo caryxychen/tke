@@ -185,7 +185,7 @@ func Convert_authz_ClusterRoleTemplateBinding_To_v1_ClusterRoleTemplateBinding(i
 
 func autoConvert_v1_ClusterRoleTemplateBindingList_To_authz_ClusterRoleTemplateBindingList(in *ClusterRoleTemplateBindingList, out *authz.ClusterRoleTemplateBindingList, s conversion.Scope) error {
 	out.ListMeta = in.ListMeta
-	out.Items = *(*[]authz.ConfigMap)(unsafe.Pointer(&in.Items))
+	out.Items = *(*[]authz.ClusterRoleTemplateBinding)(unsafe.Pointer(&in.Items))
 	return nil
 }
 
@@ -196,7 +196,7 @@ func Convert_v1_ClusterRoleTemplateBindingList_To_authz_ClusterRoleTemplateBindi
 
 func autoConvert_authz_ClusterRoleTemplateBindingList_To_v1_ClusterRoleTemplateBindingList(in *authz.ClusterRoleTemplateBindingList, out *ClusterRoleTemplateBindingList, s conversion.Scope) error {
 	out.ListMeta = in.ListMeta
-	out.Items = *(*[]ConfigMap)(unsafe.Pointer(&in.Items))
+	out.Items = *(*[]ClusterRoleTemplateBinding)(unsafe.Pointer(&in.Items))
 	return nil
 }
 

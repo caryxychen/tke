@@ -145,7 +145,6 @@ type ClusterRoleTemplateBindingStatusItem struct {
 	Message string `json:"message" protobuf:"bytes,4,opt,name=message"`
 }
 
-// +genclient:nonNamespaced
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // ClusterRoleTemplateBindingList is a resource containing a list of ClusterRoleTemplateBinding objects.
@@ -154,7 +153,7 @@ type ClusterRoleTemplateBindingList struct {
 	// +optional
 	metav1.ListMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 	// Items is the list of ConfigMaps.
-	Items []ConfigMap `json:"items" protobuf:"bytes,2,rep,name=items"`
+	Items []ClusterRoleTemplateBinding `json:"items" protobuf:"bytes,2,rep,name=items"`
 }
 
 // +genclient
