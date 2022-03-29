@@ -11,7 +11,7 @@ import (
 
 type Provider interface {
 	Name() string
-	ReconcileRoleTemplate(rt authzv1.RoleTemplate, platformClient platformversionedclient.PlatformV1Interface) (*authzv1.RoleTemplate, error)
+	ReconcileRoleTemplate(rt *authzv1.RoleTemplate, platformClient platformversionedclient.PlatformV1Interface) error
 	GetClusterRoleBindingSubject(platformUser string, platformGroup string, cluster *platformv1.Cluster) (*rbacv1.Subject, error)
 	DispatchClusterRoleBindings(platformClient platformversionedclient.PlatformV1Interface, rt *authzv1.RoleTemplate, crtb *authzv1.ClusterRoleTemplateBinding, clusterSubjects map[string]*rbacv1.Subject) (authzv1.ClusterRoleTemplateBindingStatus, error)
 }
@@ -34,10 +34,10 @@ func (p *DelegateProvider) GetClusterRoleBindingSubject(platformUser string, pla
 	return nil, nil
 }
 
-func (p *DelegateProvider) ReconcileRoleTemplate(rt authzv1.RoleTemplate, platformClient platformversionedclient.PlatformV1Interface) (*authzv1.RoleTemplate, error) {
+func (p *DelegateProvider) ReconcileRoleTemplate(rt *authzv1.RoleTemplate, platformClient platformversionedclient.PlatformV1Interface) error {
 	rt.Status.Phase = authzv1.Succeeded
 	rt.Status.LastTransitionTime = metav1.Time{Time: time.Now()}
-	return &rt, nil
+	return nil
 }
 
 func (p *DelegateProvider) Name() string {

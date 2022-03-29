@@ -193,6 +193,7 @@ func (c *Controller) syncItem(key string) error {
 		return err
 	}
 	rt, err := c.lister.RoleTemplates(clusterName).Get(name)
+	rt = rt.DeepCopy()
 	switch {
 	case errors.IsNotFound(err):
 		log.Info("App has been deleted. Attempting to cleanup resources",
@@ -212,13 +213,13 @@ func (c *Controller) syncItem(key string) error {
 				log.String("name", name), log.Err(err))
 			return err
 		}
-		newRt, err := provider.ReconcileRoleTemplate(*rt, c.platformClient)
+		err = provider.ReconcileRoleTemplate(rt, c.platformClient)
 		if err != nil {
 			log.Warnf("Unable to reconcile roletemplate '%s', err: '%#v'", rt.Name, err)
 			return err
 		}
 		// 更新Status
-		_, err = c.client.AuthzV1().RoleTemplates(clusterName).UpdateStatus(context.Background(), newRt, metav1.UpdateOptions{})
+		_, err = c.client.AuthzV1().RoleTemplates(clusterName).UpdateStatus(context.Background(), rt, metav1.UpdateOptions{})
 		if err != nil {
 			log.Warnf("Failed to update roletemplate '%s', err: '%#v'", rt.Name, err)
 		}
