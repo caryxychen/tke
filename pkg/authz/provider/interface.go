@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"time"
@@ -11,9 +12,10 @@ import (
 
 type Provider interface {
 	Name() string
-	ReconcileRoleTemplate(rt *authzv1.RoleTemplate, platformClient platformversionedclient.PlatformV1Interface) error
-	GetClusterRoleBindingSubject(platformUser string, platformGroup string, cluster *platformv1.Cluster) (*rbacv1.Subject, error)
-	DispatchClusterRoleBindings(platformClient platformversionedclient.PlatformV1Interface, rt *authzv1.RoleTemplate, crtb *authzv1.ClusterRoleTemplateBinding, clusterSubjects map[string]*rbacv1.Subject) error
+	InitContext(param interface{}) context.Context
+	ReconcileRoleTemplate(ctx context.Context, rt *authzv1.RoleTemplate, platformClient platformversionedclient.PlatformV1Interface) error
+	GetClusterRoleBindingSubject(ctx context.Context, userName string, cluster *platformv1.Cluster) (*rbacv1.Subject, error)
+	DispatchClusterRBAC(ctx context.Context, platformClient platformversionedclient.PlatformV1Interface, rt *authzv1.RoleTemplate, crtb *authzv1.ClusterRoleTemplateBinding, clusterSubjects map[string]*rbacv1.Subject) error
 }
 
 var _ Provider = &DelegateProvider{}
@@ -22,11 +24,24 @@ type DelegateProvider struct {
 	ProviderName string
 }
 
-func (p *DelegateProvider) DispatchClusterRoleBindings(platformClient platformversionedclient.PlatformV1Interface, rt *authzv1.RoleTemplate, crtb *authzv1.ClusterRoleTemplateBinding, clusterSubjects map[string]*rbacv1.Subject) error {
+func (p *DelegateProvider) Name() string {
+	if p.ProviderName == "" {
+		return "unknown"
+	}
+	return p.ProviderName
+}
+
+func (p *DelegateProvider) InitContext(param interface{}) context.Context {
+	return context.Background()
+}
+
+func (p *DelegateProvider) ReconcileRoleTemplate(ctx context.Context, rt *authzv1.RoleTemplate, platformClient platformversionedclient.PlatformV1Interface) error {
+	rt.Status.Phase = authzv1.Succeeded
+	rt.Status.LastTransitionTime = metav1.Time{Time: time.Now()}
 	return nil
 }
 
-func (p *DelegateProvider) GetClusterRoleBindingSubject(platformUser string, platformGroup string, cluster *platformv1.Cluster) (*rbacv1.Subject, error) {
+func (p *DelegateProvider) GetClusterRoleBindingSubject(ctx context.Context, platformUser string, cluster *platformv1.Cluster) (*rbacv1.Subject, error) {
 	_, err := cluster.RESTConfig()
 	if err != nil {
 		return nil, err
@@ -34,15 +49,11 @@ func (p *DelegateProvider) GetClusterRoleBindingSubject(platformUser string, pla
 	return nil, nil
 }
 
-func (p *DelegateProvider) ReconcileRoleTemplate(rt *authzv1.RoleTemplate, platformClient platformversionedclient.PlatformV1Interface) error {
-	rt.Status.Phase = authzv1.Succeeded
-	rt.Status.LastTransitionTime = metav1.Time{Time: time.Now()}
+func (p *DelegateProvider) DispatchClusterRBAC(
+	ctx context.Context,
+	platformClient platformversionedclient.PlatformV1Interface,
+	rt *authzv1.RoleTemplate,
+	crtb *authzv1.ClusterRoleTemplateBinding,
+	clusterSubjects map[string]*rbacv1.Subject) error {
 	return nil
-}
-
-func (p *DelegateProvider) Name() string {
-	if p.ProviderName == "" {
-		return "unknown"
-	}
-	return p.ProviderName
 }

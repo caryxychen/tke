@@ -229,16 +229,17 @@ func (c *Controller) syncItem(key string) error {
 			log.String("name", name), log.Err(err))
 		return err
 	}
+	ctx := provider.InitContext(crtb)
 
 	// 获取user在各个cluster内的subject
 	clusterSubjects := map[string]*rbacv1.Subject{}
 	for _, cls := range crtb.Spec.Clusters {
-		cluster, err := clusterprovider.GetV1ClusterByName(context.Background(), c.platformClient, cls, crtb.Spec.UserName)
+		cluster, err := clusterprovider.GetV1ClusterByName(ctx, c.platformClient, cls, crtb.Spec.UserName)
 		if err != nil {
 			log.Warnf("Unable to retrieve cluster '%s'", ns)
 			return err
 		}
-		subject, err := provider.GetClusterRoleBindingSubject(crtb.Spec.UserName, crtb.Spec.GroupName, cluster)
+		subject, err := provider.GetClusterRoleBindingSubject(ctx, crtb.Spec.UserName, cluster)
 		if err != nil {
 			log.Warnf("Unable to get cluster rolebinding subject '%s'", ns)
 			return err
@@ -247,10 +248,12 @@ func (c *Controller) syncItem(key string) error {
 	}
 
 	// 执行权限分发
-	err = provider.DispatchClusterRoleBindings(c.platformClient, rt, crtb, clusterSubjects)
+	err = provider.DispatchClusterRBAC(ctx, c.platformClient, rt, crtb, clusterSubjects)
 	if err != nil {
 		log.Warnf("Unable to retrieve cluster '%s'", ns)
+		return err
 	}
+
 	// 更新Status
 	if _, err = c.client.AuthzV1().ClusterRoleTemplateBindings(ns).Update(context.Background(), crtb, metav1.UpdateOptions{}); err != nil {
 		log.Warnf("Failed to update cluster roletemplate binding '%s'", crtb.Name)

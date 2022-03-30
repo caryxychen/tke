@@ -213,7 +213,8 @@ func (c *Controller) syncItem(key string) error {
 				log.String("name", name), log.Err(err))
 			return err
 		}
-		err = provider.ReconcileRoleTemplate(rt, c.platformClient)
+		initContext := provider.InitContext(rt)
+		err = provider.ReconcileRoleTemplate(initContext, rt, c.platformClient)
 		if err != nil {
 			log.Warnf("Unable to reconcile roletemplate '%s', err: '%#v'", rt.Name, err)
 			return err
