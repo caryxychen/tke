@@ -192,7 +192,7 @@ func (c *Controller) worker() {
 func (c *Controller) syncItem(key string) error {
 	startTime := time.Now()
 	defer func() {
-		log.Info("Finished syncing roletemplate", log.String("roletemplate", key), log.Duration("processTime", time.Since(startTime)))
+		log.Info("Finished syncing clusterroletemplatebinding", log.String("clusterroletemplatebinding", key), log.Duration("processTime", time.Since(startTime)))
 	}()
 	ns, name, err := cache.SplitMetaNamespaceKey(key)
 	if err != nil {
@@ -236,12 +236,12 @@ func (c *Controller) syncItem(key string) error {
 	for _, cls := range crtb.Spec.Clusters {
 		cluster, err := clusterprovider.GetV1ClusterByName(ctx, c.platformClient, cls, crtb.Spec.UserName)
 		if err != nil {
-			log.Warnf("Unable to retrieve cluster '%s'", ns)
+			log.Warnf("GetV1ClusterByName failed, cluster: '%s', user: '%s', err: '%#v'", ns, crtb.Spec.UserName, err)
 			return err
 		}
 		subject, err := provider.GetClusterRoleBindingSubject(ctx, crtb.Spec.UserName, cluster)
 		if err != nil {
-			log.Warnf("Unable to get cluster rolebinding subject '%s'", ns)
+			log.Warnf("GetClusterRoleBindingSubject failed, cluster: '%s',  user: '%s', err: '%#v'", ns, crtb.Spec.UserName, err)
 			return err
 		}
 		clusterSubjects[cls] = subject
@@ -250,13 +250,13 @@ func (c *Controller) syncItem(key string) error {
 	// 执行权限分发
 	err = provider.DispatchClusterRBAC(ctx, c.platformClient, rt, crtb, clusterSubjects)
 	if err != nil {
-		log.Warnf("Unable to retrieve cluster '%s'", ns)
+		log.Warnf("DispatchClusterRBAC failed, clusterroletemplatebinding: '%s', err: '%#v'", crtb.Name, err)
 		return err
 	}
 
 	// 更新Status
 	if _, err = c.client.AuthzV1().ClusterRoleTemplateBindings(ns).Update(context.Background(), crtb, metav1.UpdateOptions{}); err != nil {
-		log.Warnf("Failed to update cluster roletemplate binding '%s'", crtb.Name)
+		log.Warnf("Failed to clusterroletemplatebinding '%s', err: '%#v'", crtb.Name, err)
 	}
 	return err
 }
