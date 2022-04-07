@@ -60,6 +60,10 @@ var (
 // addKnownTypes adds the list of known types to the given scheme.
 func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
+		&Role{},
+		&RoleList{},
+		&RoleBinding{},
+		&RoleBindingList{},
 		&RoleTemplate{},
 		&RoleTemplateList{},
 		&ConfigMap{},
