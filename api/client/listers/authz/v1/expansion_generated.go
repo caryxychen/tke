@@ -32,6 +32,22 @@ type ClusterRoleTemplateBindingNamespaceListerExpansion interface{}
 // ConfigMapLister.
 type ConfigMapListerExpansion interface{}
 
+// RoleListerExpansion allows custom methods to be added to
+// RoleLister.
+type RoleListerExpansion interface{}
+
+// RoleNamespaceListerExpansion allows custom methods to be added to
+// RoleNamespaceLister.
+type RoleNamespaceListerExpansion interface{}
+
+// RoleBindingListerExpansion allows custom methods to be added to
+// RoleBindingLister.
+type RoleBindingListerExpansion interface{}
+
+// RoleBindingNamespaceListerExpansion allows custom methods to be added to
+// RoleBindingNamespaceLister.
+type RoleBindingNamespaceListerExpansion interface{}
+
 // RoleTemplateListerExpansion allows custom methods to be added to
 // RoleTemplateLister.
 type RoleTemplateListerExpansion interface{}

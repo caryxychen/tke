@@ -31,6 +31,8 @@ import (
 	clusterroletemplatebindingstorage "tkestack.io/tke/pkg/authz/registry/clusterroletemplatebinding/storage"
 	configmapstorage "tkestack.io/tke/pkg/authz/registry/configmap/storage"
 	roletemplatestorage "tkestack.io/tke/pkg/authz/registry/roletemplate/storage"
+	rolestorage "tkestack.io/tke/pkg/authz/registry/role/storage"
+	rolebindingstorage "tkestack.io/tke/pkg/authz/registry/rolebinding/storage"
 )
 
 // StorageProvider is a REST type for core resources storage that implement
@@ -65,7 +67,11 @@ func (s *StorageProvider) v1Storage(apiResourceConfigSource serverstorage.APIRes
 		configmapREST := configmapstorage.NewStorage(restOptionsGetter)
 		roletemplateREST := roletemplatestorage.NewStorage(restOptionsGetter)
 		clusterroletemplatebindingstorageREST := clusterroletemplatebindingstorage.NewStorage(restOptionsGetter)
+		rolestorageREST := rolestorage.NewStorage(restOptionsGetter)
+		rolebindingstorageREST := rolebindingstorage.NewStorage(restOptionsGetter)
 
+		storageMap["roles"] = rolestorageREST.Role
+		storageMap["rolebindings"] = rolebindingstorageREST.RoleBinding
 		storageMap["roletemplates"] = roletemplateREST.RoleTemplate
 		storageMap["roletemplates/status"] = roletemplateREST.Status
 		storageMap["configmaps"] = configmapREST.ConfigMap

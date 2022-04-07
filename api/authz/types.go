@@ -27,6 +27,61 @@ import (
 // +genclient:skipVerbs=deleteCollection
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
+// Role is a collection with multiple policies.
+type Role struct {
+	metav1.TypeMeta
+	metav1.ObjectMeta
+
+	DisplayName string
+	TenantID    string
+	// Username is Creator
+	Username    string
+	Description string
+	Policies    []string
+}
+
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+// RoleList is the whole list of policy.
+type RoleList struct {
+	metav1.TypeMeta
+	metav1.ListMeta
+	// List of rules.
+	Items []Role
+}
+
+// +genclient
+// +genclient:skipVerbs=deleteCollection
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+type RoleBinding struct {
+	metav1.TypeMeta
+	metav1.ObjectMeta
+	Spec RoleBindingSpec
+}
+
+type RoleBindingSpec struct {
+	// +optional
+	UserName string
+	// +optional
+	GroupName string
+	RoleName  string
+	Clusters  []string
+}
+
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+type RoleBindingList struct {
+	metav1.TypeMeta
+	metav1.ListMeta
+	// List of rules.
+	Items []RoleBindingList
+}
+
+// +genclient
+// +genclient:skipVerbs=deleteCollection
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
 // RoleTemplate is a rbac template in TKE.
 type RoleTemplate struct {
 	metav1.TypeMeta
@@ -97,13 +152,13 @@ type ClusterRoleTemplateBinding struct {
 	metav1.TypeMeta
 	// +optional
 	metav1.ObjectMeta
-	Spec ClusterRoleTemplateBindingSpec
+	Spec   ClusterRoleTemplateBindingSpec
 	Status ClusterRoleTemplateBindingStatus
 }
 
 type ClusterRoleTemplateBindingSpec struct {
 	// +optional
-	UserName         string
+	UserName string
 	// +optional
 	GroupName        string
 	RoleTemplateName string

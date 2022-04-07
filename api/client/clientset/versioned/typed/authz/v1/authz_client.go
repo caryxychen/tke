@@ -30,6 +30,8 @@ type AuthzV1Interface interface {
 	RESTClient() rest.Interface
 	ClusterRoleTemplateBindingsGetter
 	ConfigMapsGetter
+	RolesGetter
+	RoleBindingsGetter
 	RoleTemplatesGetter
 }
 
@@ -44,6 +46,14 @@ func (c *AuthzV1Client) ClusterRoleTemplateBindings(namespace string) ClusterRol
 
 func (c *AuthzV1Client) ConfigMaps() ConfigMapInterface {
 	return newConfigMaps(c)
+}
+
+func (c *AuthzV1Client) Roles(namespace string) RoleInterface {
+	return newRoles(c, namespace)
+}
+
+func (c *AuthzV1Client) RoleBindings(namespace string) RoleBindingInterface {
+	return newRoleBindings(c, namespace)
 }
 
 func (c *AuthzV1Client) RoleTemplates(namespace string) RoleTemplateInterface {

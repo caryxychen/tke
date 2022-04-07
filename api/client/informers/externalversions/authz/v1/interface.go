@@ -30,6 +30,10 @@ type Interface interface {
 	ClusterRoleTemplateBindings() ClusterRoleTemplateBindingInformer
 	// ConfigMaps returns a ConfigMapInformer.
 	ConfigMaps() ConfigMapInformer
+	// Roles returns a RoleInformer.
+	Roles() RoleInformer
+	// RoleBindings returns a RoleBindingInformer.
+	RoleBindings() RoleBindingInformer
 	// RoleTemplates returns a RoleTemplateInformer.
 	RoleTemplates() RoleTemplateInformer
 }
@@ -53,6 +57,16 @@ func (v *version) ClusterRoleTemplateBindings() ClusterRoleTemplateBindingInform
 // ConfigMaps returns a ConfigMapInformer.
 func (v *version) ConfigMaps() ConfigMapInformer {
 	return &configMapInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
+}
+
+// Roles returns a RoleInformer.
+func (v *version) Roles() RoleInformer {
+	return &roleInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// RoleBindings returns a RoleBindingInformer.
+func (v *version) RoleBindings() RoleBindingInformer {
+	return &roleBindingInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // RoleTemplates returns a RoleTemplateInformer.

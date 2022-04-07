@@ -27,6 +27,61 @@ import (
 // +genclient:skipVerbs=deleteCollection
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
+// Role is a collection with multiple policies.
+type Role struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+
+	DisplayName string `json:"displayName" protobuf:"bytes,2,opt,name=displayName"`
+	TenantID    string `json:"tenantID" protobuf:"bytes,3,opt,name=tenantID"`
+	// Username is Creator
+	Username    string   `json:"username" protobuf:"bytes,4,opt,name=username"`
+	Description string   `json:"description" protobuf:"bytes,5,opt,name=description"`
+	Policies    []string `json:"policies" protobuf:"bytes,6,rep,name=policies"`
+}
+
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+// RoleList is the whole list of policy.
+type RoleList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+	// List of rules.
+	Items []Role `json:"items" protobuf:"bytes,2,rep,name=items"`
+}
+
+// +genclient
+// +genclient:skipVerbs=deleteCollection
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+type RoleBinding struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+	Spec              RoleBindingSpec `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
+}
+
+type RoleBindingSpec struct {
+	// +optional
+	UserName string `json:"userName" protobuf:"bytes,1,opt,name=userName"`
+	// +optional
+	GroupName string   `json:"groupName" protobuf:"bytes,2,opt,name=groupName"`
+	RoleName  string   `json:"roleName" protobuf:"bytes,3,opt,name=roleName"`
+	Clusters  []string `json:"clusters" protobuf:"bytes,4,rep,name=clusters"`
+}
+
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+type RoleBindingList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+	// List of rules.
+	Items []RoleBindingList `json:"items" protobuf:"bytes,2,rep,name=items"`
+}
+
+// +genclient
+// +genclient:skipVerbs=deleteCollection
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
 // RoleTemplate is a rbac template in TKE.
 type RoleTemplate struct {
 	metav1.TypeMeta `json:",inline"`

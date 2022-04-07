@@ -38,6 +38,14 @@ func (c *FakeAuthzV1) ConfigMaps() v1.ConfigMapInterface {
 	return &FakeConfigMaps{c}
 }
 
+func (c *FakeAuthzV1) Roles(namespace string) v1.RoleInterface {
+	return &FakeRoles{c, namespace}
+}
+
+func (c *FakeAuthzV1) RoleBindings(namespace string) v1.RoleBindingInterface {
+	return &FakeRoleBindings{c, namespace}
+}
+
 func (c *FakeAuthzV1) RoleTemplates(namespace string) v1.RoleTemplateInterface {
 	return &FakeRoleTemplates{c, namespace}
 }

@@ -79,6 +79,32 @@ func (ConfigMapList) SwaggerDoc() map[string]string {
 	return map_ConfigMapList
 }
 
+var map_Role = map[string]string{
+	"":         "Role is a collection with multiple policies.",
+	"username": "Username is Creator",
+}
+
+func (Role) SwaggerDoc() map[string]string {
+	return map_Role
+}
+
+var map_RoleBindingList = map[string]string{
+	"items": "List of rules.",
+}
+
+func (RoleBindingList) SwaggerDoc() map[string]string {
+	return map_RoleBindingList
+}
+
+var map_RoleList = map[string]string{
+	"":      "RoleList is the whole list of policy.",
+	"items": "List of rules.",
+}
+
+func (RoleList) SwaggerDoc() map[string]string {
+	return map_RoleList
+}
+
 var map_RoleTemplate = map[string]string{
 	"": "RoleTemplate is a rbac template in TKE.",
 }

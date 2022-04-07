@@ -130,6 +130,55 @@ message ConfigMapList {
   repeated ConfigMap items = 2;
 }
 
+// Role is a collection with multiple policies.
+message Role {
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
+
+  optional string displayName = 2;
+
+  optional string tenantID = 3;
+
+  // Username is Creator
+  optional string username = 4;
+
+  optional string description = 5;
+
+  repeated string policies = 6;
+}
+
+message RoleBinding {
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
+
+  optional RoleBindingSpec spec = 2;
+}
+
+message RoleBindingList {
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
+
+  // List of rules.
+  repeated RoleBindingList items = 2;
+}
+
+message RoleBindingSpec {
+  // +optional
+  optional string userName = 1;
+
+  // +optional
+  optional string groupName = 2;
+
+  optional string roleName = 3;
+
+  repeated string clusters = 4;
+}
+
+// RoleList is the whole list of policy.
+message RoleList {
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
+
+  // List of rules.
+  repeated Role items = 2;
+}
+
 // RoleTemplate is a rbac template in TKE.
 message RoleTemplate {
   // +optional

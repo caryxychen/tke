@@ -108,6 +108,10 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Authz().InternalVersion().ClusterRoleTemplateBindings().Informer()}, nil
 	case authz.SchemeGroupVersion.WithResource("configmaps"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Authz().InternalVersion().ConfigMaps().Informer()}, nil
+	case authz.SchemeGroupVersion.WithResource("roles"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Authz().InternalVersion().Roles().Informer()}, nil
+	case authz.SchemeGroupVersion.WithResource("rolebindings"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Authz().InternalVersion().RoleBindings().Informer()}, nil
 	case authz.SchemeGroupVersion.WithResource("roletemplates"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Authz().InternalVersion().RoleTemplates().Informer()}, nil
 

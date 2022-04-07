@@ -24,4 +24,8 @@ type ClusterRoleTemplateBindingExpansion interface{}
 
 type ConfigMapExpansion interface{}
 
+type RoleExpansion interface{}
+
+type RoleBindingExpansion interface{}
+
 type RoleTemplateExpansion interface{}
