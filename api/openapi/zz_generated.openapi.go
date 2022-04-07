@@ -46046,7 +46046,7 @@ func schema_tke_api_authz_v1_RoleBindingList(ref common.ReferenceCallback) commo
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Default: map[string]interface{}{},
-										Ref:     ref("tkestack.io/tke/api/authz/v1.RoleBindingList"),
+										Ref:     ref("tkestack.io/tke/api/authz/v1.RoleBinding"),
 									},
 								},
 							},
@@ -46057,7 +46057,7 @@ func schema_tke_api_authz_v1_RoleBindingList(ref common.ReferenceCallback) commo
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta", "tkestack.io/tke/api/authz/v1.RoleBindingList"},
+			"k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta", "tkestack.io/tke/api/authz/v1.RoleBinding"},
 	}
 }
 

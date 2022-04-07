@@ -296,7 +296,7 @@ func (in *RoleBindingList) DeepCopyInto(out *RoleBindingList) {
 	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
-		*out = make([]RoleBindingList, len(*in))
+		*out = make([]RoleBinding, len(*in))
 		for i := range *in {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}

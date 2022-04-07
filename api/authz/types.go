@@ -75,7 +75,7 @@ type RoleBindingList struct {
 	metav1.TypeMeta
 	metav1.ListMeta
 	// List of rules.
-	Items []RoleBindingList
+	Items []RoleBinding
 }
 
 // +genclient

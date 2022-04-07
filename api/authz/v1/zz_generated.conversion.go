@@ -439,7 +439,7 @@ func Convert_authz_RoleBinding_To_v1_RoleBinding(in *authz.RoleBinding, out *Rol
 
 func autoConvert_v1_RoleBindingList_To_authz_RoleBindingList(in *RoleBindingList, out *authz.RoleBindingList, s conversion.Scope) error {
 	out.ListMeta = in.ListMeta
-	out.Items = *(*[]authz.RoleBindingList)(unsafe.Pointer(&in.Items))
+	out.Items = *(*[]authz.RoleBinding)(unsafe.Pointer(&in.Items))
 	return nil
 }
 
@@ -450,7 +450,7 @@ func Convert_v1_RoleBindingList_To_authz_RoleBindingList(in *RoleBindingList, ou
 
 func autoConvert_authz_RoleBindingList_To_v1_RoleBindingList(in *authz.RoleBindingList, out *RoleBindingList, s conversion.Scope) error {
 	out.ListMeta = in.ListMeta
-	out.Items = *(*[]RoleBindingList)(unsafe.Pointer(&in.Items))
+	out.Items = *(*[]RoleBinding)(unsafe.Pointer(&in.Items))
 	return nil
 }
 

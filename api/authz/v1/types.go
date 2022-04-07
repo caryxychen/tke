@@ -75,7 +75,7 @@ type RoleBindingList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 	// List of rules.
-	Items []RoleBindingList `json:"items" protobuf:"bytes,2,rep,name=items"`
+	Items []RoleBinding `json:"items" protobuf:"bytes,2,rep,name=items"`
 }
 
 // +genclient
