@@ -134,7 +134,7 @@ type ClusterPolicyBindingSpec struct {
 	UserName string `json:"userName" protobuf:"bytes,1,opt,name=userName"`
 	// +optional
 	GroupName  string   `json:"groupName" protobuf:"bytes,2,opt,name=groupName"`
-	PolicyName string   `json:"roleTemplateName" protobuf:"bytes,3,opt,name=roleTemplateName"`
+	PolicyName string   `json:"policyName" protobuf:"bytes,3,opt,name=policyName"`
 	Clusters   []string `json:"clusters" protobuf:"bytes,4,rep,name=clusters"`
 }
 

@@ -55,7 +55,7 @@ message ClusterPolicyBindingSpec {
   // +optional
   optional string groupName = 2;
 
-  optional string roleTemplateName = 3;
+  optional string policyName = 3;
 
   repeated string clusters = 4;
 }

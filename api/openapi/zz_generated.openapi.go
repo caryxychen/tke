@@ -45644,7 +45644,7 @@ func schema_tke_api_authz_v1_ClusterPolicyBindingSpec(ref common.ReferenceCallba
 							Format:  "",
 						},
 					},
-					"roleTemplateName": {
+					"policyName": {
 						SchemaProps: spec.SchemaProps{
 							Default: "",
 							Type:    []string{"string"},
@@ -45666,7 +45666,7 @@ func schema_tke_api_authz_v1_ClusterPolicyBindingSpec(ref common.ReferenceCallba
 						},
 					},
 				},
-				Required: []string{"roleTemplateName", "clusters"},
+				Required: []string{"policyName", "clusters"},
 			},
 		},
 	}
