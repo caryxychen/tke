@@ -37,7 +37,8 @@ type Role struct {
 	// Username is Creator
 	Username    string
 	Description string
-	Policies    []string
+	// policyNamespace/policyName
+	Policies []string
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -82,25 +83,12 @@ type RoleBindingList struct {
 // +genclient:skipVerbs=deleteCollection
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// RoleTemplate is a rbac template in TKE.
-type RoleTemplate struct {
+type Policy struct {
 	metav1.TypeMeta
 	// +optional
 	metav1.ObjectMeta
+
 	// +optional
-	Spec RoleTemplateSpec
-	// +optional
-	Status RoleTemplateStatus
-}
-
-type Scope string
-
-const (
-	ClusterScope  Scope = "Cluster"
-	BusinessScope Scope = "Business"
-)
-
-type RoleTemplateSpec struct {
 	TenantID    string
 	DisplayName string
 	// +optional
@@ -110,65 +98,59 @@ type RoleTemplateSpec struct {
 	Rules []rbacv1.PolicyRule
 }
 
-type RoleTemplatePhase string
+type Scope string
 
 const (
-	Installing RoleTemplatePhase = "Installing"
-	Succeeded  RoleTemplatePhase = "Succeeded"
-	Failed     RoleTemplatePhase = "Failed"
+	PlatformScope Scope = "Platform"
+	ClusterScope  Scope = "Cluster"
+	BusinessScope Scope = "Business"
 )
-
-type RoleTemplateStatus struct {
-	// Phase the release is in, one of ('Installing', 'Succeeded', 'Failed')
-	// +optional
-	Phase RoleTemplatePhase
-	// The last time the condition transitioned from one status to another.
-	// +optional
-	LastTransitionTime metav1.Time
-	// The reason for the condition's last transition.
-	// +optional
-	Reason string
-	// A human readable message indicating details about the transition.
-	// +optional
-	Message string
-}
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// RoleTemplateList is the whole list of all rbac templates.
-type RoleTemplateList struct {
+// PolicyList is the whole list of all policies.
+type PolicyList struct {
 	metav1.TypeMeta
 	// +optional
 	metav1.ListMeta
-	// List of bootstraps
-	Items []RoleTemplate
+	// List of policies
+	Items []Policy
 }
 
 // +genclient
 // +genclient:skipVerbs=deleteCollection
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-type ClusterRoleTemplateBinding struct {
+type ClusterPolicyBinding struct {
 	metav1.TypeMeta
 	// +optional
 	metav1.ObjectMeta
-	Spec   ClusterRoleTemplateBindingSpec
-	Status ClusterRoleTemplateBindingStatus
+	Spec   ClusterPolicyBindingSpec
+	Status ClusterPolicyBindingStatus
 }
 
-type ClusterRoleTemplateBindingSpec struct {
+type ClusterPolicyBindingSpec struct {
 	// +optional
 	UserName string
 	// +optional
-	GroupName        string
-	RoleTemplateName string
-	Clusters         []string
+	GroupName string
+	// PolicyNamespace/PolicyName
+	PolicyName string
+	Clusters   []string
 }
 
-type ClusterRoleTemplateBindingStatus struct {
+type Phase string
+
+const (
+	Installing Phase = "Installing"
+	Succeeded  Phase = "Succeeded"
+	Failed     Phase = "Failed"
+)
+
+type ClusterPolicyBindingStatus struct {
 	// Phase the release is in, one of ('Installing', 'Succeeded', 'Failed')
 	// +optional
-	Phase RoleTemplatePhase
+	Phase Phase
 	// The last time the condition transitioned from one status to another.
 	// +optional
 	LastTransitionTime metav1.Time
@@ -179,13 +161,13 @@ type ClusterRoleTemplateBindingStatus struct {
 	// +optional
 	Message string
 	// +optional
-	Clusters []ClusterRoleTemplateBindingStatusItem
+	Clusters []ClusterPolicyBindingStatusItem
 }
 
-type ClusterRoleTemplateBindingStatusItem struct {
+type ClusterPolicyBindingStatusItem struct {
 	// Phase the release is in, one of ('Installing', 'Succeeded', 'Failed')
 	// +optional
-	Phase RoleTemplatePhase
+	Phase Phase
 	// The last time the condition transitioned from one status to another.
 	// +optional
 	LastTransitionTime metav1.Time
@@ -199,13 +181,13 @@ type ClusterRoleTemplateBindingStatusItem struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// ClusterRoleTemplateBindingList is a resource containing a list of ClusterRoleTemplateBinding objects.
-type ClusterRoleTemplateBindingList struct {
+// ClusterPolicyBindingList is a resource containing a list of ClusterPolicyBinding objects.
+type ClusterPolicyBindingList struct {
 	metav1.TypeMeta
 	// +optional
 	metav1.ListMeta
 	// Items is the list of ConfigMaps.
-	Items []ClusterRoleTemplateBinding
+	Items []ClusterPolicyBinding
 }
 
 // +genclient

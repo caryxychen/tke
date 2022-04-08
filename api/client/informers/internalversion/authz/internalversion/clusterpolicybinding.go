@@ -34,59 +34,59 @@ import (
 	internalversion "tkestack.io/tke/api/client/listers/authz/internalversion"
 )
 
-// RoleTemplateInformer provides access to a shared informer and lister for
-// RoleTemplates.
-type RoleTemplateInformer interface {
+// ClusterPolicyBindingInformer provides access to a shared informer and lister for
+// ClusterPolicyBindings.
+type ClusterPolicyBindingInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() internalversion.RoleTemplateLister
+	Lister() internalversion.ClusterPolicyBindingLister
 }
 
-type roleTemplateInformer struct {
+type clusterPolicyBindingInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
 	namespace        string
 }
 
-// NewRoleTemplateInformer constructs a new informer for RoleTemplate type.
+// NewClusterPolicyBindingInformer constructs a new informer for ClusterPolicyBinding type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewRoleTemplateInformer(client clientsetinternalversion.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredRoleTemplateInformer(client, namespace, resyncPeriod, indexers, nil)
+func NewClusterPolicyBindingInformer(client clientsetinternalversion.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+	return NewFilteredClusterPolicyBindingInformer(client, namespace, resyncPeriod, indexers, nil)
 }
 
-// NewFilteredRoleTemplateInformer constructs a new informer for RoleTemplate type.
+// NewFilteredClusterPolicyBindingInformer constructs a new informer for ClusterPolicyBinding type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFilteredRoleTemplateInformer(client clientsetinternalversion.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
+func NewFilteredClusterPolicyBindingInformer(client clientsetinternalversion.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.Authz().RoleTemplates(namespace).List(context.TODO(), options)
+				return client.Authz().ClusterPolicyBindings(namespace).List(context.TODO(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.Authz().RoleTemplates(namespace).Watch(context.TODO(), options)
+				return client.Authz().ClusterPolicyBindings(namespace).Watch(context.TODO(), options)
 			},
 		},
-		&authz.RoleTemplate{},
+		&authz.ClusterPolicyBinding{},
 		resyncPeriod,
 		indexers,
 	)
 }
 
-func (f *roleTemplateInformer) defaultInformer(client clientsetinternalversion.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredRoleTemplateInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+func (f *clusterPolicyBindingInformer) defaultInformer(client clientsetinternalversion.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+	return NewFilteredClusterPolicyBindingInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
-func (f *roleTemplateInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&authz.RoleTemplate{}, f.defaultInformer)
+func (f *clusterPolicyBindingInformer) Informer() cache.SharedIndexInformer {
+	return f.factory.InformerFor(&authz.ClusterPolicyBinding{}, f.defaultInformer)
 }
 
-func (f *roleTemplateInformer) Lister() internalversion.RoleTemplateLister {
-	return internalversion.NewRoleTemplateLister(f.Informer().GetIndexer())
+func (f *clusterPolicyBindingInformer) Lister() internalversion.ClusterPolicyBindingLister {
+	return internalversion.NewClusterPolicyBindingLister(f.Informer().GetIndexer())
 }

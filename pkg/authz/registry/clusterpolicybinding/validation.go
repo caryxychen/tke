@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package clusterroletemplatebinding
+package clusterpolicybinding
 
 import (
 	apimachineryvalidation "k8s.io/apimachinery/pkg/api/validation"
@@ -24,20 +24,19 @@ import (
 	"tkestack.io/tke/api/authz"
 )
 
-var ValidateRoleTemplateName = apimachineryvalidation.NameIsDNSLabel
+var ValidateClusterPolicyBindingName = apimachineryvalidation.NameIsDNSLabel
 
-// ValidateClusterRoleTemplateBinding tests if required fields in the cluster are set.
-func ValidateClusterRoleTemplateBinding(clusterroletemplatebinding *authz.ClusterRoleTemplateBinding) field.ErrorList {
-	allErrs := apimachineryvalidation.ValidateObjectMeta(&clusterroletemplatebinding.ObjectMeta, true, ValidateRoleTemplateName, field.NewPath("metadata"))
+// ValidateClusterPolicyBinding tests if required fields in the cluster are set.
+func ValidateClusterPolicyBinding(clusterPolicyBinding *authz.ClusterPolicyBinding) field.ErrorList {
+	allErrs := apimachineryvalidation.ValidateObjectMeta(&clusterPolicyBinding.ObjectMeta, true, ValidateClusterPolicyBindingName, field.NewPath("metadata"))
 
 	return allErrs
 }
 
-// ValidateClusterRoleTemplateBindingUpdate tests if required fields in the namespace set are
+// ValidateClusterPolicyBindingUpdate tests if required fields in the namespace set are
 // set during an update.
-func ValidateClusterRoleTemplateBindingUpdate(clusterroletemplatebinding *authz.ClusterRoleTemplateBinding, old *authz.ClusterRoleTemplateBinding) field.ErrorList {
+func ValidateClusterPolicyBindingUpdate(clusterroletemplatebinding *authz.ClusterPolicyBinding, old *authz.ClusterPolicyBinding) field.ErrorList {
 	allErrs := apimachineryvalidation.ValidateObjectMetaUpdate(&clusterroletemplatebinding.ObjectMeta, &old.ObjectMeta, field.NewPath("metadata"))
-	allErrs = append(allErrs, ValidateClusterRoleTemplateBinding(clusterroletemplatebinding)...)
-
+	allErrs = append(allErrs, ValidateClusterPolicyBinding(clusterroletemplatebinding)...)
 	return allErrs
 }

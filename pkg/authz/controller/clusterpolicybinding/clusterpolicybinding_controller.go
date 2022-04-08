@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package clusterroletemplatebinding
+package clusterpolicybinding
 
 import (
 	"context"
@@ -52,26 +52,26 @@ const (
 )
 
 const (
-	controllerName = "clusterroletemplatebinding-controller"
+	controllerName = "clusterpolicybinding-controller"
 )
 
 type Controller struct {
-	client             clientset.Interface
-	platformClient     platformversionedclient.PlatformV1Interface
-	queue              workqueue.RateLimitingInterface
-	roleTemplateLister authzv1.RoleTemplateLister
-	bindingLister      authzv1.ClusterRoleTemplateBindingLister
-	roleTemplateSynced cache.InformerSynced
-	bindingSynced      cache.InformerSynced
-	stopCh             <-chan struct{}
+	client                     clientset.Interface
+	platformClient             platformversionedclient.PlatformV1Interface
+	queue                      workqueue.RateLimitingInterface
+	policyLister               authzv1.PolicyLister
+	clusterPolicyBindingLister authzv1.ClusterPolicyBindingLister
+	policySynced               cache.InformerSynced
+	clusterPolicyBindingSynced cache.InformerSynced
+	stopCh                     <-chan struct{}
 }
 
 // NewController creates a new Controller object.
 func NewController(
 	client clientset.Interface,
 	platformClient platformversionedclient.PlatformV1Interface,
-	roletemplateInformer authzv1informer.RoleTemplateInformer,
-	bindingInformer authzv1informer.ClusterRoleTemplateBindingInformer,
+	policyInformer authzv1informer.PolicyInformer,
+	clusterPolicyBindingInformer authzv1informer.ClusterPolicyBindingInformer,
 	resyncPeriod time.Duration,
 ) *Controller {
 	// create the controller so we can inject the enqueue function
@@ -87,13 +87,13 @@ func NewController(
 		_ = metrics.RegisterMetricAndTrackRateLimiterUsage(controllerName, client.AuthzV1().RESTClient().GetRateLimiter())
 	}
 
-	bindingInformer.Informer().AddEventHandlerWithResyncPeriod(
+	clusterPolicyBindingInformer.Informer().AddEventHandlerWithResyncPeriod(
 		cache.FilteringResourceEventHandler{
 			Handler: cache.ResourceEventHandlerFuncs{
 				AddFunc: controller.enqueue,
 				UpdateFunc: func(oldObj, newObj interface{}) {
-					old, ok1 := oldObj.(*apiauthzv1.ClusterRoleTemplateBinding)
-					cur, ok2 := newObj.(*apiauthzv1.ClusterRoleTemplateBinding)
+					old, ok1 := oldObj.(*apiauthzv1.ClusterPolicyBinding)
+					cur, ok2 := newObj.(*apiauthzv1.ClusterPolicyBinding)
 					if ok1 && ok2 && controller.needsUpdate(old, cur) {
 						controller.enqueue(newObj)
 					}
@@ -107,10 +107,10 @@ func NewController(
 		},
 		resyncPeriod,
 	)
-	controller.bindingLister = bindingInformer.Lister()
-	controller.bindingSynced = bindingInformer.Informer().HasSynced
-	controller.roleTemplateLister = roletemplateInformer.Lister()
-	controller.roleTemplateSynced = roletemplateInformer.Informer().HasSynced
+	controller.clusterPolicyBindingLister = clusterPolicyBindingInformer.Lister()
+	controller.clusterPolicyBindingSynced = clusterPolicyBindingInformer.Informer().HasSynced
+	controller.policyLister = policyInformer.Lister()
+	controller.policySynced = policyInformer.Informer().HasSynced
 	return controller
 }
 
@@ -123,7 +123,7 @@ func (c *Controller) enqueue(obj interface{}) {
 	c.queue.AddAfter(key, appDeletionGracePeriod)
 }
 
-func (c *Controller) needsUpdate(old *apiauthzv1.ClusterRoleTemplateBinding, new *apiauthzv1.ClusterRoleTemplateBinding) bool {
+func (c *Controller) needsUpdate(old *apiauthzv1.ClusterPolicyBinding, new *apiauthzv1.ClusterPolicyBinding) bool {
 	if old.UID != new.UID {
 		return true
 	}
@@ -143,7 +143,7 @@ func (c *Controller) Run(workers int, stopCh <-chan struct{}) {
 	log.Info("Starting app controller")
 	defer log.Info("Shutting down app controller")
 
-	if ok := cache.WaitForCacheSync(stopCh, c.bindingSynced, c.roleTemplateSynced); !ok {
+	if ok := cache.WaitForCacheSync(stopCh, c.clusterPolicyBindingSynced, c.policySynced); !ok {
 		log.Error("Failed to wait for app caches to sync")
 		return
 	}
@@ -192,14 +192,14 @@ func (c *Controller) worker() {
 func (c *Controller) syncItem(key string) error {
 	startTime := time.Now()
 	defer func() {
-		log.Info("Finished syncing clusterroletemplatebinding", log.String("clusterroletemplatebinding", key), log.Duration("processTime", time.Since(startTime)))
+		log.Info("Finished syncing clusterpolicybinding", log.String("clusterpolicybinding", key), log.Duration("processTime", time.Since(startTime)))
 	}()
 	ns, name, err := cache.SplitMetaNamespaceKey(key)
 	if err != nil {
 		return err
 	}
 
-	crtb, err := c.bindingLister.ClusterRoleTemplateBindings(ns).Get(name)
+	cpb, err := c.clusterPolicyBindingLister.ClusterPolicyBindings(ns).Get(name)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			log.Info("App has been deleted. Attempting to cleanup resources",
@@ -207,56 +207,61 @@ func (c *Controller) syncItem(key string) error {
 				log.String("name", name))
 			return nil
 		}
-		log.Warn("Unable to retrieve app from store",
+		log.Warn("Unable to retrieve clusterpolicybinding from store",
 			log.String("namespace", ns),
 			log.String("name", name), log.Err(err))
 		return err
 	}
-	crtb = crtb.DeepCopy()
+	cpb = cpb.DeepCopy()
 
-	rt, err := c.roleTemplateLister.RoleTemplates(ns).Get(crtb.Spec.RoleTemplateName)
-	if err != nil {
-		log.Warn("Unable to retrieve app from store",
-			log.String("namespace", ns),
-			log.String("name", name), log.Err(err))
-		return err
-	}
-
-	provider, err := authzprovider.GetProvider(&rt.ObjectMeta)
+	provider, err := authzprovider.GetProvider(cpb.Annotations)
 	if err != nil {
 		log.Warn("Unable to retrieve provider",
 			log.String("namespace", ns),
 			log.String("name", name), log.Err(err))
 		return err
 	}
-	ctx := provider.InitContext(crtb)
+	ctx := provider.InitContext(cpb)
+
+	policyNs, policyName, err := cache.SplitMetaNamespaceKey(cpb.Spec.PolicyName)
+	if err != nil {
+		log.Warnf("failed to parse policy name '%s'", cpb.Spec.PolicyName)
+		return err
+	}
+	policy, err := c.policyLister.Policies(policyNs).Get(policyName)
+	if err != nil {
+		log.Warn("Unable to retrieve policy from store",
+			log.String("namespace", policyNs),
+			log.String("name", policyName), log.Err(err))
+		return err
+	}
 
 	// 获取user在各个cluster内的subject
 	clusterSubjects := map[string]*rbacv1.Subject{}
-	for _, cls := range crtb.Spec.Clusters {
-		cluster, err := clusterprovider.GetV1ClusterByName(ctx, c.platformClient, cls, crtb.Spec.UserName)
+	for _, cls := range cpb.Spec.Clusters {
+		cluster, err := clusterprovider.GetV1ClusterByName(ctx, c.platformClient, cls, cpb.Spec.UserName)
 		if err != nil {
-			log.Warnf("GetV1ClusterByName failed, cluster: '%s', user: '%s', err: '%#v'", ns, crtb.Spec.UserName, err)
+			log.Warnf("GetV1ClusterByName failed, cluster: '%s', user: '%s', err: '%#v'", ns, cpb.Spec.UserName, err)
 			return err
 		}
-		subject, err := provider.GetClusterRoleBindingSubject(ctx, crtb.Spec.UserName, cluster)
+		subject, err := provider.GetSubject(ctx, cpb.Spec.UserName, cluster)
 		if err != nil {
-			log.Warnf("GetClusterRoleBindingSubject failed, cluster: '%s',  user: '%s', err: '%#v'", ns, crtb.Spec.UserName, err)
+			log.Warnf("GetSubject failed, cluster: '%s',  user: '%s', err: '%#v'", ns, cpb.Spec.UserName, err)
 			return err
 		}
 		clusterSubjects[cls] = subject
 	}
 
 	// 执行权限分发
-	err = provider.DispatchClusterRBAC(ctx, c.platformClient, rt, crtb, clusterSubjects)
+	err = provider.DispatchPolicy(ctx, c.platformClient, policy, cpb, clusterSubjects)
 	if err != nil {
-		log.Warnf("DispatchClusterRBAC failed, clusterroletemplatebinding: '%s', err: '%#v'", crtb.Name, err)
+		log.Warnf("DispatchPolicy failed, clusterpolicybinding: '%s', err: '%#v'", cpb.Name, err)
 		return err
 	}
 
 	// 更新Status
-	if _, err = c.client.AuthzV1().ClusterRoleTemplateBindings(ns).Update(context.Background(), crtb, metav1.UpdateOptions{}); err != nil {
-		log.Warnf("Failed to clusterroletemplatebinding '%s', err: '%#v'", crtb.Name, err)
+	if _, err = c.client.AuthzV1().ClusterPolicyBindings(ns).Update(context.Background(), cpb, metav1.UpdateOptions{}); err != nil {
+		log.Warnf("Failed to clusterpolicybinding '%s', err: '%#v'", cpb.Name, err)
 	}
 	return err
 }

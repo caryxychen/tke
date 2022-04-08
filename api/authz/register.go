@@ -64,12 +64,12 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&RoleList{},
 		&RoleBinding{},
 		&RoleBindingList{},
-		&RoleTemplate{},
-		&RoleTemplateList{},
+		&Policy{},
+		&PolicyList{},
+		&ClusterPolicyBinding{},
+		&ClusterPolicyBindingList{},
 		&ConfigMap{},
 		&ConfigMapList{},
-		&ClusterRoleTemplateBinding{},
-		&ClusterRoleTemplateBindingList{},
 	)
 
 	return nil

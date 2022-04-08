@@ -27,11 +27,11 @@ import (
 
 type AuthzInterface interface {
 	RESTClient() rest.Interface
-	ClusterRoleTemplateBindingsGetter
+	ClusterPolicyBindingsGetter
 	ConfigMapsGetter
+	PoliciesGetter
 	RolesGetter
 	RoleBindingsGetter
-	RoleTemplatesGetter
 }
 
 // AuthzClient is used to interact with features provided by the authz.tkestack.io group.
@@ -39,12 +39,16 @@ type AuthzClient struct {
 	restClient rest.Interface
 }
 
-func (c *AuthzClient) ClusterRoleTemplateBindings(namespace string) ClusterRoleTemplateBindingInterface {
-	return newClusterRoleTemplateBindings(c, namespace)
+func (c *AuthzClient) ClusterPolicyBindings(namespace string) ClusterPolicyBindingInterface {
+	return newClusterPolicyBindings(c, namespace)
 }
 
 func (c *AuthzClient) ConfigMaps() ConfigMapInterface {
 	return newConfigMaps(c)
+}
+
+func (c *AuthzClient) Policies(namespace string) PolicyInterface {
+	return newPolicies(c, namespace)
 }
 
 func (c *AuthzClient) Roles(namespace string) RoleInterface {
@@ -53,10 +57,6 @@ func (c *AuthzClient) Roles(namespace string) RoleInterface {
 
 func (c *AuthzClient) RoleBindings(namespace string) RoleBindingInterface {
 	return newRoleBindings(c, namespace)
-}
-
-func (c *AuthzClient) RoleTemplates(namespace string) RoleTemplateInterface {
-	return newRoleTemplates(c, namespace)
 }
 
 // NewForConfig creates a new AuthzClient for the given config.

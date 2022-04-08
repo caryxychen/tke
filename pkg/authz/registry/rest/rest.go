@@ -28,9 +28,9 @@ import (
 	"tkestack.io/tke/api/authz"
 	authzv1 "tkestack.io/tke/api/authz/v1"
 	"tkestack.io/tke/pkg/apiserver/storage"
-	clusterroletemplatebindingstorage "tkestack.io/tke/pkg/authz/registry/clusterroletemplatebinding/storage"
+	clusterpolicybindingstorage "tkestack.io/tke/pkg/authz/registry/clusterpolicybinding/storage"
 	configmapstorage "tkestack.io/tke/pkg/authz/registry/configmap/storage"
-	roletemplatestorage "tkestack.io/tke/pkg/authz/registry/roletemplate/storage"
+	policystorage "tkestack.io/tke/pkg/authz/registry/policy/storage"
 	rolestorage "tkestack.io/tke/pkg/authz/registry/role/storage"
 	rolebindingstorage "tkestack.io/tke/pkg/authz/registry/rolebinding/storage"
 )
@@ -65,18 +65,19 @@ func (s *StorageProvider) v1Storage(apiResourceConfigSource serverstorage.APIRes
 	storageMap := make(map[string]rest.Storage)
 	{
 		configmapREST := configmapstorage.NewStorage(restOptionsGetter)
-		roletemplateREST := roletemplatestorage.NewStorage(restOptionsGetter)
-		clusterroletemplatebindingstorageREST := clusterroletemplatebindingstorage.NewStorage(restOptionsGetter)
+		policyREST := policystorage.NewStorage(restOptionsGetter)
+		clusterpolicybindingREST := clusterpolicybindingstorage.NewStorage(restOptionsGetter)
 		rolestorageREST := rolestorage.NewStorage(restOptionsGetter)
 		rolebindingstorageREST := rolebindingstorage.NewStorage(restOptionsGetter)
 
+		storageMap["policies"] = policyREST.Policy
+		storageMap["clusterpolicybindings"] = clusterpolicybindingREST.ClusterPolicyBinding
+		storageMap["clusterpolicybindings/status"] = clusterpolicybindingREST.Status
+
 		storageMap["roles"] = rolestorageREST.Role
 		storageMap["rolebindings"] = rolebindingstorageREST.RoleBinding
-		storageMap["roletemplates"] = roletemplateREST.RoleTemplate
-		storageMap["roletemplates/status"] = roletemplateREST.Status
+
 		storageMap["configmaps"] = configmapREST.ConfigMap
-		storageMap["clusterroletemplatebindings"] = clusterroletemplatebindingstorageREST.RoleTemplate
-		storageMap["clusterroletemplatebindings/status"] = clusterroletemplatebindingstorageREST.Status
 	}
 	return storageMap
 }

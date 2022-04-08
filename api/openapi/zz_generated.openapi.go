@@ -904,22 +904,20 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"tkestack.io/tke/api/auth/v1.User":                                            schema_tke_api_auth_v1_User(ref),
 		"tkestack.io/tke/api/auth/v1.UserList":                                        schema_tke_api_auth_v1_UserList(ref),
 		"tkestack.io/tke/api/auth/v1.UserSpec":                                        schema_tke_api_auth_v1_UserSpec(ref),
-		"tkestack.io/tke/api/authz/v1.ClusterRoleTemplateBinding":                     schema_tke_api_authz_v1_ClusterRoleTemplateBinding(ref),
-		"tkestack.io/tke/api/authz/v1.ClusterRoleTemplateBindingList":                 schema_tke_api_authz_v1_ClusterRoleTemplateBindingList(ref),
-		"tkestack.io/tke/api/authz/v1.ClusterRoleTemplateBindingSpec":                 schema_tke_api_authz_v1_ClusterRoleTemplateBindingSpec(ref),
-		"tkestack.io/tke/api/authz/v1.ClusterRoleTemplateBindingStatus":               schema_tke_api_authz_v1_ClusterRoleTemplateBindingStatus(ref),
-		"tkestack.io/tke/api/authz/v1.ClusterRoleTemplateBindingStatusItem":           schema_tke_api_authz_v1_ClusterRoleTemplateBindingStatusItem(ref),
+		"tkestack.io/tke/api/authz/v1.ClusterPolicyBinding":                           schema_tke_api_authz_v1_ClusterPolicyBinding(ref),
+		"tkestack.io/tke/api/authz/v1.ClusterPolicyBindingList":                       schema_tke_api_authz_v1_ClusterPolicyBindingList(ref),
+		"tkestack.io/tke/api/authz/v1.ClusterPolicyBindingSpec":                       schema_tke_api_authz_v1_ClusterPolicyBindingSpec(ref),
+		"tkestack.io/tke/api/authz/v1.ClusterPolicyBindingStatus":                     schema_tke_api_authz_v1_ClusterPolicyBindingStatus(ref),
+		"tkestack.io/tke/api/authz/v1.ClusterPolicyBindingStatusItem":                 schema_tke_api_authz_v1_ClusterPolicyBindingStatusItem(ref),
 		"tkestack.io/tke/api/authz/v1.ConfigMap":                                      schema_tke_api_authz_v1_ConfigMap(ref),
 		"tkestack.io/tke/api/authz/v1.ConfigMapList":                                  schema_tke_api_authz_v1_ConfigMapList(ref),
+		"tkestack.io/tke/api/authz/v1.Policy":                                         schema_tke_api_authz_v1_Policy(ref),
+		"tkestack.io/tke/api/authz/v1.PolicyList":                                     schema_tke_api_authz_v1_PolicyList(ref),
 		"tkestack.io/tke/api/authz/v1.Role":                                           schema_tke_api_authz_v1_Role(ref),
 		"tkestack.io/tke/api/authz/v1.RoleBinding":                                    schema_tke_api_authz_v1_RoleBinding(ref),
 		"tkestack.io/tke/api/authz/v1.RoleBindingList":                                schema_tke_api_authz_v1_RoleBindingList(ref),
 		"tkestack.io/tke/api/authz/v1.RoleBindingSpec":                                schema_tke_api_authz_v1_RoleBindingSpec(ref),
 		"tkestack.io/tke/api/authz/v1.RoleList":                                       schema_tke_api_authz_v1_RoleList(ref),
-		"tkestack.io/tke/api/authz/v1.RoleTemplate":                                   schema_tke_api_authz_v1_RoleTemplate(ref),
-		"tkestack.io/tke/api/authz/v1.RoleTemplateList":                               schema_tke_api_authz_v1_RoleTemplateList(ref),
-		"tkestack.io/tke/api/authz/v1.RoleTemplateSpec":                               schema_tke_api_authz_v1_RoleTemplateSpec(ref),
-		"tkestack.io/tke/api/authz/v1.RoleTemplateStatus":                             schema_tke_api_authz_v1_RoleTemplateStatus(ref),
 		"tkestack.io/tke/api/business/v1.ChartGroup":                                  schema_tke_api_business_v1_ChartGroup(ref),
 		"tkestack.io/tke/api/business/v1.ChartGroupList":                              schema_tke_api_business_v1_ChartGroupList(ref),
 		"tkestack.io/tke/api/business/v1.ChartGroupSpec":                              schema_tke_api_business_v1_ChartGroupSpec(ref),
@@ -45529,7 +45527,7 @@ func schema_tke_api_auth_v1_UserSpec(ref common.ReferenceCallback) common.OpenAP
 	}
 }
 
-func schema_tke_api_authz_v1_ClusterRoleTemplateBinding(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_tke_api_authz_v1_ClusterPolicyBinding(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -45558,13 +45556,13 @@ func schema_tke_api_authz_v1_ClusterRoleTemplateBinding(ref common.ReferenceCall
 					"spec": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
-							Ref:     ref("tkestack.io/tke/api/authz/v1.ClusterRoleTemplateBindingSpec"),
+							Ref:     ref("tkestack.io/tke/api/authz/v1.ClusterPolicyBindingSpec"),
 						},
 					},
 					"status": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
-							Ref:     ref("tkestack.io/tke/api/authz/v1.ClusterRoleTemplateBindingStatus"),
+							Ref:     ref("tkestack.io/tke/api/authz/v1.ClusterPolicyBindingStatus"),
 						},
 					},
 				},
@@ -45572,15 +45570,15 @@ func schema_tke_api_authz_v1_ClusterRoleTemplateBinding(ref common.ReferenceCall
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta", "tkestack.io/tke/api/authz/v1.ClusterRoleTemplateBindingSpec", "tkestack.io/tke/api/authz/v1.ClusterRoleTemplateBindingStatus"},
+			"k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta", "tkestack.io/tke/api/authz/v1.ClusterPolicyBindingSpec", "tkestack.io/tke/api/authz/v1.ClusterPolicyBindingStatus"},
 	}
 }
 
-func schema_tke_api_authz_v1_ClusterRoleTemplateBindingList(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_tke_api_authz_v1_ClusterPolicyBindingList(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "ClusterRoleTemplateBindingList is a resource containing a list of ClusterRoleTemplateBinding objects.",
+				Description: "ClusterPolicyBindingList is a resource containing a list of ClusterPolicyBinding objects.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"kind": {
@@ -45611,7 +45609,7 @@ func schema_tke_api_authz_v1_ClusterRoleTemplateBindingList(ref common.Reference
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Default: map[string]interface{}{},
-										Ref:     ref("tkestack.io/tke/api/authz/v1.ClusterRoleTemplateBinding"),
+										Ref:     ref("tkestack.io/tke/api/authz/v1.ClusterPolicyBinding"),
 									},
 								},
 							},
@@ -45622,11 +45620,11 @@ func schema_tke_api_authz_v1_ClusterRoleTemplateBindingList(ref common.Reference
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta", "tkestack.io/tke/api/authz/v1.ClusterRoleTemplateBinding"},
+			"k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta", "tkestack.io/tke/api/authz/v1.ClusterPolicyBinding"},
 	}
 }
 
-func schema_tke_api_authz_v1_ClusterRoleTemplateBindingSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_tke_api_authz_v1_ClusterPolicyBindingSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -45674,7 +45672,7 @@ func schema_tke_api_authz_v1_ClusterRoleTemplateBindingSpec(ref common.Reference
 	}
 }
 
-func schema_tke_api_authz_v1_ClusterRoleTemplateBindingStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_tke_api_authz_v1_ClusterPolicyBindingStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -45718,7 +45716,7 @@ func schema_tke_api_authz_v1_ClusterRoleTemplateBindingStatus(ref common.Referen
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Default: map[string]interface{}{},
-										Ref:     ref("tkestack.io/tke/api/authz/v1.ClusterRoleTemplateBindingStatusItem"),
+										Ref:     ref("tkestack.io/tke/api/authz/v1.ClusterPolicyBindingStatusItem"),
 									},
 								},
 							},
@@ -45728,11 +45726,11 @@ func schema_tke_api_authz_v1_ClusterRoleTemplateBindingStatus(ref common.Referen
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/apimachinery/pkg/apis/meta/v1.Time", "tkestack.io/tke/api/authz/v1.ClusterRoleTemplateBindingStatusItem"},
+			"k8s.io/apimachinery/pkg/apis/meta/v1.Time", "tkestack.io/tke/api/authz/v1.ClusterPolicyBindingStatusItem"},
 	}
 }
 
-func schema_tke_api_authz_v1_ClusterRoleTemplateBindingStatusItem(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_tke_api_authz_v1_ClusterPolicyBindingStatusItem(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -45890,6 +45888,133 @@ func schema_tke_api_authz_v1_ConfigMapList(ref common.ReferenceCallback) common.
 		},
 		Dependencies: []string{
 			"k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta", "tkestack.io/tke/api/authz/v1.ConfigMap"},
+	}
+}
+
+func schema_tke_api_authz_v1_Policy(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Policy is a rbac template in TKE.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"tenantID": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"displayName": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"description": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"scope": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"rules": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("k8s.io/api/rbac/v1.PolicyRule"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"tenantID", "displayName", "rules"},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/api/rbac/v1.PolicyRule", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+	}
+}
+
+func schema_tke_api_authz_v1_PolicyList(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "PolicyList is the whole list of all rbac templates.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"),
+						},
+					},
+					"items": {
+						SchemaProps: spec.SchemaProps{
+							Description: "List of policies",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("tkestack.io/tke/api/authz/v1.Policy"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"items"},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta", "tkestack.io/tke/api/authz/v1.Policy"},
 	}
 }
 
@@ -46156,204 +46281,6 @@ func schema_tke_api_authz_v1_RoleList(ref common.ReferenceCallback) common.OpenA
 		},
 		Dependencies: []string{
 			"k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta", "tkestack.io/tke/api/authz/v1.Role"},
-	}
-}
-
-func schema_tke_api_authz_v1_RoleTemplate(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "RoleTemplate is a rbac template in TKE.",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"kind": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"apiVersion": {
-						SchemaProps: spec.SchemaProps{
-							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"metadata": {
-						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
-						},
-					},
-					"spec": {
-						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref("tkestack.io/tke/api/authz/v1.RoleTemplateSpec"),
-						},
-					},
-					"status": {
-						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref("tkestack.io/tke/api/authz/v1.RoleTemplateStatus"),
-						},
-					},
-				},
-			},
-		},
-		Dependencies: []string{
-			"k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta", "tkestack.io/tke/api/authz/v1.RoleTemplateSpec", "tkestack.io/tke/api/authz/v1.RoleTemplateStatus"},
-	}
-}
-
-func schema_tke_api_authz_v1_RoleTemplateList(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "RoleTemplateList is the whole list of all rbac templates.",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"kind": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"apiVersion": {
-						SchemaProps: spec.SchemaProps{
-							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"metadata": {
-						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"),
-						},
-					},
-					"items": {
-						SchemaProps: spec.SchemaProps{
-							Description: "List of bootstraps",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: map[string]interface{}{},
-										Ref:     ref("tkestack.io/tke/api/authz/v1.RoleTemplate"),
-									},
-								},
-							},
-						},
-					},
-				},
-				Required: []string{"items"},
-			},
-		},
-		Dependencies: []string{
-			"k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta", "tkestack.io/tke/api/authz/v1.RoleTemplate"},
-	}
-}
-
-func schema_tke_api_authz_v1_RoleTemplateSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
-				Properties: map[string]spec.Schema{
-					"tenantID": {
-						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
-						},
-					},
-					"displayName": {
-						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
-						},
-					},
-					"description": {
-						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
-						},
-					},
-					"scope": {
-						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
-						},
-					},
-					"rules": {
-						SchemaProps: spec.SchemaProps{
-							Type: []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: map[string]interface{}{},
-										Ref:     ref("k8s.io/api/rbac/v1.PolicyRule"),
-									},
-								},
-							},
-						},
-					},
-				},
-				Required: []string{"tenantID", "displayName", "rules"},
-			},
-		},
-		Dependencies: []string{
-			"k8s.io/api/rbac/v1.PolicyRule"},
-	}
-}
-
-func schema_tke_api_authz_v1_RoleTemplateStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
-				Properties: map[string]spec.Schema{
-					"phase": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Phase the release is in, one of ('Installing', 'Succeeded', 'Failed')",
-							Default:     "",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"lastTransitionTime": {
-						SchemaProps: spec.SchemaProps{
-							Description: "The last time the condition transitioned from one status to another.",
-							Default:     map[string]interface{}{},
-							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
-						},
-					},
-					"reason": {
-						SchemaProps: spec.SchemaProps{
-							Description: "The reason for the condition's last transition.",
-							Default:     "",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"message": {
-						SchemaProps: spec.SchemaProps{
-							Description: "A human readable message indicating details about the transition.",
-							Default:     "",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-				},
-			},
-		},
-		Dependencies: []string{
-			"k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
 	}
 }
 

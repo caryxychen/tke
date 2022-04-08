@@ -35,6 +35,7 @@ import (
 	platformversionedclient "tkestack.io/tke/api/client/clientset/versioned/typed/platform/v1"
 	authzv1informer "tkestack.io/tke/api/client/informers/externalversions/authz/v1"
 	authzv1 "tkestack.io/tke/api/client/listers/authz/v1"
+	authzprovider "tkestack.io/tke/pkg/authz/provider"
 	controllerutil "tkestack.io/tke/pkg/controller"
 	"tkestack.io/tke/pkg/util/log"
 	"tkestack.io/tke/pkg/util/metrics"
@@ -55,16 +56,16 @@ const (
 )
 
 type Controller struct {
-	client             clientset.Interface
-	platformClient     platformversionedclient.PlatformV1Interface
-	queue              workqueue.RateLimitingInterface
-	roleLister         authzv1.RoleLister
-	rolebindingLister  authzv1.RoleBindingLister
-	roletemplateLister authzv1.RoleTemplateLister
-	roleSynced         cache.InformerSynced
-	rolebindingSynced  cache.InformerSynced
-	roletemplateSynced  cache.InformerSynced
-	stopCh             <-chan struct{}
+	client            clientset.Interface
+	platformClient    platformversionedclient.PlatformV1Interface
+	queue             workqueue.RateLimitingInterface
+	roleLister        authzv1.RoleLister
+	rolebindingLister authzv1.RoleBindingLister
+	policyLister      authzv1.PolicyLister
+	roleSynced        cache.InformerSynced
+	rolebindingSynced cache.InformerSynced
+	policySynced      cache.InformerSynced
+	stopCh            <-chan struct{}
 }
 
 // NewController creates a new Controller object.
@@ -73,7 +74,7 @@ func NewController(
 	platformClient platformversionedclient.PlatformV1Interface,
 	roleInformer authzv1informer.RoleInformer,
 	rolebindingInformer authzv1informer.RoleBindingInformer,
-	roletemplateInformer authzv1informer.RoleTemplateInformer,
+	policyInformer authzv1informer.PolicyInformer,
 	resyncPeriod time.Duration,
 ) *Controller {
 	// create the controller so we can inject the enqueue function
@@ -113,8 +114,8 @@ func NewController(
 	controller.roleSynced = roleInformer.Informer().HasSynced
 	controller.rolebindingLister = rolebindingInformer.Lister()
 	controller.rolebindingSynced = rolebindingInformer.Informer().HasSynced
-	controller.roletemplateLister = roletemplateInformer.Lister()
-	controller.roletemplateSynced = roletemplateInformer.Informer().HasSynced
+	controller.policyLister = policyInformer.Lister()
+	controller.policySynced = policyInformer.Informer().HasSynced
 	return controller
 }
 
@@ -147,7 +148,7 @@ func (c *Controller) Run(workers int, stopCh <-chan struct{}) {
 	log.Info("Starting rolebinding controller")
 	defer log.Info("Shutting down rolebinding controller")
 
-	if ok := cache.WaitForCacheSync(stopCh, c.roleSynced, c.rolebindingSynced, c.roletemplateSynced); !ok {
+	if ok := cache.WaitForCacheSync(stopCh, c.roleSynced, c.rolebindingSynced, c.policySynced); !ok {
 		log.Error("Failed to wait for rolebinding caches to sync")
 		return
 	}
@@ -218,72 +219,85 @@ func (c *Controller) syncItem(key string) error {
 	}
 	rb = rb.DeepCopy()
 
-	// 构造 RoleTemplate和RoleTemplateBinding资源并提交
-	roleName := rb.Spec.RoleName
-	userName := rb.Spec.UserName
-	clusters := rb.Spec.Clusters
-	namespaceKey, nameKey, err := cache.SplitMetaNamespaceKey(roleName)
+	// 构造 Policy和PolicyBinding资源并提交
+	roleNs, roleName, err := cache.SplitMetaNamespaceKey(rb.Spec.RoleName)
 	if err != nil {
 		return err
 	}
-	role, err := c.roleLister.Roles(namespaceKey).Get(nameKey)
+	role, err := c.roleLister.Roles(roleNs).Get(roleName)
 	if err != nil {
 		return err
 	}
-	policies := role.Policies
-	policyRules := []rbacv1.PolicyRule{}
-	for _, policy := range policies {
-		policyNamespace, policyName, _ := cache.SplitMetaNamespaceKey(policy)
-		pol, _ := c.roletemplateLister.RoleTemplates(policyNamespace).Get(policyName)
-		policyRules = append(policyRules, pol.Spec.Rules...)
+	var policyRules []rbacv1.PolicyRule
+	for _, policy := range role.Policies {
+		policyNamespace, policyName, err := cache.SplitMetaNamespaceKey(policy)
+		if err != nil {
+			return err
+		}
+		pol, err := c.policyLister.Policies(policyNamespace).Get(policyName)
+		if err != nil {
+			if errors.IsNotFound(err) {
+				continue
+			}
+			return err
+		}
+		policyRules = append(policyRules, pol.Rules...)
 	}
-	rtName := fmt.Sprintf("role-%s", name)
-	rt := &apiauthzv1.RoleTemplate{
+	combinedPolicyName := fmt.Sprintf("role-%s", name)
+	combinedPolicy := &apiauthzv1.Policy{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      rtName,
+			Name:      combinedPolicyName,
 			Namespace: ns,
 		},
-		Spec: apiauthzv1.RoleTemplateSpec{
-			Scope: apiauthzv1.ClusterScope,
-			Rules: policyRules,
-		},
+		Scope: apiauthzv1.ClusterScope,
+		Rules: policyRules,
 	}
-	_, err = c.client.AuthzV1().RoleTemplates(ns).Get(context.Background(), rtName, metav1.GetOptions{})
+	_, err = c.client.AuthzV1().Policies(ns).Get(context.Background(), combinedPolicyName, metav1.GetOptions{})
 	if err != nil {
 		if errors.IsNotFound(err) {
-			if _, err = c.client.AuthzV1().RoleTemplates(ns).Create(context.Background(), rt, metav1.CreateOptions{}); err != nil {
+			if _, err = c.client.AuthzV1().Policies(ns).Create(context.Background(), combinedPolicy, metav1.CreateOptions{}); err != nil {
 				return err
 			}
 		} else {
 			return err
 		}
 	} else {
-		if _, err = c.client.AuthzV1().RoleTemplates(ns).Update(context.Background(), rt, metav1.UpdateOptions{}); err != nil {
+		if _, err = c.client.AuthzV1().Policies(ns).Update(context.Background(), combinedPolicy, metav1.UpdateOptions{}); err != nil {
 			return err
 		}
 	}
 
-	rtb := &apiauthzv1.ClusterRoleTemplateBinding{
+	provider, err := authzprovider.GetProvider(rb.Annotations)
+	if err != nil {
+		log.Warn("Unable to retrieve provider",
+			log.String("namespace", ns),
+			log.String("name", name), log.Err(err))
+		return err
+	}
+
+	// 创建ClusterPolicyBinding
+	cpb := &apiauthzv1.ClusterPolicyBinding{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      rtName,
+			Name:      combinedPolicyName,
 			Namespace: ns,
 		},
-		Spec: apiauthzv1.ClusterRoleTemplateBindingSpec{
-			RoleTemplateName: rtName,
-			UserName:         userName,
-			Clusters:         clusters,
+		Spec: apiauthzv1.ClusterPolicyBindingSpec{
+			PolicyName: fmt.Sprintf("%s/%s", ns, combinedPolicyName),
+			UserName:   rb.Spec.UserName,
+			Clusters:   rb.Spec.Clusters,
 		},
 	}
-	if _, err = c.client.AuthzV1().ClusterRoleTemplateBindings(ns).Get(context.Background(), rtName, metav1.GetOptions{}); err != nil {
+	provider.RenderClusterPolicyBinding(context.Background(), cpb)
+	if _, err = c.client.AuthzV1().ClusterPolicyBindings(ns).Get(context.Background(), cpb.Name, metav1.GetOptions{}); err != nil {
 		if errors.IsNotFound(err) {
-			if _, err = c.client.AuthzV1().ClusterRoleTemplateBindings(ns).Create(context.Background(), rtb, metav1.CreateOptions{}); err != nil {
+			if _, err = c.client.AuthzV1().ClusterPolicyBindings(ns).Create(context.Background(), cpb, metav1.CreateOptions{}); err != nil {
 				return err
 			}
 		} else {
 			return err
 		}
 	} else {
-		if _, err = c.client.AuthzV1().ClusterRoleTemplateBindings(ns).Update(context.Background(), rtb, metav1.UpdateOptions{}); err != nil {
+		if _, err = c.client.AuthzV1().ClusterPolicyBindings(ns).Update(context.Background(), cpb, metav1.UpdateOptions{}); err != nil {
 			return err
 		}
 	}

@@ -27,27 +27,26 @@ import (
 	"k8s.io/apiserver/pkg/registry/rest"
 	"tkestack.io/tke/api/authz"
 	apiserverutil "tkestack.io/tke/pkg/apiserver/util"
-	"tkestack.io/tke/pkg/authz/registry/roletemplate"
+	"tkestack.io/tke/pkg/authz/registry/clusterpolicybinding"
 	"tkestack.io/tke/pkg/util/log"
 )
 
 // Storage includes storage for configmap and all sub resources.
 type Storage struct {
-	RoleTemplate *REST
-	Status   *StatusREST
+	ClusterPolicyBinding *REST
+	Status               *StatusREST
 }
 
 // NewStorage returns a Storage object that will work against configmap.
 func NewStorage(optsGetter genericregistry.RESTOptionsGetter) *Storage {
-	strategy := roletemplate.NewStrategy()
+	strategy := clusterpolicybinding.NewStrategy()
 	store := &registry.Store{
-		NewFunc:                  func() runtime.Object { return &authz.RoleTemplate{} },
-		NewListFunc:              func() runtime.Object { return &authz.RoleTemplateList{} },
-		DefaultQualifiedResource: authz.Resource("roletemplates"),
-
-		CreateStrategy: strategy,
-		UpdateStrategy: strategy,
-		DeleteStrategy: strategy,
+		NewFunc:                  func() runtime.Object { return &authz.ClusterPolicyBinding{} },
+		NewListFunc:              func() runtime.Object { return &authz.ClusterPolicyBindingList{} },
+		DefaultQualifiedResource: authz.Resource("clusterpolicybindings"),
+		CreateStrategy:           strategy,
+		UpdateStrategy:           strategy,
+		DeleteStrategy:           strategy,
 	}
 	store.TableConvertor = rest.NewDefaultTableConvertor(store.DefaultQualifiedResource)
 	options := &genericregistry.StoreOptions{
@@ -59,11 +58,11 @@ func NewStorage(optsGetter genericregistry.RESTOptionsGetter) *Storage {
 	}
 
 	statusStore := *store
-	statusStore.UpdateStrategy = roletemplate.NewStatusStrategy(strategy)
+	statusStore.UpdateStrategy = clusterpolicybinding.NewStatusStrategy(strategy)
 
 	return &Storage{
-		RoleTemplate: &REST{store},
-		Status: &StatusREST{&statusStore},
+		ClusterPolicyBinding: &REST{store},
+		Status:               &StatusREST{&statusStore},
 	}
 }
 
@@ -76,7 +75,7 @@ var _ rest.ShortNamesProvider = &REST{}
 
 // ShortNames implements the ShortNamesProvider interface. Returns a list of short names for a resource.
 func (r *REST) ShortNames() []string {
-	return []string{"rt"}
+	return []string{"cpb"}
 }
 
 // List selects resources in the storage which match to the selector. 'options' can be nil.
@@ -85,7 +84,7 @@ func (r *REST) List(ctx context.Context, options *metainternal.ListOptions) (run
 	return r.Store.List(ctx, wrappedOptions)
 }
 
-// StatusREST implements the GenericREST endpoint for changing the status of a roletemplate request.
+// StatusREST implements the GenericREST endpoint for changing the status of a policy request.
 type StatusREST struct {
 	store *registry.Store
 }
@@ -94,4 +93,3 @@ type StatusREST struct {
 func (r *StatusREST) New() runtime.Object {
 	return r.store.New()
 }
-

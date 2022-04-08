@@ -20,12 +20,12 @@
 
 package v1
 
-type ClusterRoleTemplateBindingExpansion interface{}
+type ClusterPolicyBindingExpansion interface{}
 
 type ConfigMapExpansion interface{}
+
+type PolicyExpansion interface{}
 
 type RoleExpansion interface{}
 
 type RoleBindingExpansion interface{}
-
-type RoleTemplateExpansion interface{}

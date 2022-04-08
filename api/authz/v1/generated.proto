@@ -30,25 +30,25 @@ import "k8s.io/apimachinery/pkg/runtime/schema/generated.proto";
 // Package-wide variables from generator "generated".
 option go_package = "v1";
 
-message ClusterRoleTemplateBinding {
+message ClusterPolicyBinding {
   // +optional
   optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
 
-  optional ClusterRoleTemplateBindingSpec spec = 2;
+  optional ClusterPolicyBindingSpec spec = 2;
 
-  optional ClusterRoleTemplateBindingStatus status = 3;
+  optional ClusterPolicyBindingStatus status = 3;
 }
 
-// ClusterRoleTemplateBindingList is a resource containing a list of ClusterRoleTemplateBinding objects.
-message ClusterRoleTemplateBindingList {
+// ClusterPolicyBindingList is a resource containing a list of ClusterPolicyBinding objects.
+message ClusterPolicyBindingList {
   // +optional
   optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
 
   // Items is the list of ConfigMaps.
-  repeated ClusterRoleTemplateBinding items = 2;
+  repeated ClusterPolicyBinding items = 2;
 }
 
-message ClusterRoleTemplateBindingSpec {
+message ClusterPolicyBindingSpec {
   // +optional
   optional string userName = 1;
 
@@ -60,7 +60,7 @@ message ClusterRoleTemplateBindingSpec {
   repeated string clusters = 4;
 }
 
-message ClusterRoleTemplateBindingStatus {
+message ClusterPolicyBindingStatus {
   // Phase the release is in, one of ('Installing', 'Succeeded', 'Failed')
   // +optional
   optional string phase = 1;
@@ -78,10 +78,10 @@ message ClusterRoleTemplateBindingStatus {
   optional string message = 4;
 
   // +optional
-  repeated ClusterRoleTemplateBindingStatusItem clusters = 5;
+  repeated ClusterPolicyBindingStatusItem clusters = 5;
 }
 
-message ClusterRoleTemplateBindingStatusItem {
+message ClusterPolicyBindingStatusItem {
   // Phase the release is in, one of ('Installing', 'Succeeded', 'Failed')
   // +optional
   optional string phase = 1;
@@ -128,6 +128,33 @@ message ConfigMapList {
 
   // Items is the list of ConfigMaps.
   repeated ConfigMap items = 2;
+}
+
+// Policy is a rbac template in TKE.
+message Policy {
+  // +optional
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
+
+  optional string tenantID = 2;
+
+  optional string displayName = 3;
+
+  // +optional
+  optional string description = 4;
+
+  // +optional
+  optional string scope = 5;
+
+  repeated k8s.io.api.rbac.v1.PolicyRule rules = 6;
+}
+
+// PolicyList is the whole list of all rbac templates.
+message PolicyList {
+  // +optional
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
+
+  // List of policies
+  repeated Policy items = 2;
 }
 
 // Role is a collection with multiple policies.
@@ -177,58 +204,5 @@ message RoleList {
 
   // List of rules.
   repeated Role items = 2;
-}
-
-// RoleTemplate is a rbac template in TKE.
-message RoleTemplate {
-  // +optional
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
-
-  // +optional
-  optional RoleTemplateSpec spec = 2;
-
-  // +optional
-  optional RoleTemplateStatus status = 3;
-}
-
-// RoleTemplateList is the whole list of all rbac templates.
-message RoleTemplateList {
-  // +optional
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
-
-  // List of bootstraps
-  repeated RoleTemplate items = 2;
-}
-
-message RoleTemplateSpec {
-  optional string tenantID = 1;
-
-  optional string displayName = 2;
-
-  // +optional
-  optional string description = 3;
-
-  // +optional
-  optional string scope = 4;
-
-  repeated k8s.io.api.rbac.v1.PolicyRule rules = 5;
-}
-
-message RoleTemplateStatus {
-  // Phase the release is in, one of ('Installing', 'Succeeded', 'Failed')
-  // +optional
-  optional string phase = 1;
-
-  // The last time the condition transitioned from one status to another.
-  // +optional
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time lastTransitionTime = 2;
-
-  // The reason for the condition's last transition.
-  // +optional
-  optional string reason = 3;
-
-  // A human readable message indicating details about the transition.
-  // +optional
-  optional string message = 4;
 }
 

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package roletemplate
+package policy
 
 import (
 	apimachineryvalidation "k8s.io/apimachinery/pkg/api/validation"
@@ -24,20 +24,20 @@ import (
 	"tkestack.io/tke/api/authz"
 )
 
-var ValidateRoleTemplateName = apimachineryvalidation.NameIsDNSLabel
+var ValidatePolicyName = apimachineryvalidation.NameIsDNSLabel
 
-// ValidateRoleTemplate tests if required fields in the cluster are set.
-func ValidateRoleTemplate(roleTemplate *authz.RoleTemplate) field.ErrorList {
-	allErrs := apimachineryvalidation.ValidateObjectMeta(&roleTemplate.ObjectMeta, true, ValidateRoleTemplateName, field.NewPath("metadata"))
+// ValidatePolicy tests if required fields in the cluster are set.
+func ValidatePolicy(policy *authz.Policy) field.ErrorList {
+	allErrs := apimachineryvalidation.ValidateObjectMeta(&policy.ObjectMeta, true, ValidatePolicyName, field.NewPath("metadata"))
 
 	return allErrs
 }
 
-// ValidateRoleTemplateUpdate tests if required fields in the namespace set are
+// ValidatePolicyUpdate tests if required fields in the namespace set are
 // set during an update.
-func ValidateRoleTemplateUpdate(roleTemplate *authz.RoleTemplate, old *authz.RoleTemplate) field.ErrorList {
-	allErrs := apimachineryvalidation.ValidateObjectMetaUpdate(&roleTemplate.ObjectMeta, &old.ObjectMeta, field.NewPath("metadata"))
-	allErrs = append(allErrs, ValidateRoleTemplate(roleTemplate)...)
+func ValidatePolicyUpdate(policy *authz.Policy, old *authz.Policy) field.ErrorList {
+	allErrs := apimachineryvalidation.ValidateObjectMetaUpdate(&policy.ObjectMeta, &old.ObjectMeta, field.NewPath("metadata"))
+	allErrs = append(allErrs, ValidatePolicy(policy)...)
 
 	return allErrs
 }

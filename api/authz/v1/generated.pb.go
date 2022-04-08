@@ -46,15 +46,15 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-func (m *ClusterRoleTemplateBinding) Reset()      { *m = ClusterRoleTemplateBinding{} }
-func (*ClusterRoleTemplateBinding) ProtoMessage() {}
-func (*ClusterRoleTemplateBinding) Descriptor() ([]byte, []int) {
+func (m *ClusterPolicyBinding) Reset()      { *m = ClusterPolicyBinding{} }
+func (*ClusterPolicyBinding) ProtoMessage() {}
+func (*ClusterPolicyBinding) Descriptor() ([]byte, []int) {
 	return fileDescriptor_c89ce64fe9f23edd, []int{0}
 }
-func (m *ClusterRoleTemplateBinding) XXX_Unmarshal(b []byte) error {
+func (m *ClusterPolicyBinding) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *ClusterRoleTemplateBinding) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *ClusterPolicyBinding) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	b = b[:cap(b)]
 	n, err := m.MarshalToSizedBuffer(b)
 	if err != nil {
@@ -62,27 +62,27 @@ func (m *ClusterRoleTemplateBinding) XXX_Marshal(b []byte, deterministic bool) (
 	}
 	return b[:n], nil
 }
-func (m *ClusterRoleTemplateBinding) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ClusterRoleTemplateBinding.Merge(m, src)
+func (m *ClusterPolicyBinding) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ClusterPolicyBinding.Merge(m, src)
 }
-func (m *ClusterRoleTemplateBinding) XXX_Size() int {
+func (m *ClusterPolicyBinding) XXX_Size() int {
 	return m.Size()
 }
-func (m *ClusterRoleTemplateBinding) XXX_DiscardUnknown() {
-	xxx_messageInfo_ClusterRoleTemplateBinding.DiscardUnknown(m)
+func (m *ClusterPolicyBinding) XXX_DiscardUnknown() {
+	xxx_messageInfo_ClusterPolicyBinding.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_ClusterRoleTemplateBinding proto.InternalMessageInfo
+var xxx_messageInfo_ClusterPolicyBinding proto.InternalMessageInfo
 
-func (m *ClusterRoleTemplateBindingList) Reset()      { *m = ClusterRoleTemplateBindingList{} }
-func (*ClusterRoleTemplateBindingList) ProtoMessage() {}
-func (*ClusterRoleTemplateBindingList) Descriptor() ([]byte, []int) {
+func (m *ClusterPolicyBindingList) Reset()      { *m = ClusterPolicyBindingList{} }
+func (*ClusterPolicyBindingList) ProtoMessage() {}
+func (*ClusterPolicyBindingList) Descriptor() ([]byte, []int) {
 	return fileDescriptor_c89ce64fe9f23edd, []int{1}
 }
-func (m *ClusterRoleTemplateBindingList) XXX_Unmarshal(b []byte) error {
+func (m *ClusterPolicyBindingList) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *ClusterRoleTemplateBindingList) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *ClusterPolicyBindingList) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	b = b[:cap(b)]
 	n, err := m.MarshalToSizedBuffer(b)
 	if err != nil {
@@ -90,27 +90,27 @@ func (m *ClusterRoleTemplateBindingList) XXX_Marshal(b []byte, deterministic boo
 	}
 	return b[:n], nil
 }
-func (m *ClusterRoleTemplateBindingList) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ClusterRoleTemplateBindingList.Merge(m, src)
+func (m *ClusterPolicyBindingList) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ClusterPolicyBindingList.Merge(m, src)
 }
-func (m *ClusterRoleTemplateBindingList) XXX_Size() int {
+func (m *ClusterPolicyBindingList) XXX_Size() int {
 	return m.Size()
 }
-func (m *ClusterRoleTemplateBindingList) XXX_DiscardUnknown() {
-	xxx_messageInfo_ClusterRoleTemplateBindingList.DiscardUnknown(m)
+func (m *ClusterPolicyBindingList) XXX_DiscardUnknown() {
+	xxx_messageInfo_ClusterPolicyBindingList.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_ClusterRoleTemplateBindingList proto.InternalMessageInfo
+var xxx_messageInfo_ClusterPolicyBindingList proto.InternalMessageInfo
 
-func (m *ClusterRoleTemplateBindingSpec) Reset()      { *m = ClusterRoleTemplateBindingSpec{} }
-func (*ClusterRoleTemplateBindingSpec) ProtoMessage() {}
-func (*ClusterRoleTemplateBindingSpec) Descriptor() ([]byte, []int) {
+func (m *ClusterPolicyBindingSpec) Reset()      { *m = ClusterPolicyBindingSpec{} }
+func (*ClusterPolicyBindingSpec) ProtoMessage() {}
+func (*ClusterPolicyBindingSpec) Descriptor() ([]byte, []int) {
 	return fileDescriptor_c89ce64fe9f23edd, []int{2}
 }
-func (m *ClusterRoleTemplateBindingSpec) XXX_Unmarshal(b []byte) error {
+func (m *ClusterPolicyBindingSpec) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *ClusterRoleTemplateBindingSpec) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *ClusterPolicyBindingSpec) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	b = b[:cap(b)]
 	n, err := m.MarshalToSizedBuffer(b)
 	if err != nil {
@@ -118,27 +118,27 @@ func (m *ClusterRoleTemplateBindingSpec) XXX_Marshal(b []byte, deterministic boo
 	}
 	return b[:n], nil
 }
-func (m *ClusterRoleTemplateBindingSpec) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ClusterRoleTemplateBindingSpec.Merge(m, src)
+func (m *ClusterPolicyBindingSpec) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ClusterPolicyBindingSpec.Merge(m, src)
 }
-func (m *ClusterRoleTemplateBindingSpec) XXX_Size() int {
+func (m *ClusterPolicyBindingSpec) XXX_Size() int {
 	return m.Size()
 }
-func (m *ClusterRoleTemplateBindingSpec) XXX_DiscardUnknown() {
-	xxx_messageInfo_ClusterRoleTemplateBindingSpec.DiscardUnknown(m)
+func (m *ClusterPolicyBindingSpec) XXX_DiscardUnknown() {
+	xxx_messageInfo_ClusterPolicyBindingSpec.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_ClusterRoleTemplateBindingSpec proto.InternalMessageInfo
+var xxx_messageInfo_ClusterPolicyBindingSpec proto.InternalMessageInfo
 
-func (m *ClusterRoleTemplateBindingStatus) Reset()      { *m = ClusterRoleTemplateBindingStatus{} }
-func (*ClusterRoleTemplateBindingStatus) ProtoMessage() {}
-func (*ClusterRoleTemplateBindingStatus) Descriptor() ([]byte, []int) {
+func (m *ClusterPolicyBindingStatus) Reset()      { *m = ClusterPolicyBindingStatus{} }
+func (*ClusterPolicyBindingStatus) ProtoMessage() {}
+func (*ClusterPolicyBindingStatus) Descriptor() ([]byte, []int) {
 	return fileDescriptor_c89ce64fe9f23edd, []int{3}
 }
-func (m *ClusterRoleTemplateBindingStatus) XXX_Unmarshal(b []byte) error {
+func (m *ClusterPolicyBindingStatus) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *ClusterRoleTemplateBindingStatus) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *ClusterPolicyBindingStatus) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	b = b[:cap(b)]
 	n, err := m.MarshalToSizedBuffer(b)
 	if err != nil {
@@ -146,27 +146,27 @@ func (m *ClusterRoleTemplateBindingStatus) XXX_Marshal(b []byte, deterministic b
 	}
 	return b[:n], nil
 }
-func (m *ClusterRoleTemplateBindingStatus) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ClusterRoleTemplateBindingStatus.Merge(m, src)
+func (m *ClusterPolicyBindingStatus) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ClusterPolicyBindingStatus.Merge(m, src)
 }
-func (m *ClusterRoleTemplateBindingStatus) XXX_Size() int {
+func (m *ClusterPolicyBindingStatus) XXX_Size() int {
 	return m.Size()
 }
-func (m *ClusterRoleTemplateBindingStatus) XXX_DiscardUnknown() {
-	xxx_messageInfo_ClusterRoleTemplateBindingStatus.DiscardUnknown(m)
+func (m *ClusterPolicyBindingStatus) XXX_DiscardUnknown() {
+	xxx_messageInfo_ClusterPolicyBindingStatus.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_ClusterRoleTemplateBindingStatus proto.InternalMessageInfo
+var xxx_messageInfo_ClusterPolicyBindingStatus proto.InternalMessageInfo
 
-func (m *ClusterRoleTemplateBindingStatusItem) Reset()      { *m = ClusterRoleTemplateBindingStatusItem{} }
-func (*ClusterRoleTemplateBindingStatusItem) ProtoMessage() {}
-func (*ClusterRoleTemplateBindingStatusItem) Descriptor() ([]byte, []int) {
+func (m *ClusterPolicyBindingStatusItem) Reset()      { *m = ClusterPolicyBindingStatusItem{} }
+func (*ClusterPolicyBindingStatusItem) ProtoMessage() {}
+func (*ClusterPolicyBindingStatusItem) Descriptor() ([]byte, []int) {
 	return fileDescriptor_c89ce64fe9f23edd, []int{4}
 }
-func (m *ClusterRoleTemplateBindingStatusItem) XXX_Unmarshal(b []byte) error {
+func (m *ClusterPolicyBindingStatusItem) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *ClusterRoleTemplateBindingStatusItem) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *ClusterPolicyBindingStatusItem) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	b = b[:cap(b)]
 	n, err := m.MarshalToSizedBuffer(b)
 	if err != nil {
@@ -174,17 +174,17 @@ func (m *ClusterRoleTemplateBindingStatusItem) XXX_Marshal(b []byte, determinist
 	}
 	return b[:n], nil
 }
-func (m *ClusterRoleTemplateBindingStatusItem) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ClusterRoleTemplateBindingStatusItem.Merge(m, src)
+func (m *ClusterPolicyBindingStatusItem) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ClusterPolicyBindingStatusItem.Merge(m, src)
 }
-func (m *ClusterRoleTemplateBindingStatusItem) XXX_Size() int {
+func (m *ClusterPolicyBindingStatusItem) XXX_Size() int {
 	return m.Size()
 }
-func (m *ClusterRoleTemplateBindingStatusItem) XXX_DiscardUnknown() {
-	xxx_messageInfo_ClusterRoleTemplateBindingStatusItem.DiscardUnknown(m)
+func (m *ClusterPolicyBindingStatusItem) XXX_DiscardUnknown() {
+	xxx_messageInfo_ClusterPolicyBindingStatusItem.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_ClusterRoleTemplateBindingStatusItem proto.InternalMessageInfo
+var xxx_messageInfo_ClusterPolicyBindingStatusItem proto.InternalMessageInfo
 
 func (m *ConfigMap) Reset()      { *m = ConfigMap{} }
 func (*ConfigMap) ProtoMessage() {}
@@ -242,10 +242,66 @@ func (m *ConfigMapList) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ConfigMapList proto.InternalMessageInfo
 
+func (m *Policy) Reset()      { *m = Policy{} }
+func (*Policy) ProtoMessage() {}
+func (*Policy) Descriptor() ([]byte, []int) {
+	return fileDescriptor_c89ce64fe9f23edd, []int{7}
+}
+func (m *Policy) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Policy) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *Policy) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Policy.Merge(m, src)
+}
+func (m *Policy) XXX_Size() int {
+	return m.Size()
+}
+func (m *Policy) XXX_DiscardUnknown() {
+	xxx_messageInfo_Policy.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Policy proto.InternalMessageInfo
+
+func (m *PolicyList) Reset()      { *m = PolicyList{} }
+func (*PolicyList) ProtoMessage() {}
+func (*PolicyList) Descriptor() ([]byte, []int) {
+	return fileDescriptor_c89ce64fe9f23edd, []int{8}
+}
+func (m *PolicyList) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *PolicyList) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *PolicyList) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PolicyList.Merge(m, src)
+}
+func (m *PolicyList) XXX_Size() int {
+	return m.Size()
+}
+func (m *PolicyList) XXX_DiscardUnknown() {
+	xxx_messageInfo_PolicyList.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_PolicyList proto.InternalMessageInfo
+
 func (m *Role) Reset()      { *m = Role{} }
 func (*Role) ProtoMessage() {}
 func (*Role) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c89ce64fe9f23edd, []int{7}
+	return fileDescriptor_c89ce64fe9f23edd, []int{9}
 }
 func (m *Role) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -273,7 +329,7 @@ var xxx_messageInfo_Role proto.InternalMessageInfo
 func (m *RoleBinding) Reset()      { *m = RoleBinding{} }
 func (*RoleBinding) ProtoMessage() {}
 func (*RoleBinding) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c89ce64fe9f23edd, []int{8}
+	return fileDescriptor_c89ce64fe9f23edd, []int{10}
 }
 func (m *RoleBinding) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -301,7 +357,7 @@ var xxx_messageInfo_RoleBinding proto.InternalMessageInfo
 func (m *RoleBindingList) Reset()      { *m = RoleBindingList{} }
 func (*RoleBindingList) ProtoMessage() {}
 func (*RoleBindingList) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c89ce64fe9f23edd, []int{9}
+	return fileDescriptor_c89ce64fe9f23edd, []int{11}
 }
 func (m *RoleBindingList) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -329,7 +385,7 @@ var xxx_messageInfo_RoleBindingList proto.InternalMessageInfo
 func (m *RoleBindingSpec) Reset()      { *m = RoleBindingSpec{} }
 func (*RoleBindingSpec) ProtoMessage() {}
 func (*RoleBindingSpec) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c89ce64fe9f23edd, []int{10}
+	return fileDescriptor_c89ce64fe9f23edd, []int{12}
 }
 func (m *RoleBindingSpec) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -357,7 +413,7 @@ var xxx_messageInfo_RoleBindingSpec proto.InternalMessageInfo
 func (m *RoleList) Reset()      { *m = RoleList{} }
 func (*RoleList) ProtoMessage() {}
 func (*RoleList) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c89ce64fe9f23edd, []int{11}
+	return fileDescriptor_c89ce64fe9f23edd, []int{13}
 }
 func (m *RoleList) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -382,137 +438,23 @@ func (m *RoleList) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_RoleList proto.InternalMessageInfo
 
-func (m *RoleTemplate) Reset()      { *m = RoleTemplate{} }
-func (*RoleTemplate) ProtoMessage() {}
-func (*RoleTemplate) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c89ce64fe9f23edd, []int{12}
-}
-func (m *RoleTemplate) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *RoleTemplate) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	b = b[:cap(b)]
-	n, err := m.MarshalToSizedBuffer(b)
-	if err != nil {
-		return nil, err
-	}
-	return b[:n], nil
-}
-func (m *RoleTemplate) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RoleTemplate.Merge(m, src)
-}
-func (m *RoleTemplate) XXX_Size() int {
-	return m.Size()
-}
-func (m *RoleTemplate) XXX_DiscardUnknown() {
-	xxx_messageInfo_RoleTemplate.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_RoleTemplate proto.InternalMessageInfo
-
-func (m *RoleTemplateList) Reset()      { *m = RoleTemplateList{} }
-func (*RoleTemplateList) ProtoMessage() {}
-func (*RoleTemplateList) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c89ce64fe9f23edd, []int{13}
-}
-func (m *RoleTemplateList) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *RoleTemplateList) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	b = b[:cap(b)]
-	n, err := m.MarshalToSizedBuffer(b)
-	if err != nil {
-		return nil, err
-	}
-	return b[:n], nil
-}
-func (m *RoleTemplateList) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RoleTemplateList.Merge(m, src)
-}
-func (m *RoleTemplateList) XXX_Size() int {
-	return m.Size()
-}
-func (m *RoleTemplateList) XXX_DiscardUnknown() {
-	xxx_messageInfo_RoleTemplateList.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_RoleTemplateList proto.InternalMessageInfo
-
-func (m *RoleTemplateSpec) Reset()      { *m = RoleTemplateSpec{} }
-func (*RoleTemplateSpec) ProtoMessage() {}
-func (*RoleTemplateSpec) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c89ce64fe9f23edd, []int{14}
-}
-func (m *RoleTemplateSpec) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *RoleTemplateSpec) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	b = b[:cap(b)]
-	n, err := m.MarshalToSizedBuffer(b)
-	if err != nil {
-		return nil, err
-	}
-	return b[:n], nil
-}
-func (m *RoleTemplateSpec) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RoleTemplateSpec.Merge(m, src)
-}
-func (m *RoleTemplateSpec) XXX_Size() int {
-	return m.Size()
-}
-func (m *RoleTemplateSpec) XXX_DiscardUnknown() {
-	xxx_messageInfo_RoleTemplateSpec.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_RoleTemplateSpec proto.InternalMessageInfo
-
-func (m *RoleTemplateStatus) Reset()      { *m = RoleTemplateStatus{} }
-func (*RoleTemplateStatus) ProtoMessage() {}
-func (*RoleTemplateStatus) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c89ce64fe9f23edd, []int{15}
-}
-func (m *RoleTemplateStatus) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *RoleTemplateStatus) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	b = b[:cap(b)]
-	n, err := m.MarshalToSizedBuffer(b)
-	if err != nil {
-		return nil, err
-	}
-	return b[:n], nil
-}
-func (m *RoleTemplateStatus) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RoleTemplateStatus.Merge(m, src)
-}
-func (m *RoleTemplateStatus) XXX_Size() int {
-	return m.Size()
-}
-func (m *RoleTemplateStatus) XXX_DiscardUnknown() {
-	xxx_messageInfo_RoleTemplateStatus.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_RoleTemplateStatus proto.InternalMessageInfo
-
 func init() {
-	proto.RegisterType((*ClusterRoleTemplateBinding)(nil), "tkestack.io.tke.api.authz.v1.ClusterRoleTemplateBinding")
-	proto.RegisterType((*ClusterRoleTemplateBindingList)(nil), "tkestack.io.tke.api.authz.v1.ClusterRoleTemplateBindingList")
-	proto.RegisterType((*ClusterRoleTemplateBindingSpec)(nil), "tkestack.io.tke.api.authz.v1.ClusterRoleTemplateBindingSpec")
-	proto.RegisterType((*ClusterRoleTemplateBindingStatus)(nil), "tkestack.io.tke.api.authz.v1.ClusterRoleTemplateBindingStatus")
-	proto.RegisterType((*ClusterRoleTemplateBindingStatusItem)(nil), "tkestack.io.tke.api.authz.v1.ClusterRoleTemplateBindingStatusItem")
+	proto.RegisterType((*ClusterPolicyBinding)(nil), "tkestack.io.tke.api.authz.v1.ClusterPolicyBinding")
+	proto.RegisterType((*ClusterPolicyBindingList)(nil), "tkestack.io.tke.api.authz.v1.ClusterPolicyBindingList")
+	proto.RegisterType((*ClusterPolicyBindingSpec)(nil), "tkestack.io.tke.api.authz.v1.ClusterPolicyBindingSpec")
+	proto.RegisterType((*ClusterPolicyBindingStatus)(nil), "tkestack.io.tke.api.authz.v1.ClusterPolicyBindingStatus")
+	proto.RegisterType((*ClusterPolicyBindingStatusItem)(nil), "tkestack.io.tke.api.authz.v1.ClusterPolicyBindingStatusItem")
 	proto.RegisterType((*ConfigMap)(nil), "tkestack.io.tke.api.authz.v1.ConfigMap")
 	proto.RegisterMapType((map[string][]byte)(nil), "tkestack.io.tke.api.authz.v1.ConfigMap.BinaryDataEntry")
 	proto.RegisterMapType((map[string]string)(nil), "tkestack.io.tke.api.authz.v1.ConfigMap.DataEntry")
 	proto.RegisterType((*ConfigMapList)(nil), "tkestack.io.tke.api.authz.v1.ConfigMapList")
+	proto.RegisterType((*Policy)(nil), "tkestack.io.tke.api.authz.v1.Policy")
+	proto.RegisterType((*PolicyList)(nil), "tkestack.io.tke.api.authz.v1.PolicyList")
 	proto.RegisterType((*Role)(nil), "tkestack.io.tke.api.authz.v1.Role")
 	proto.RegisterType((*RoleBinding)(nil), "tkestack.io.tke.api.authz.v1.RoleBinding")
 	proto.RegisterType((*RoleBindingList)(nil), "tkestack.io.tke.api.authz.v1.RoleBindingList")
 	proto.RegisterType((*RoleBindingSpec)(nil), "tkestack.io.tke.api.authz.v1.RoleBindingSpec")
 	proto.RegisterType((*RoleList)(nil), "tkestack.io.tke.api.authz.v1.RoleList")
-	proto.RegisterType((*RoleTemplate)(nil), "tkestack.io.tke.api.authz.v1.RoleTemplate")
-	proto.RegisterType((*RoleTemplateList)(nil), "tkestack.io.tke.api.authz.v1.RoleTemplateList")
-	proto.RegisterType((*RoleTemplateSpec)(nil), "tkestack.io.tke.api.authz.v1.RoleTemplateSpec")
-	proto.RegisterType((*RoleTemplateStatus)(nil), "tkestack.io.tke.api.authz.v1.RoleTemplateStatus")
 }
 
 func init() {
@@ -520,80 +462,77 @@ func init() {
 }
 
 var fileDescriptor_c89ce64fe9f23edd = []byte{
-	// 1115 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x57, 0xcd, 0x6f, 0xe3, 0x44,
-	0x14, 0xaf, 0x9d, 0xa4, 0xdb, 0x4c, 0xba, 0x6c, 0x77, 0x40, 0xc8, 0x8a, 0x90, 0x5b, 0x59, 0x08,
-	0xba, 0xab, 0xae, 0xbd, 0xa9, 0x80, 0xad, 0x10, 0x70, 0x70, 0x8b, 0x56, 0x2b, 0xb5, 0xdb, 0x6a,
-	0x5a, 0x24, 0x84, 0x00, 0x31, 0x71, 0xa7, 0x8e, 0x49, 0x62, 0x5b, 0x9e, 0x71, 0xa4, 0x70, 0xe2,
-	0x4f, 0xe0, 0xba, 0x12, 0x17, 0x4e, 0x1c, 0x38, 0x71, 0xe6, 0x00, 0x5c, 0x50, 0x8f, 0x7b, 0xdc,
-	0x03, 0x54, 0x34, 0xfc, 0x01, 0xdc, 0xf7, 0x84, 0x66, 0x3c, 0xfe, 0xc8, 0x57, 0x93, 0x2d, 0x52,
-	0x4e, 0x7b, 0xf3, 0xbc, 0x79, 0xbf, 0xf7, 0x3d, 0xef, 0x3d, 0x83, 0x2d, 0xd6, 0x26, 0x94, 0x61,
-	0xa7, 0x6d, 0x7a, 0x81, 0xc5, 0xda, 0xc4, 0xc2, 0xa1, 0x67, 0xe1, 0x98, 0xb5, 0xbe, 0xb1, 0x7a,
-	0x0d, 0xcb, 0x25, 0x3e, 0x89, 0x30, 0x23, 0xa7, 0x66, 0x18, 0x05, 0x2c, 0x80, 0x6f, 0x14, 0xb8,
-	0x4d, 0xd6, 0x26, 0x26, 0x0e, 0x3d, 0x53, 0x70, 0x9b, 0xbd, 0x46, 0xfd, 0x9e, 0xeb, 0xb1, 0x56,
-	0xdc, 0x34, 0x9d, 0xa0, 0x6b, 0xb9, 0x81, 0x1b, 0x58, 0x02, 0xd4, 0x8c, 0xcf, 0xc4, 0x49, 0x1c,
-	0xc4, 0x57, 0x22, 0xac, 0x6e, 0xb4, 0x77, 0x28, 0xd7, 0xca, 0x35, 0x46, 0x4d, 0xec, 0x4c, 0x50,
-	0x58, 0x7f, 0x27, 0xe7, 0xe9, 0x62, 0xa7, 0xe5, 0xf9, 0x24, 0xea, 0x5b, 0x61, 0xdb, 0xe5, 0x04,
-	0x6a, 0x75, 0x09, 0xc3, 0x93, 0x50, 0xd6, 0x34, 0x54, 0x14, 0xfb, 0xcc, 0xeb, 0x92, 0x31, 0xc0,
-	0x7b, 0xb3, 0x00, 0xd4, 0x69, 0x91, 0x2e, 0x1e, 0xc5, 0x19, 0x7f, 0xa8, 0xa0, 0xbe, 0xdb, 0x89,
-	0x29, 0x23, 0x11, 0x0a, 0x3a, 0xe4, 0x84, 0x74, 0xc3, 0x0e, 0x66, 0xc4, 0xf6, 0xfc, 0x53, 0xcf,
-	0x77, 0xe1, 0x57, 0x60, 0x85, 0x9b, 0x78, 0x8a, 0x19, 0xd6, 0x94, 0x0d, 0x65, 0xb3, 0xb6, 0x7d,
-	0xdf, 0x4c, 0x34, 0x99, 0x45, 0x4d, 0x66, 0xd8, 0x76, 0x39, 0x81, 0x9a, 0x9c, 0xdb, 0xec, 0x35,
-	0xcc, 0xc3, 0xe6, 0xd7, 0xc4, 0x61, 0x07, 0x84, 0x61, 0x1b, 0x9e, 0x5f, 0xac, 0x2f, 0x0d, 0x2e,
-	0xd6, 0x41, 0x4e, 0x43, 0x99, 0x54, 0xf8, 0x25, 0x28, 0xd3, 0x90, 0x38, 0x9a, 0x2a, 0xa4, 0x7f,
-	0x60, 0x5e, 0x95, 0x1f, 0x73, 0xba, 0xa5, 0xc7, 0x21, 0x71, 0xec, 0x55, 0xa9, 0xa9, 0xcc, 0x4f,
-	0x48, 0xc8, 0x85, 0x67, 0x60, 0x99, 0x32, 0xcc, 0x62, 0xaa, 0x95, 0x84, 0x86, 0x8f, 0xae, 0xad,
-	0x41, 0x48, 0xb1, 0x5f, 0x91, 0x3a, 0x96, 0x93, 0x33, 0x92, 0xd2, 0x8d, 0xbf, 0x14, 0xa0, 0x4f,
-	0x07, 0xef, 0x7b, 0x94, 0xc1, 0xcf, 0xc7, 0x82, 0x69, 0xce, 0x17, 0x4c, 0x8e, 0x16, 0xa1, 0x5c,
-	0x93, 0xca, 0x57, 0x52, 0x4a, 0x21, 0x90, 0x5f, 0x80, 0x8a, 0xc7, 0x48, 0x97, 0x6a, 0xea, 0x46,
-	0x69, 0xb3, 0xb6, 0xbd, 0x73, 0x5d, 0x3f, 0xed, 0x9b, 0x52, 0x49, 0xe5, 0x11, 0x17, 0x87, 0x12,
-	0xa9, 0xc6, 0xbf, 0x57, 0xfa, 0xc7, 0x03, 0x0e, 0xb7, 0xc0, 0x4a, 0x4c, 0x49, 0xf4, 0x18, 0x77,
-	0x89, 0xf0, 0xaf, 0x9a, 0xdb, 0xfb, 0x89, 0xa4, 0xa3, 0x8c, 0x03, 0x5a, 0xa0, 0xea, 0x46, 0x41,
-	0x1c, 0x0a, 0x76, 0x55, 0xb0, 0xdf, 0x96, 0xec, 0xd5, 0x87, 0xe9, 0x05, 0xca, 0x79, 0xe0, 0x1e,
-	0x58, 0x8b, 0x0a, 0x9a, 0x05, 0xae, 0x24, 0x70, 0x9a, 0xc4, 0xad, 0xa1, 0x91, 0x7b, 0x34, 0x86,
-	0x80, 0x9b, 0x60, 0xc5, 0x49, 0xdc, 0xa0, 0x5a, 0x79, 0xa3, 0xb4, 0x59, 0xb5, 0x57, 0xb9, 0x81,
-	0xd2, 0x35, 0x8a, 0xb2, 0x5b, 0xe3, 0x49, 0x09, 0x6c, 0xcc, 0x2a, 0x07, 0xb8, 0x03, 0x2a, 0x61,
-	0x0b, 0xd3, 0xd4, 0x61, 0x23, 0x8d, 0xdd, 0x11, 0x27, 0x3e, 0xbf, 0x58, 0xbf, 0x5d, 0x84, 0x0a,
-	0x22, 0x4a, 0x00, 0xb0, 0x07, 0x60, 0x07, 0x53, 0x76, 0x12, 0x61, 0x9f, 0x7a, 0xcc, 0x0b, 0xfc,
-	0x13, 0x4f, 0x06, 0xa2, 0xb6, 0x7d, 0x77, 0xbe, 0xba, 0xe0, 0x08, 0xbb, 0x2e, 0x55, 0xc2, 0xfd,
-	0x31, 0x69, 0x68, 0x82, 0x06, 0xf8, 0x16, 0x58, 0x8e, 0x08, 0xa6, 0x81, 0x2f, 0x83, 0x97, 0x15,
-	0x34, 0x12, 0x54, 0x24, 0x6f, 0xe1, 0x1d, 0x70, 0xa3, 0x4b, 0x28, 0xc5, 0x2e, 0xd1, 0xca, 0x82,
-	0xf1, 0x96, 0x64, 0xbc, 0x71, 0x90, 0x90, 0x51, 0x7a, 0x0f, 0xc3, 0x42, 0x4c, 0x2b, 0xa2, 0xfa,
-	0xec, 0xff, 0xf7, 0xca, 0x78, 0xe5, 0xe5, 0xc5, 0x33, 0x21, 0x37, 0x3f, 0xa9, 0xe0, 0xcd, 0x79,
-	0x84, 0xbc, 0xcc, 0x0f, 0x76, 0x89, 0xf1, 0x63, 0x09, 0x54, 0x77, 0x03, 0xff, 0xcc, 0x73, 0x0f,
-	0x70, 0xb8, 0x80, 0x9e, 0x7e, 0x0c, 0xca, 0x42, 0x7a, 0xd2, 0x89, 0x1a, 0x33, 0x6a, 0x21, 0x35,
-	0xcc, 0xdc, 0xc3, 0x0c, 0x7f, 0xec, 0xb3, 0xa8, 0x9f, 0x37, 0x72, 0x4e, 0x42, 0x42, 0x18, 0x6c,
-	0x03, 0xd0, 0xf4, 0x7c, 0x1c, 0xf5, 0x39, 0x4d, 0x2b, 0x09, 0xd1, 0x0f, 0xe6, 0x15, 0x6d, 0x67,
-	0xc8, 0x44, 0x41, 0x66, 0x7f, 0x7e, 0x81, 0x0a, 0xe2, 0xeb, 0x0f, 0x40, 0x35, 0x63, 0x86, 0x6b,
-	0xa0, 0xd4, 0x26, 0xfd, 0xa4, 0x82, 0x10, 0xff, 0x84, 0xaf, 0x81, 0x4a, 0x0f, 0x77, 0x62, 0xd9,
-	0xb7, 0x50, 0x72, 0x78, 0x5f, 0xdd, 0x51, 0xea, 0x1f, 0x82, 0x5b, 0x23, 0xba, 0x66, 0xc1, 0x57,
-	0x0b, 0x70, 0xe3, 0x17, 0x05, 0xdc, 0xcc, 0xac, 0x5e, 0xc0, 0xd0, 0xd8, 0x1f, 0x1e, 0x1a, 0x6f,
-	0xcf, 0x19, 0xcf, 0x29, 0x33, 0xe2, 0x4f, 0x15, 0x94, 0xf9, 0x7b, 0x5a, 0x40, 0x89, 0xbd, 0x0b,
-	0x6a, 0xa7, 0x1e, 0x0d, 0x3b, 0xb8, 0x5f, 0x98, 0x1f, 0xaf, 0x4a, 0x48, 0x6d, 0x2f, 0xbf, 0x42,
-	0x45, 0x3e, 0x3e, 0xa2, 0x18, 0xf1, 0xb1, 0xcf, 0x1e, 0xed, 0xc9, 0xe7, 0x95, 0x45, 0xe7, 0x44,
-	0xd2, 0x51, 0xc6, 0x91, 0x0e, 0x34, 0x9f, 0x6b, 0x28, 0x8f, 0x0f, 0x34, 0x3f, 0x1b, 0x68, 0xfc,
-	0x4b, 0x98, 0x44, 0xa8, 0x13, 0x79, 0x21, 0x7f, 0xcb, 0x5a, 0x65, 0xc4, 0xa4, 0xfc, 0x0a, 0x15,
-	0xf9, 0xf8, 0x40, 0x0a, 0x83, 0x8e, 0xe7, 0x78, 0x84, 0x6a, 0xcb, 0xf9, 0x40, 0x3a, 0x92, 0x34,
-	0x94, 0xdd, 0x1a, 0xbf, 0x29, 0xa0, 0xc6, 0xc3, 0xbb, 0xb8, 0xe5, 0xec, 0x70, 0x68, 0x39, 0xbb,
-	0x77, 0x75, 0x75, 0x14, 0x4c, 0x9b, 0xb6, 0x8d, 0x19, 0xbf, 0x2a, 0xe0, 0x56, 0x81, 0x6f, 0x01,
-	0x15, 0xfe, 0x78, 0xb8, 0xc2, 0xef, 0xcc, 0xed, 0xc3, 0x94, 0x1a, 0x3f, 0x1f, 0xf6, 0x60, 0x11,
-	0x8b, 0xcf, 0x16, 0x58, 0xe1, 0x6b, 0x4c, 0x61, 0xe1, 0xc9, 0xc4, 0x23, 0x49, 0x47, 0x19, 0xc7,
-	0x0b, 0x2c, 0x38, 0x3f, 0x2b, 0x40, 0x08, 0x58, 0x40, 0x16, 0x1e, 0x0e, 0x67, 0xc1, 0x98, 0x23,
-	0x0b, 0x93, 0xc3, 0xff, 0xbd, 0x0a, 0x56, 0x8b, 0x23, 0x7b, 0x01, 0x8f, 0xe0, 0x68, 0xe8, 0x11,
-	0x98, 0xb3, 0x4d, 0x4f, 0x6d, 0x9b, 0xfa, 0x4f, 0xf2, 0xe9, 0xc8, 0x3f, 0xc9, 0xfd, 0x17, 0x90,
-	0x79, 0xf5, 0x5f, 0xc8, 0xef, 0x0a, 0x18, 0x5a, 0x82, 0x17, 0x90, 0xda, 0xc3, 0xe1, 0xd4, 0xde,
-	0x9d, 0xdf, 0x97, 0x29, 0x29, 0xfe, 0x41, 0x1d, 0xf6, 0x21, 0x7d, 0x62, 0x59, 0xe3, 0x56, 0x66,
-	0x36, 0xee, 0x6b, 0x4e, 0x87, 0x91, 0x0e, 0x5e, 0x9a, 0xb3, 0x83, 0x6f, 0x81, 0x0a, 0x75, 0x82,
-	0x30, 0x9d, 0x11, 0xaf, 0xa7, 0x5e, 0x1d, 0x73, 0xe2, 0xf3, 0xf4, 0x03, 0x25, 0x4c, 0x70, 0x17,
-	0x54, 0xa2, 0xb8, 0x43, 0xd2, 0x4d, 0x59, 0x2f, 0xa4, 0xc2, 0x8c, 0x9a, 0xd8, 0xe1, 0x51, 0x12,
-	0xcd, 0xbf, 0x8f, 0xe2, 0xe2, 0x33, 0xe0, 0x27, 0x8a, 0x12, 0xac, 0xf1, 0x44, 0x05, 0x70, 0xbc,
-	0x2c, 0x5e, 0x6e, 0xbb, 0xd8, 0x25, 0xf6, 0xe6, 0xf9, 0xa5, 0xbe, 0xf4, 0xf4, 0x52, 0x5f, 0x7a,
-	0x76, 0xa9, 0x2f, 0x7d, 0x3b, 0xd0, 0x95, 0xf3, 0x81, 0xae, 0x3c, 0x1d, 0xe8, 0xca, 0xb3, 0x81,
-	0xae, 0xfc, 0x3d, 0xd0, 0x95, 0xef, 0xfe, 0xd1, 0x97, 0x3e, 0x53, 0x7b, 0x8d, 0xff, 0x02, 0x00,
-	0x00, 0xff, 0xff, 0xbc, 0x9b, 0x4d, 0x41, 0x3b, 0x12, 0x00, 0x00,
+	// 1070 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe4, 0x56, 0x41, 0x8f, 0xdb, 0x44,
+	0x14, 0x5e, 0x3b, 0xc9, 0x36, 0x99, 0xb4, 0xec, 0x32, 0x54, 0xc8, 0x8a, 0x90, 0xbb, 0xb2, 0x10,
+	0xa4, 0x28, 0xb5, 0xc9, 0x0a, 0xda, 0x15, 0x02, 0x0e, 0xd9, 0x45, 0xd5, 0x4a, 0xbb, 0xed, 0x6a,
+	0x76, 0x11, 0x08, 0x71, 0xe8, 0xc4, 0x3b, 0x75, 0xa6, 0x71, 0x6c, 0xcb, 0x33, 0x8e, 0x14, 0x4e,
+	0xf0, 0x0f, 0xb8, 0xf2, 0x0b, 0x38, 0x23, 0xc1, 0x89, 0x03, 0x1c, 0xf7, 0x58, 0x6e, 0x3d, 0xa0,
+	0x8a, 0x4d, 0x7f, 0x05, 0x3d, 0xa1, 0x19, 0x4f, 0x6c, 0x67, 0x93, 0xec, 0xa6, 0x3d, 0xe4, 0xc2,
+	0xcd, 0x7e, 0xf3, 0x7d, 0xef, 0xbd, 0x79, 0xef, 0xf3, 0xf3, 0x03, 0x2d, 0xde, 0x27, 0x8c, 0x63,
+	0xb7, 0x6f, 0xd3, 0xd0, 0xe1, 0x7d, 0xe2, 0xe0, 0x88, 0x3a, 0x38, 0xe1, 0xbd, 0xef, 0x9c, 0x61,
+	0xdb, 0xf1, 0x48, 0x40, 0x62, 0xcc, 0xc9, 0xa9, 0x1d, 0xc5, 0x21, 0x0f, 0xe1, 0x3b, 0x05, 0xb4,
+	0xcd, 0xfb, 0xc4, 0xc6, 0x11, 0xb5, 0x25, 0xda, 0x1e, 0xb6, 0x1b, 0x77, 0x3c, 0xca, 0x7b, 0x49,
+	0xd7, 0x76, 0xc3, 0x81, 0xe3, 0x85, 0x5e, 0xe8, 0x48, 0x52, 0x37, 0x79, 0x2c, 0xdf, 0xe4, 0x8b,
+	0x7c, 0x4a, 0x9d, 0x35, 0xac, 0xfe, 0x0e, 0x13, 0x51, 0x45, 0xc4, 0xb8, 0x8b, 0xdd, 0x39, 0x01,
+	0x1b, 0x1f, 0xe5, 0x98, 0x01, 0x76, 0x7b, 0x34, 0x20, 0xf1, 0xc8, 0x89, 0xfa, 0x9e, 0x30, 0x30,
+	0x67, 0x40, 0x38, 0x9e, 0xc7, 0x72, 0x16, 0xb1, 0xe2, 0x24, 0xe0, 0x74, 0x40, 0x66, 0x08, 0x77,
+	0xaf, 0x22, 0x30, 0xb7, 0x47, 0x06, 0xf8, 0x22, 0xcf, 0xfa, 0x55, 0x07, 0x37, 0x77, 0xfd, 0x84,
+	0x71, 0x12, 0x1f, 0x85, 0x3e, 0x75, 0x47, 0x1d, 0x1a, 0x9c, 0xd2, 0xc0, 0x83, 0x8f, 0x40, 0x55,
+	0x24, 0x77, 0x8a, 0x39, 0x36, 0xb4, 0x2d, 0xad, 0x59, 0xdf, 0xfe, 0xd0, 0x4e, 0x63, 0xd8, 0xc5,
+	0x18, 0x76, 0xd4, 0xf7, 0x84, 0x81, 0xd9, 0x02, 0x6d, 0x0f, 0xdb, 0xf6, 0xc3, 0xee, 0x13, 0xe2,
+	0xf2, 0x43, 0xc2, 0x71, 0x07, 0x9e, 0x3d, 0xbf, 0xb5, 0x36, 0x7e, 0x7e, 0x0b, 0xe4, 0x36, 0x94,
+	0x79, 0x85, 0x5f, 0x83, 0x32, 0x8b, 0x88, 0x6b, 0xe8, 0xd2, 0xfb, 0x5d, 0xfb, 0xb2, 0xce, 0xd8,
+	0xf3, 0x72, 0x3c, 0x8e, 0x88, 0xdb, 0xb9, 0xae, 0x62, 0x94, 0xc5, 0x1b, 0x92, 0x1e, 0xe1, 0x23,
+	0xb0, 0xce, 0x38, 0xe6, 0x09, 0x33, 0x4a, 0xd2, 0xf7, 0xce, 0x6b, 0xf8, 0x96, 0xfc, 0xce, 0x1b,
+	0xca, 0xfb, 0x7a, 0xfa, 0x8e, 0x94, 0x5f, 0xeb, 0x2f, 0x0d, 0x18, 0xf3, 0x68, 0x07, 0x94, 0x71,
+	0xf8, 0xed, 0x4c, 0xe9, 0xec, 0xe5, 0x4a, 0x27, 0xd8, 0xb2, 0x70, 0x9b, 0x2a, 0x6c, 0x75, 0x62,
+	0x29, 0x94, 0xed, 0x2b, 0x50, 0xa1, 0x9c, 0x0c, 0x98, 0xa1, 0x6f, 0x95, 0x9a, 0xf5, 0xed, 0xed,
+	0x57, 0xbf, 0x5b, 0xe7, 0x86, 0x72, 0x5f, 0xd9, 0x17, 0x8e, 0x50, 0xea, 0xcf, 0x7a, 0xb1, 0xe0,
+	0x4e, 0xa2, 0xb0, 0xb0, 0x05, 0xaa, 0x09, 0x23, 0xf1, 0x03, 0x3c, 0x20, 0xf2, 0x4e, 0xb5, 0x3c,
+	0xc7, 0x2f, 0x95, 0x1d, 0x65, 0x08, 0xe8, 0x80, 0x9a, 0x17, 0x87, 0x49, 0x24, 0xe1, 0xba, 0x84,
+	0xbf, 0xa9, 0xe0, 0xb5, 0xfb, 0x93, 0x03, 0x94, 0x63, 0xe0, 0xe7, 0x60, 0x33, 0x0e, 0x7d, 0x72,
+	0x42, 0x06, 0x91, 0x8f, 0x39, 0x91, 0xbc, 0x92, 0xe4, 0x65, 0x1a, 0x4a, 0x73, 0x92, 0xc4, 0x19,
+	0x2c, 0x6c, 0x82, 0xaa, 0x9b, 0xa6, 0xce, 0x8c, 0xf2, 0x56, 0xa9, 0x59, 0xeb, 0x5c, 0x17, 0xa9,
+	0xa9, 0xeb, 0x30, 0x94, 0x9d, 0x5a, 0x3f, 0x94, 0x40, 0x63, 0x71, 0xc3, 0x61, 0x0b, 0x54, 0xa2,
+	0x1e, 0x66, 0x93, 0x4b, 0xbe, 0x3d, 0xa9, 0xd4, 0x91, 0x30, 0xbe, 0x9c, 0x3c, 0xa0, 0x14, 0x04,
+	0x87, 0x00, 0xfa, 0x98, 0xf1, 0x93, 0x18, 0x07, 0x8c, 0x72, 0x1a, 0x06, 0x27, 0x54, 0x5d, 0xb8,
+	0xbe, 0xfd, 0xc1, 0x72, 0x3d, 0x17, 0x8c, 0x4e, 0x43, 0x85, 0x81, 0x07, 0x33, 0xde, 0xd0, 0x9c,
+	0x08, 0xf0, 0x3d, 0xb0, 0x1e, 0x13, 0xcc, 0xc2, 0x40, 0x15, 0x29, 0x93, 0x29, 0x92, 0x56, 0xa4,
+	0x4e, 0xe1, 0x6d, 0x70, 0x6d, 0x40, 0x18, 0xc3, 0x1e, 0x31, 0xca, 0x12, 0xb8, 0xa1, 0x80, 0xd7,
+	0x0e, 0x53, 0x33, 0x9a, 0x9c, 0xc3, 0x27, 0x85, 0x0a, 0x56, 0xa4, 0xb2, 0x3e, 0x7d, 0xdd, 0xaf,
+	0x46, 0xa8, 0x2a, 0x97, 0xc7, 0x9c, 0x1e, 0xfc, 0xa4, 0x03, 0xf3, 0x72, 0xfa, 0xff, 0xb6, 0x0f,
+	0xd6, 0xcf, 0x25, 0x50, 0xdb, 0x0d, 0x83, 0xc7, 0xd4, 0x3b, 0xc4, 0xd1, 0x0a, 0xa6, 0xf0, 0x31,
+	0x28, 0x4b, 0xef, 0xe9, 0x34, 0x69, 0x5f, 0xd1, 0xf3, 0x49, 0x62, 0xf6, 0x1e, 0xe6, 0xf8, 0x8b,
+	0x80, 0xc7, 0xa3, 0x7c, 0x00, 0x0b, 0x13, 0x92, 0xce, 0x60, 0x1f, 0x80, 0x2e, 0x0d, 0x70, 0x3c,
+	0x12, 0x36, 0xa3, 0x24, 0x5d, 0xdf, 0x5b, 0xd6, 0x75, 0x27, 0x63, 0xa6, 0x01, 0xb2, 0xfc, 0xf3,
+	0x03, 0x54, 0x70, 0xdf, 0xb8, 0x07, 0x6a, 0x19, 0x18, 0x6e, 0x82, 0x52, 0x9f, 0x8c, 0x52, 0xd5,
+	0x20, 0xf1, 0x08, 0x6f, 0x82, 0xca, 0x10, 0xfb, 0x89, 0x9a, 0x43, 0x28, 0x7d, 0xf9, 0x44, 0xdf,
+	0xd1, 0x1a, 0x9f, 0x81, 0x8d, 0x0b, 0xb1, 0xae, 0xa2, 0x5f, 0x2f, 0xd0, 0xad, 0xdf, 0x35, 0x70,
+	0x23, 0xcb, 0x7a, 0x05, 0x83, 0xff, 0x60, 0x7a, 0xf0, 0xbf, 0xbf, 0x64, 0x3d, 0x17, 0x4c, 0xfb,
+	0x7f, 0x75, 0xb0, 0x9e, 0x7e, 0x7c, 0x2b, 0x10, 0x59, 0x0b, 0x54, 0x39, 0x09, 0x70, 0xc0, 0xf7,
+	0xf7, 0xd4, 0xef, 0x20, 0xbb, 0xe8, 0x89, 0xb2, 0xa3, 0x0c, 0x01, 0x3f, 0x06, 0xf5, 0x53, 0xca,
+	0x22, 0x1f, 0x8f, 0x0a, 0xff, 0x81, 0xb7, 0x14, 0xa1, 0xbe, 0x97, 0x1f, 0xa1, 0x22, 0x4e, 0xd2,
+	0x08, 0x73, 0x63, 0x1a, 0x89, 0xef, 0x53, 0x7d, 0x68, 0x39, 0x2d, 0x3f, 0x42, 0x45, 0x9c, 0x98,
+	0x34, 0xcc, 0x0d, 0x23, 0x62, 0x54, 0xa6, 0x27, 0xcd, 0xb1, 0x30, 0xbe, 0x9c, 0x3c, 0xa0, 0x14,
+	0x04, 0x77, 0x41, 0x25, 0x4e, 0x7c, 0xc2, 0x8c, 0x75, 0xd9, 0x04, 0xb3, 0x50, 0x28, 0x5b, 0xac,
+	0x80, 0xa2, 0x2c, 0x69, 0x59, 0x51, 0xe2, 0x93, 0xbc, 0xf6, 0xe2, 0x8d, 0xa1, 0x94, 0x6b, 0xfd,
+	0xa6, 0x01, 0xf5, 0x3b, 0x5b, 0x81, 0x6c, 0xf6, 0xa7, 0x65, 0xf3, 0xee, 0xe5, 0xb2, 0x51, 0xf3,
+	0x78, 0xbe, 0x66, 0xfe, 0xd6, 0x41, 0x19, 0x85, 0x3e, 0x59, 0x81, 0x62, 0x2e, 0x68, 0x40, 0x5f,
+	0x52, 0x03, 0x45, 0xa1, 0x95, 0xae, 0x14, 0x9a, 0x5a, 0x6a, 0x02, 0x11, 0xa1, 0x3c, 0xbb, 0xd4,
+	0x04, 0xd9, 0x52, 0x13, 0xcc, 0xd1, 0x57, 0x65, 0x49, 0x7d, 0x35, 0x41, 0x35, 0x12, 0x45, 0xa5,
+	0x4a, 0x34, 0x6a, 0x35, 0x39, 0x52, 0x36, 0x94, 0x9d, 0x5a, 0x7f, 0x6a, 0xa0, 0x2e, 0xca, 0xbb,
+	0xba, 0x15, 0xfc, 0xe1, 0xd4, 0x0a, 0x7e, 0xe7, 0x72, 0x69, 0x14, 0x52, 0x5b, 0xb4, 0x79, 0x5b,
+	0x7f, 0x68, 0x60, 0xa3, 0x80, 0x5b, 0x81, 0xbc, 0x1f, 0x4c, 0xcb, 0xfb, 0xf6, 0xd2, 0x77, 0x58,
+	0xa0, 0xf1, 0xb3, 0xe9, 0x1b, 0xac, 0x62, 0xf9, 0x6d, 0x81, 0xaa, 0x58, 0x68, 0x0b, 0xc3, 0x2e,
+	0x73, 0x8f, 0x94, 0x1d, 0x65, 0x88, 0x57, 0x58, 0x75, 0x7f, 0xd1, 0x80, 0x74, 0xb0, 0x82, 0x2e,
+	0xdc, 0x9f, 0xee, 0x82, 0xb5, 0x44, 0x17, 0xe6, 0x96, 0xbf, 0xd3, 0x3c, 0x3b, 0x37, 0xd7, 0x9e,
+	0x9e, 0x9b, 0x6b, 0xcf, 0xce, 0xcd, 0xb5, 0xef, 0xc7, 0xa6, 0x76, 0x36, 0x36, 0xb5, 0xa7, 0x63,
+	0x53, 0x7b, 0x36, 0x36, 0xb5, 0x7f, 0xc6, 0xa6, 0xf6, 0xe3, 0x0b, 0x73, 0xed, 0x1b, 0x7d, 0xd8,
+	0xfe, 0x2f, 0x00, 0x00, 0xff, 0xff, 0xc0, 0x30, 0x22, 0x4e, 0xf8, 0x0f, 0x00, 0x00,
 }
 
-func (m *ClusterRoleTemplateBinding) Marshal() (dAtA []byte, err error) {
+func (m *ClusterPolicyBinding) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -603,12 +542,12 @@ func (m *ClusterRoleTemplateBinding) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *ClusterRoleTemplateBinding) MarshalTo(dAtA []byte) (int, error) {
+func (m *ClusterPolicyBinding) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *ClusterRoleTemplateBinding) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ClusterPolicyBinding) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -646,7 +585,7 @@ func (m *ClusterRoleTemplateBinding) MarshalToSizedBuffer(dAtA []byte) (int, err
 	return len(dAtA) - i, nil
 }
 
-func (m *ClusterRoleTemplateBindingList) Marshal() (dAtA []byte, err error) {
+func (m *ClusterPolicyBindingList) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -656,12 +595,12 @@ func (m *ClusterRoleTemplateBindingList) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *ClusterRoleTemplateBindingList) MarshalTo(dAtA []byte) (int, error) {
+func (m *ClusterPolicyBindingList) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *ClusterRoleTemplateBindingList) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ClusterPolicyBindingList) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -693,7 +632,7 @@ func (m *ClusterRoleTemplateBindingList) MarshalToSizedBuffer(dAtA []byte) (int,
 	return len(dAtA) - i, nil
 }
 
-func (m *ClusterRoleTemplateBindingSpec) Marshal() (dAtA []byte, err error) {
+func (m *ClusterPolicyBindingSpec) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -703,12 +642,12 @@ func (m *ClusterRoleTemplateBindingSpec) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *ClusterRoleTemplateBindingSpec) MarshalTo(dAtA []byte) (int, error) {
+func (m *ClusterPolicyBindingSpec) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *ClusterRoleTemplateBindingSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ClusterPolicyBindingSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -722,9 +661,9 @@ func (m *ClusterRoleTemplateBindingSpec) MarshalToSizedBuffer(dAtA []byte) (int,
 			dAtA[i] = 0x22
 		}
 	}
-	i -= len(m.RoleTemplateName)
-	copy(dAtA[i:], m.RoleTemplateName)
-	i = encodeVarintGenerated(dAtA, i, uint64(len(m.RoleTemplateName)))
+	i -= len(m.PolicyName)
+	copy(dAtA[i:], m.PolicyName)
+	i = encodeVarintGenerated(dAtA, i, uint64(len(m.PolicyName)))
 	i--
 	dAtA[i] = 0x1a
 	i -= len(m.GroupName)
@@ -740,7 +679,7 @@ func (m *ClusterRoleTemplateBindingSpec) MarshalToSizedBuffer(dAtA []byte) (int,
 	return len(dAtA) - i, nil
 }
 
-func (m *ClusterRoleTemplateBindingStatus) Marshal() (dAtA []byte, err error) {
+func (m *ClusterPolicyBindingStatus) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -750,12 +689,12 @@ func (m *ClusterRoleTemplateBindingStatus) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *ClusterRoleTemplateBindingStatus) MarshalTo(dAtA []byte) (int, error) {
+func (m *ClusterPolicyBindingStatus) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *ClusterRoleTemplateBindingStatus) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ClusterPolicyBindingStatus) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -802,7 +741,7 @@ func (m *ClusterRoleTemplateBindingStatus) MarshalToSizedBuffer(dAtA []byte) (in
 	return len(dAtA) - i, nil
 }
 
-func (m *ClusterRoleTemplateBindingStatusItem) Marshal() (dAtA []byte, err error) {
+func (m *ClusterPolicyBindingStatusItem) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -812,12 +751,12 @@ func (m *ClusterRoleTemplateBindingStatusItem) Marshal() (dAtA []byte, err error
 	return dAtA[:n], nil
 }
 
-func (m *ClusterRoleTemplateBindingStatusItem) MarshalTo(dAtA []byte) (int, error) {
+func (m *ClusterPolicyBindingStatusItem) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *ClusterRoleTemplateBindingStatusItem) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ClusterPolicyBindingStatusItem) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -949,6 +888,120 @@ func (m *ConfigMapList) MarshalTo(dAtA []byte) (int, error) {
 }
 
 func (m *ConfigMapList) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Items) > 0 {
+		for iNdEx := len(m.Items) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Items[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintGenerated(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	{
+		size, err := m.ListMeta.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintGenerated(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+
+func (m *Policy) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Policy) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Policy) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Rules) > 0 {
+		for iNdEx := len(m.Rules) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Rules[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintGenerated(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x32
+		}
+	}
+	i -= len(m.Scope)
+	copy(dAtA[i:], m.Scope)
+	i = encodeVarintGenerated(dAtA, i, uint64(len(m.Scope)))
+	i--
+	dAtA[i] = 0x2a
+	i -= len(m.Description)
+	copy(dAtA[i:], m.Description)
+	i = encodeVarintGenerated(dAtA, i, uint64(len(m.Description)))
+	i--
+	dAtA[i] = 0x22
+	i -= len(m.DisplayName)
+	copy(dAtA[i:], m.DisplayName)
+	i = encodeVarintGenerated(dAtA, i, uint64(len(m.DisplayName)))
+	i--
+	dAtA[i] = 0x1a
+	i -= len(m.TenantID)
+	copy(dAtA[i:], m.TenantID)
+	i = encodeVarintGenerated(dAtA, i, uint64(len(m.TenantID)))
+	i--
+	dAtA[i] = 0x12
+	{
+		size, err := m.ObjectMeta.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintGenerated(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+
+func (m *PolicyList) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *PolicyList) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *PolicyList) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1226,211 +1279,6 @@ func (m *RoleList) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *RoleTemplate) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *RoleTemplate) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *RoleTemplate) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	{
-		size, err := m.Status.MarshalToSizedBuffer(dAtA[:i])
-		if err != nil {
-			return 0, err
-		}
-		i -= size
-		i = encodeVarintGenerated(dAtA, i, uint64(size))
-	}
-	i--
-	dAtA[i] = 0x1a
-	{
-		size, err := m.Spec.MarshalToSizedBuffer(dAtA[:i])
-		if err != nil {
-			return 0, err
-		}
-		i -= size
-		i = encodeVarintGenerated(dAtA, i, uint64(size))
-	}
-	i--
-	dAtA[i] = 0x12
-	{
-		size, err := m.ObjectMeta.MarshalToSizedBuffer(dAtA[:i])
-		if err != nil {
-			return 0, err
-		}
-		i -= size
-		i = encodeVarintGenerated(dAtA, i, uint64(size))
-	}
-	i--
-	dAtA[i] = 0xa
-	return len(dAtA) - i, nil
-}
-
-func (m *RoleTemplateList) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *RoleTemplateList) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *RoleTemplateList) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Items) > 0 {
-		for iNdEx := len(m.Items) - 1; iNdEx >= 0; iNdEx-- {
-			{
-				size, err := m.Items[iNdEx].MarshalToSizedBuffer(dAtA[:i])
-				if err != nil {
-					return 0, err
-				}
-				i -= size
-				i = encodeVarintGenerated(dAtA, i, uint64(size))
-			}
-			i--
-			dAtA[i] = 0x12
-		}
-	}
-	{
-		size, err := m.ListMeta.MarshalToSizedBuffer(dAtA[:i])
-		if err != nil {
-			return 0, err
-		}
-		i -= size
-		i = encodeVarintGenerated(dAtA, i, uint64(size))
-	}
-	i--
-	dAtA[i] = 0xa
-	return len(dAtA) - i, nil
-}
-
-func (m *RoleTemplateSpec) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *RoleTemplateSpec) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *RoleTemplateSpec) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Rules) > 0 {
-		for iNdEx := len(m.Rules) - 1; iNdEx >= 0; iNdEx-- {
-			{
-				size, err := m.Rules[iNdEx].MarshalToSizedBuffer(dAtA[:i])
-				if err != nil {
-					return 0, err
-				}
-				i -= size
-				i = encodeVarintGenerated(dAtA, i, uint64(size))
-			}
-			i--
-			dAtA[i] = 0x2a
-		}
-	}
-	i -= len(m.Scope)
-	copy(dAtA[i:], m.Scope)
-	i = encodeVarintGenerated(dAtA, i, uint64(len(m.Scope)))
-	i--
-	dAtA[i] = 0x22
-	i -= len(m.Description)
-	copy(dAtA[i:], m.Description)
-	i = encodeVarintGenerated(dAtA, i, uint64(len(m.Description)))
-	i--
-	dAtA[i] = 0x1a
-	i -= len(m.DisplayName)
-	copy(dAtA[i:], m.DisplayName)
-	i = encodeVarintGenerated(dAtA, i, uint64(len(m.DisplayName)))
-	i--
-	dAtA[i] = 0x12
-	i -= len(m.TenantID)
-	copy(dAtA[i:], m.TenantID)
-	i = encodeVarintGenerated(dAtA, i, uint64(len(m.TenantID)))
-	i--
-	dAtA[i] = 0xa
-	return len(dAtA) - i, nil
-}
-
-func (m *RoleTemplateStatus) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *RoleTemplateStatus) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *RoleTemplateStatus) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	i -= len(m.Message)
-	copy(dAtA[i:], m.Message)
-	i = encodeVarintGenerated(dAtA, i, uint64(len(m.Message)))
-	i--
-	dAtA[i] = 0x22
-	i -= len(m.Reason)
-	copy(dAtA[i:], m.Reason)
-	i = encodeVarintGenerated(dAtA, i, uint64(len(m.Reason)))
-	i--
-	dAtA[i] = 0x1a
-	{
-		size, err := m.LastTransitionTime.MarshalToSizedBuffer(dAtA[:i])
-		if err != nil {
-			return 0, err
-		}
-		i -= size
-		i = encodeVarintGenerated(dAtA, i, uint64(size))
-	}
-	i--
-	dAtA[i] = 0x12
-	i -= len(m.Phase)
-	copy(dAtA[i:], m.Phase)
-	i = encodeVarintGenerated(dAtA, i, uint64(len(m.Phase)))
-	i--
-	dAtA[i] = 0xa
-	return len(dAtA) - i, nil
-}
-
 func encodeVarintGenerated(dAtA []byte, offset int, v uint64) int {
 	offset -= sovGenerated(v)
 	base := offset
@@ -1442,7 +1290,7 @@ func encodeVarintGenerated(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
-func (m *ClusterRoleTemplateBinding) Size() (n int) {
+func (m *ClusterPolicyBinding) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1457,7 +1305,7 @@ func (m *ClusterRoleTemplateBinding) Size() (n int) {
 	return n
 }
 
-func (m *ClusterRoleTemplateBindingList) Size() (n int) {
+func (m *ClusterPolicyBindingList) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1474,7 +1322,7 @@ func (m *ClusterRoleTemplateBindingList) Size() (n int) {
 	return n
 }
 
-func (m *ClusterRoleTemplateBindingSpec) Size() (n int) {
+func (m *ClusterPolicyBindingSpec) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1484,7 +1332,7 @@ func (m *ClusterRoleTemplateBindingSpec) Size() (n int) {
 	n += 1 + l + sovGenerated(uint64(l))
 	l = len(m.GroupName)
 	n += 1 + l + sovGenerated(uint64(l))
-	l = len(m.RoleTemplateName)
+	l = len(m.PolicyName)
 	n += 1 + l + sovGenerated(uint64(l))
 	if len(m.Clusters) > 0 {
 		for _, s := range m.Clusters {
@@ -1495,7 +1343,7 @@ func (m *ClusterRoleTemplateBindingSpec) Size() (n int) {
 	return n
 }
 
-func (m *ClusterRoleTemplateBindingStatus) Size() (n int) {
+func (m *ClusterPolicyBindingStatus) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1518,7 +1366,7 @@ func (m *ClusterRoleTemplateBindingStatus) Size() (n int) {
 	return n
 }
 
-func (m *ClusterRoleTemplateBindingStatusItem) Size() (n int) {
+func (m *ClusterPolicyBindingStatusItem) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1567,6 +1415,48 @@ func (m *ConfigMap) Size() (n int) {
 }
 
 func (m *ConfigMapList) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = m.ListMeta.Size()
+	n += 1 + l + sovGenerated(uint64(l))
+	if len(m.Items) > 0 {
+		for _, e := range m.Items {
+			l = e.Size()
+			n += 1 + l + sovGenerated(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *Policy) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = m.ObjectMeta.Size()
+	n += 1 + l + sovGenerated(uint64(l))
+	l = len(m.TenantID)
+	n += 1 + l + sovGenerated(uint64(l))
+	l = len(m.DisplayName)
+	n += 1 + l + sovGenerated(uint64(l))
+	l = len(m.Description)
+	n += 1 + l + sovGenerated(uint64(l))
+	l = len(m.Scope)
+	n += 1 + l + sovGenerated(uint64(l))
+	if len(m.Rules) > 0 {
+		for _, e := range m.Rules {
+			l = e.Size()
+			n += 1 + l + sovGenerated(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *PolicyList) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1676,135 +1566,63 @@ func (m *RoleList) Size() (n int) {
 	return n
 }
 
-func (m *RoleTemplate) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = m.ObjectMeta.Size()
-	n += 1 + l + sovGenerated(uint64(l))
-	l = m.Spec.Size()
-	n += 1 + l + sovGenerated(uint64(l))
-	l = m.Status.Size()
-	n += 1 + l + sovGenerated(uint64(l))
-	return n
-}
-
-func (m *RoleTemplateList) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = m.ListMeta.Size()
-	n += 1 + l + sovGenerated(uint64(l))
-	if len(m.Items) > 0 {
-		for _, e := range m.Items {
-			l = e.Size()
-			n += 1 + l + sovGenerated(uint64(l))
-		}
-	}
-	return n
-}
-
-func (m *RoleTemplateSpec) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.TenantID)
-	n += 1 + l + sovGenerated(uint64(l))
-	l = len(m.DisplayName)
-	n += 1 + l + sovGenerated(uint64(l))
-	l = len(m.Description)
-	n += 1 + l + sovGenerated(uint64(l))
-	l = len(m.Scope)
-	n += 1 + l + sovGenerated(uint64(l))
-	if len(m.Rules) > 0 {
-		for _, e := range m.Rules {
-			l = e.Size()
-			n += 1 + l + sovGenerated(uint64(l))
-		}
-	}
-	return n
-}
-
-func (m *RoleTemplateStatus) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Phase)
-	n += 1 + l + sovGenerated(uint64(l))
-	l = m.LastTransitionTime.Size()
-	n += 1 + l + sovGenerated(uint64(l))
-	l = len(m.Reason)
-	n += 1 + l + sovGenerated(uint64(l))
-	l = len(m.Message)
-	n += 1 + l + sovGenerated(uint64(l))
-	return n
-}
-
 func sovGenerated(x uint64) (n int) {
 	return (math_bits.Len64(x|1) + 6) / 7
 }
 func sozGenerated(x uint64) (n int) {
 	return sovGenerated(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
-func (this *ClusterRoleTemplateBinding) String() string {
+func (this *ClusterPolicyBinding) String() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&ClusterRoleTemplateBinding{`,
+	s := strings.Join([]string{`&ClusterPolicyBinding{`,
 		`ObjectMeta:` + strings.Replace(strings.Replace(fmt.Sprintf("%v", this.ObjectMeta), "ObjectMeta", "v1.ObjectMeta", 1), `&`, ``, 1) + `,`,
-		`Spec:` + strings.Replace(strings.Replace(this.Spec.String(), "ClusterRoleTemplateBindingSpec", "ClusterRoleTemplateBindingSpec", 1), `&`, ``, 1) + `,`,
-		`Status:` + strings.Replace(strings.Replace(this.Status.String(), "ClusterRoleTemplateBindingStatus", "ClusterRoleTemplateBindingStatus", 1), `&`, ``, 1) + `,`,
+		`Spec:` + strings.Replace(strings.Replace(this.Spec.String(), "ClusterPolicyBindingSpec", "ClusterPolicyBindingSpec", 1), `&`, ``, 1) + `,`,
+		`Status:` + strings.Replace(strings.Replace(this.Status.String(), "ClusterPolicyBindingStatus", "ClusterPolicyBindingStatus", 1), `&`, ``, 1) + `,`,
 		`}`,
 	}, "")
 	return s
 }
-func (this *ClusterRoleTemplateBindingList) String() string {
+func (this *ClusterPolicyBindingList) String() string {
 	if this == nil {
 		return "nil"
 	}
-	repeatedStringForItems := "[]ClusterRoleTemplateBinding{"
+	repeatedStringForItems := "[]ClusterPolicyBinding{"
 	for _, f := range this.Items {
-		repeatedStringForItems += strings.Replace(strings.Replace(f.String(), "ClusterRoleTemplateBinding", "ClusterRoleTemplateBinding", 1), `&`, ``, 1) + ","
+		repeatedStringForItems += strings.Replace(strings.Replace(f.String(), "ClusterPolicyBinding", "ClusterPolicyBinding", 1), `&`, ``, 1) + ","
 	}
 	repeatedStringForItems += "}"
-	s := strings.Join([]string{`&ClusterRoleTemplateBindingList{`,
+	s := strings.Join([]string{`&ClusterPolicyBindingList{`,
 		`ListMeta:` + strings.Replace(strings.Replace(fmt.Sprintf("%v", this.ListMeta), "ListMeta", "v1.ListMeta", 1), `&`, ``, 1) + `,`,
 		`Items:` + repeatedStringForItems + `,`,
 		`}`,
 	}, "")
 	return s
 }
-func (this *ClusterRoleTemplateBindingSpec) String() string {
+func (this *ClusterPolicyBindingSpec) String() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&ClusterRoleTemplateBindingSpec{`,
+	s := strings.Join([]string{`&ClusterPolicyBindingSpec{`,
 		`UserName:` + fmt.Sprintf("%v", this.UserName) + `,`,
 		`GroupName:` + fmt.Sprintf("%v", this.GroupName) + `,`,
-		`RoleTemplateName:` + fmt.Sprintf("%v", this.RoleTemplateName) + `,`,
+		`PolicyName:` + fmt.Sprintf("%v", this.PolicyName) + `,`,
 		`Clusters:` + fmt.Sprintf("%v", this.Clusters) + `,`,
 		`}`,
 	}, "")
 	return s
 }
-func (this *ClusterRoleTemplateBindingStatus) String() string {
+func (this *ClusterPolicyBindingStatus) String() string {
 	if this == nil {
 		return "nil"
 	}
-	repeatedStringForClusters := "[]ClusterRoleTemplateBindingStatusItem{"
+	repeatedStringForClusters := "[]ClusterPolicyBindingStatusItem{"
 	for _, f := range this.Clusters {
-		repeatedStringForClusters += strings.Replace(strings.Replace(f.String(), "ClusterRoleTemplateBindingStatusItem", "ClusterRoleTemplateBindingStatusItem", 1), `&`, ``, 1) + ","
+		repeatedStringForClusters += strings.Replace(strings.Replace(f.String(), "ClusterPolicyBindingStatusItem", "ClusterPolicyBindingStatusItem", 1), `&`, ``, 1) + ","
 	}
 	repeatedStringForClusters += "}"
-	s := strings.Join([]string{`&ClusterRoleTemplateBindingStatus{`,
+	s := strings.Join([]string{`&ClusterPolicyBindingStatus{`,
 		`Phase:` + fmt.Sprintf("%v", this.Phase) + `,`,
 		`LastTransitionTime:` + strings.Replace(strings.Replace(fmt.Sprintf("%v", this.LastTransitionTime), "Time", "v1.Time", 1), `&`, ``, 1) + `,`,
 		`Reason:` + fmt.Sprintf("%v", this.Reason) + `,`,
@@ -1814,11 +1632,11 @@ func (this *ClusterRoleTemplateBindingStatus) String() string {
 	}, "")
 	return s
 }
-func (this *ClusterRoleTemplateBindingStatusItem) String() string {
+func (this *ClusterPolicyBindingStatusItem) String() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&ClusterRoleTemplateBindingStatusItem{`,
+	s := strings.Join([]string{`&ClusterPolicyBindingStatusItem{`,
 		`Phase:` + fmt.Sprintf("%v", this.Phase) + `,`,
 		`LastTransitionTime:` + strings.Replace(strings.Replace(fmt.Sprintf("%v", this.LastTransitionTime), "Time", "v1.Time", 1), `&`, ``, 1) + `,`,
 		`Reason:` + fmt.Sprintf("%v", this.Reason) + `,`,
@@ -1869,6 +1687,42 @@ func (this *ConfigMapList) String() string {
 	}
 	repeatedStringForItems += "}"
 	s := strings.Join([]string{`&ConfigMapList{`,
+		`ListMeta:` + strings.Replace(strings.Replace(fmt.Sprintf("%v", this.ListMeta), "ListMeta", "v1.ListMeta", 1), `&`, ``, 1) + `,`,
+		`Items:` + repeatedStringForItems + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *Policy) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForRules := "[]PolicyRule{"
+	for _, f := range this.Rules {
+		repeatedStringForRules += fmt.Sprintf("%v", f) + ","
+	}
+	repeatedStringForRules += "}"
+	s := strings.Join([]string{`&Policy{`,
+		`ObjectMeta:` + strings.Replace(strings.Replace(fmt.Sprintf("%v", this.ObjectMeta), "ObjectMeta", "v1.ObjectMeta", 1), `&`, ``, 1) + `,`,
+		`TenantID:` + fmt.Sprintf("%v", this.TenantID) + `,`,
+		`DisplayName:` + fmt.Sprintf("%v", this.DisplayName) + `,`,
+		`Description:` + fmt.Sprintf("%v", this.Description) + `,`,
+		`Scope:` + fmt.Sprintf("%v", this.Scope) + `,`,
+		`Rules:` + repeatedStringForRules + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *PolicyList) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForItems := "[]Policy{"
+	for _, f := range this.Items {
+		repeatedStringForItems += strings.Replace(strings.Replace(f.String(), "Policy", "Policy", 1), `&`, ``, 1) + ","
+	}
+	repeatedStringForItems += "}"
+	s := strings.Join([]string{`&PolicyList{`,
 		`ListMeta:` + strings.Replace(strings.Replace(fmt.Sprintf("%v", this.ListMeta), "ListMeta", "v1.ListMeta", 1), `&`, ``, 1) + `,`,
 		`Items:` + repeatedStringForItems + `,`,
 		`}`,
@@ -1946,66 +1800,6 @@ func (this *RoleList) String() string {
 	}, "")
 	return s
 }
-func (this *RoleTemplate) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&RoleTemplate{`,
-		`ObjectMeta:` + strings.Replace(strings.Replace(fmt.Sprintf("%v", this.ObjectMeta), "ObjectMeta", "v1.ObjectMeta", 1), `&`, ``, 1) + `,`,
-		`Spec:` + strings.Replace(strings.Replace(this.Spec.String(), "RoleTemplateSpec", "RoleTemplateSpec", 1), `&`, ``, 1) + `,`,
-		`Status:` + strings.Replace(strings.Replace(this.Status.String(), "RoleTemplateStatus", "RoleTemplateStatus", 1), `&`, ``, 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *RoleTemplateList) String() string {
-	if this == nil {
-		return "nil"
-	}
-	repeatedStringForItems := "[]RoleTemplate{"
-	for _, f := range this.Items {
-		repeatedStringForItems += strings.Replace(strings.Replace(f.String(), "RoleTemplate", "RoleTemplate", 1), `&`, ``, 1) + ","
-	}
-	repeatedStringForItems += "}"
-	s := strings.Join([]string{`&RoleTemplateList{`,
-		`ListMeta:` + strings.Replace(strings.Replace(fmt.Sprintf("%v", this.ListMeta), "ListMeta", "v1.ListMeta", 1), `&`, ``, 1) + `,`,
-		`Items:` + repeatedStringForItems + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *RoleTemplateSpec) String() string {
-	if this == nil {
-		return "nil"
-	}
-	repeatedStringForRules := "[]PolicyRule{"
-	for _, f := range this.Rules {
-		repeatedStringForRules += fmt.Sprintf("%v", f) + ","
-	}
-	repeatedStringForRules += "}"
-	s := strings.Join([]string{`&RoleTemplateSpec{`,
-		`TenantID:` + fmt.Sprintf("%v", this.TenantID) + `,`,
-		`DisplayName:` + fmt.Sprintf("%v", this.DisplayName) + `,`,
-		`Description:` + fmt.Sprintf("%v", this.Description) + `,`,
-		`Scope:` + fmt.Sprintf("%v", this.Scope) + `,`,
-		`Rules:` + repeatedStringForRules + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *RoleTemplateStatus) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&RoleTemplateStatus{`,
-		`Phase:` + fmt.Sprintf("%v", this.Phase) + `,`,
-		`LastTransitionTime:` + strings.Replace(strings.Replace(fmt.Sprintf("%v", this.LastTransitionTime), "Time", "v1.Time", 1), `&`, ``, 1) + `,`,
-		`Reason:` + fmt.Sprintf("%v", this.Reason) + `,`,
-		`Message:` + fmt.Sprintf("%v", this.Message) + `,`,
-		`}`,
-	}, "")
-	return s
-}
 func valueToStringGenerated(v interface{}) string {
 	rv := reflect.ValueOf(v)
 	if rv.IsNil() {
@@ -2014,7 +1808,7 @@ func valueToStringGenerated(v interface{}) string {
 	pv := reflect.Indirect(rv).Interface()
 	return fmt.Sprintf("*%v", pv)
 }
-func (m *ClusterRoleTemplateBinding) Unmarshal(dAtA []byte) error {
+func (m *ClusterPolicyBinding) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2037,10 +1831,10 @@ func (m *ClusterRoleTemplateBinding) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: ClusterRoleTemplateBinding: wiretype end group for non-group")
+			return fmt.Errorf("proto: ClusterPolicyBinding: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: ClusterRoleTemplateBinding: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: ClusterPolicyBinding: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -2163,7 +1957,7 @@ func (m *ClusterRoleTemplateBinding) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *ClusterRoleTemplateBindingList) Unmarshal(dAtA []byte) error {
+func (m *ClusterPolicyBindingList) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2186,10 +1980,10 @@ func (m *ClusterRoleTemplateBindingList) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: ClusterRoleTemplateBindingList: wiretype end group for non-group")
+			return fmt.Errorf("proto: ClusterPolicyBindingList: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: ClusterRoleTemplateBindingList: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: ClusterPolicyBindingList: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -2254,7 +2048,7 @@ func (m *ClusterRoleTemplateBindingList) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Items = append(m.Items, ClusterRoleTemplateBinding{})
+			m.Items = append(m.Items, ClusterPolicyBinding{})
 			if err := m.Items[len(m.Items)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -2280,7 +2074,7 @@ func (m *ClusterRoleTemplateBindingList) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *ClusterRoleTemplateBindingSpec) Unmarshal(dAtA []byte) error {
+func (m *ClusterPolicyBindingSpec) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2303,10 +2097,10 @@ func (m *ClusterRoleTemplateBindingSpec) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: ClusterRoleTemplateBindingSpec: wiretype end group for non-group")
+			return fmt.Errorf("proto: ClusterPolicyBindingSpec: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: ClusterRoleTemplateBindingSpec: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: ClusterPolicyBindingSpec: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -2375,7 +2169,7 @@ func (m *ClusterRoleTemplateBindingSpec) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 3:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field RoleTemplateName", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field PolicyName", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -2403,7 +2197,7 @@ func (m *ClusterRoleTemplateBindingSpec) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.RoleTemplateName = string(dAtA[iNdEx:postIndex])
+			m.PolicyName = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 4:
 			if wireType != 2 {
@@ -2458,7 +2252,7 @@ func (m *ClusterRoleTemplateBindingSpec) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *ClusterRoleTemplateBindingStatus) Unmarshal(dAtA []byte) error {
+func (m *ClusterPolicyBindingStatus) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2481,10 +2275,10 @@ func (m *ClusterRoleTemplateBindingStatus) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: ClusterRoleTemplateBindingStatus: wiretype end group for non-group")
+			return fmt.Errorf("proto: ClusterPolicyBindingStatus: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: ClusterRoleTemplateBindingStatus: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: ClusterPolicyBindingStatus: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -2517,7 +2311,7 @@ func (m *ClusterRoleTemplateBindingStatus) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Phase = RoleTemplatePhase(dAtA[iNdEx:postIndex])
+			m.Phase = Phase(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -2645,7 +2439,7 @@ func (m *ClusterRoleTemplateBindingStatus) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Clusters = append(m.Clusters, ClusterRoleTemplateBindingStatusItem{})
+			m.Clusters = append(m.Clusters, ClusterPolicyBindingStatusItem{})
 			if err := m.Clusters[len(m.Clusters)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -2671,7 +2465,7 @@ func (m *ClusterRoleTemplateBindingStatus) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *ClusterRoleTemplateBindingStatusItem) Unmarshal(dAtA []byte) error {
+func (m *ClusterPolicyBindingStatusItem) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2694,10 +2488,10 @@ func (m *ClusterRoleTemplateBindingStatusItem) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: ClusterRoleTemplateBindingStatusItem: wiretype end group for non-group")
+			return fmt.Errorf("proto: ClusterPolicyBindingStatusItem: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: ClusterRoleTemplateBindingStatusItem: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: ClusterPolicyBindingStatusItem: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -2730,7 +2524,7 @@ func (m *ClusterRoleTemplateBindingStatusItem) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Phase = RoleTemplatePhase(dAtA[iNdEx:postIndex])
+			m.Phase = Phase(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -3280,6 +3074,368 @@ func (m *ConfigMapList) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			m.Items = append(m.Items, ConfigMap{})
+			if err := m.Items[len(m.Items)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipGenerated(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Policy) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowGenerated
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Policy: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Policy: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ObjectMeta", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenerated
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.ObjectMeta.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TenantID", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenerated
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.TenantID = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DisplayName", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenerated
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.DisplayName = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Description", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenerated
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Description = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Scope", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenerated
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Scope = Scope(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Rules", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenerated
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Rules = append(m.Rules, v11.PolicyRule{})
+			if err := m.Rules[len(m.Rules)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipGenerated(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *PolicyList) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowGenerated
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: PolicyList: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: PolicyList: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ListMeta", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenerated
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.ListMeta.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Items", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenerated
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthGenerated
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Items = append(m.Items, Policy{})
 			if err := m.Items[len(m.Items)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -4054,663 +4210,6 @@ func (m *RoleList) Unmarshal(dAtA []byte) error {
 			if err := m.Items[len(m.Items)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipGenerated(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *RoleTemplate) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowGenerated
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: RoleTemplate: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: RoleTemplate: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ObjectMeta", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowGenerated
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if err := m.ObjectMeta.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Spec", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowGenerated
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if err := m.Spec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 3:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Status", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowGenerated
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if err := m.Status.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipGenerated(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *RoleTemplateList) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowGenerated
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: RoleTemplateList: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: RoleTemplateList: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ListMeta", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowGenerated
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if err := m.ListMeta.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Items", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowGenerated
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Items = append(m.Items, RoleTemplate{})
-			if err := m.Items[len(m.Items)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipGenerated(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *RoleTemplateSpec) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowGenerated
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: RoleTemplateSpec: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: RoleTemplateSpec: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TenantID", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowGenerated
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.TenantID = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field DisplayName", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowGenerated
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.DisplayName = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 3:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Description", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowGenerated
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Description = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Scope", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowGenerated
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Scope = Scope(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 5:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Rules", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowGenerated
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Rules = append(m.Rules, v11.PolicyRule{})
-			if err := m.Rules[len(m.Rules)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipGenerated(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *RoleTemplateStatus) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowGenerated
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: RoleTemplateStatus: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: RoleTemplateStatus: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Phase", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowGenerated
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Phase = RoleTemplatePhase(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field LastTransitionTime", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowGenerated
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if err := m.LastTransitionTime.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 3:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Reason", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowGenerated
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Reason = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Message", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowGenerated
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthGenerated
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Message = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

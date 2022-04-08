@@ -27,23 +27,23 @@ import (
 	"k8s.io/apiserver/pkg/registry/rest"
 	"tkestack.io/tke/api/authz"
 	apiserverutil "tkestack.io/tke/pkg/apiserver/util"
-	"tkestack.io/tke/pkg/authz/registry/clusterroletemplatebinding"
+	"tkestack.io/tke/pkg/authz/registry/policy"
 	"tkestack.io/tke/pkg/util/log"
 )
 
 // Storage includes storage for configmap and all sub resources.
 type Storage struct {
-	RoleTemplate *REST
-	Status       *StatusREST
+	Policy *REST
 }
 
 // NewStorage returns a Storage object that will work against configmap.
 func NewStorage(optsGetter genericregistry.RESTOptionsGetter) *Storage {
-	strategy := clusterroletemplatebinding.NewStrategy()
+	strategy := policy.NewStrategy()
 	store := &registry.Store{
-		NewFunc:                  func() runtime.Object { return &authz.ClusterRoleTemplateBinding{} },
-		NewListFunc:              func() runtime.Object { return &authz.ClusterRoleTemplateBindingList{} },
-		DefaultQualifiedResource: authz.Resource("clusterroletemplatebindings"),
+		NewFunc:                  func() runtime.Object { return &authz.Policy{} },
+		NewListFunc:              func() runtime.Object { return &authz.PolicyList{} },
+		DefaultQualifiedResource: authz.Resource("policies"),
+
 		CreateStrategy: strategy,
 		UpdateStrategy: strategy,
 		DeleteStrategy: strategy,
@@ -57,12 +57,8 @@ func NewStorage(optsGetter genericregistry.RESTOptionsGetter) *Storage {
 		log.Panic("Failed to create configmap etcd rest storage", log.Err(err))
 	}
 
-	statusStore := *store
-	statusStore.UpdateStrategy = clusterroletemplatebinding.NewStatusStrategy(strategy)
-
 	return &Storage{
-		RoleTemplate: &REST{store},
-		Status:       &StatusREST{&statusStore},
+		Policy: &REST{store},
 	}
 }
 
@@ -75,21 +71,11 @@ var _ rest.ShortNamesProvider = &REST{}
 
 // ShortNames implements the ShortNamesProvider interface. Returns a list of short names for a resource.
 func (r *REST) ShortNames() []string {
-	return []string{"crtb"}
+	return []string{"pol"}
 }
 
 // List selects resources in the storage which match to the selector. 'options' can be nil.
 func (r *REST) List(ctx context.Context, options *metainternal.ListOptions) (runtime.Object, error) {
 	wrappedOptions := apiserverutil.PredicateListOptions(ctx, options)
 	return r.Store.List(ctx, wrappedOptions)
-}
-
-// StatusREST implements the GenericREST endpoint for changing the status of a roletemplate request.
-type StatusREST struct {
-	store *registry.Store
-}
-
-// New returns an empty object that can be used with Create and Update after request data has been put into it.
-func (r *StatusREST) New() runtime.Object {
-	return r.store.New()
 }

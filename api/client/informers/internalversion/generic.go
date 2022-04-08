@@ -104,16 +104,16 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Auth().InternalVersion().Users().Informer()}, nil
 
 		// Group=authz.tkestack.io, Version=internalVersion
-	case authz.SchemeGroupVersion.WithResource("clusterroletemplatebindings"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Authz().InternalVersion().ClusterRoleTemplateBindings().Informer()}, nil
+	case authz.SchemeGroupVersion.WithResource("clusterpolicybindings"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Authz().InternalVersion().ClusterPolicyBindings().Informer()}, nil
 	case authz.SchemeGroupVersion.WithResource("configmaps"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Authz().InternalVersion().ConfigMaps().Informer()}, nil
+	case authz.SchemeGroupVersion.WithResource("policies"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Authz().InternalVersion().Policies().Informer()}, nil
 	case authz.SchemeGroupVersion.WithResource("roles"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Authz().InternalVersion().Roles().Informer()}, nil
 	case authz.SchemeGroupVersion.WithResource("rolebindings"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Authz().InternalVersion().RoleBindings().Informer()}, nil
-	case authz.SchemeGroupVersion.WithResource("roletemplates"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Authz().InternalVersion().RoleTemplates().Informer()}, nil
 
 		// Group=business.tkestack.io, Version=internalVersion
 	case business.SchemeGroupVersion.WithResource("chartgroups"):

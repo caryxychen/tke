@@ -20,7 +20,6 @@ package provider
 
 import (
 	"fmt"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sort"
 	"sync"
 )
@@ -61,18 +60,15 @@ func Providers() []string {
 
 // GetProvider will get your provider with the application,
 // set an annotation with key, application.tkestack.io/provider-name, and value, the provider will work for your application.
-func GetProvider(meta *metav1.ObjectMeta) (Provider, error) {
-	if meta == nil {
-		return &DelegateProvider{}, nil
-	}
-	if meta.Annotations == nil {
+func GetProvider(annotation map[string]string) (Provider, error) {
+	if annotation == nil {
 		return &DelegateProvider{}, nil
 	}
 	providersMu.RLock()
-	provider, ok := providers[meta.Annotations[AnnotationProviderNameKey]]
+	provider, ok := providers[annotation[AnnotationProviderNameKey]]
 	providersMu.RUnlock()
 	if !ok {
-		return nil, fmt.Errorf("authz: unknown provider %q (forgotten import?)", meta.Annotations[AnnotationProviderNameKey])
+		return nil, fmt.Errorf("authz: unknown provider %q (forgotten import?)", annotation[AnnotationProviderNameKey])
 	}
 	return provider, nil
 }

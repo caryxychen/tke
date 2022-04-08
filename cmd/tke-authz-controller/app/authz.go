@@ -23,35 +23,20 @@ import (
 	"net/http"
 	"time"
 	authzv1 "tkestack.io/tke/api/authz/v1"
-	"tkestack.io/tke/pkg/authz/controller/clusterroletemplatebinding"
+	"tkestack.io/tke/pkg/authz/controller/clusterpolicybinding"
 	"tkestack.io/tke/pkg/authz/controller/rolebinding"
-	"tkestack.io/tke/pkg/authz/controller/roletemplate"
 )
 
-func startRoleTemplateController(ctx ControllerContext) (http.Handler, bool, error) {
-	if !ctx.AvailableResources[schema.GroupVersionResource{Group: authzv1.GroupName, Version: "v1", Resource: "roletemplates"}] {
+func startClusterPolicyBindingController(ctx ControllerContext) (http.Handler, bool, error) {
+	if !ctx.AvailableResources[schema.GroupVersionResource{Group: authzv1.GroupName, Version: "v1", Resource: "clusterpolicybindings"}] {
 		return nil, false, nil
 	}
-	ctrl := roletemplate.NewController(
-		ctx.ClientBuilder.ClientOrDie("roletemplate-controller"),
+	ctrl := clusterpolicybinding.NewController(
+		ctx.ClientBuilder.ClientOrDie("clusterpolicybinding-controller"),
 		ctx.PlatformClient,
-		ctx.InformerFactory.Authz().V1().RoleTemplates(),
-		5 * time.Second,
-	)
-	go ctrl.Run(4, ctx.Stop)
-	return nil, true, nil
-}
-
-func startClusterRoleTemplateBindingController(ctx ControllerContext) (http.Handler, bool, error) {
-	if !ctx.AvailableResources[schema.GroupVersionResource{Group: authzv1.GroupName, Version: "v1", Resource: "clusterroletemplatebindings"}] {
-		return nil, false, nil
-	}
-	ctrl := clusterroletemplatebinding.NewController(
-		ctx.ClientBuilder.ClientOrDie("clusterroletemplatebinding-controller"),
-		ctx.PlatformClient,
-		ctx.InformerFactory.Authz().V1().RoleTemplates(),
-		ctx.InformerFactory.Authz().V1().ClusterRoleTemplateBindings(),
-		5 * time.Second,
+		ctx.InformerFactory.Authz().V1().Policies(),
+		ctx.InformerFactory.Authz().V1().ClusterPolicyBindings(),
+		5*time.Second,
 	)
 	go ctrl.Run(4, ctx.Stop)
 	return nil, true, nil
@@ -66,8 +51,8 @@ func startRoleBindingController(ctx ControllerContext) (http.Handler, bool, erro
 		ctx.PlatformClient,
 		ctx.InformerFactory.Authz().V1().Roles(),
 		ctx.InformerFactory.Authz().V1().RoleBindings(),
-		ctx.InformerFactory.Authz().V1().RoleTemplates(),
-		5 * time.Second,
+		ctx.InformerFactory.Authz().V1().Policies(),
+		5*time.Second,
 	)
 	go ctrl.Run(4, ctx.Stop)
 	return nil, true, nil

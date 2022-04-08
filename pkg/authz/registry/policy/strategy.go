@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package clusterroletemplatebinding
+package policy
 
 import (
 	"context"
@@ -73,7 +73,7 @@ func (Strategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
 
 // Validate validates a new configmap.
 func (Strategy) Validate(ctx context.Context, obj runtime.Object) field.ErrorList {
-	return ValidateClusterRoleTemplateBinding(obj.(*authz.ClusterRoleTemplateBinding))
+	return ValidatePolicy(obj.(*authz.Policy))
 }
 
 // AllowCreateOnUpdate is false for persistent events
@@ -99,39 +99,10 @@ func (Strategy) Canonicalize(obj runtime.Object) {
 
 // ValidateUpdate is the default update validation for an end namespace set.
 func (Strategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
-	return ValidateClusterRoleTemplateBindingUpdate(obj.(*authz.ClusterRoleTemplateBinding), old.(*authz.ClusterRoleTemplateBinding))
+	return ValidatePolicyUpdate(obj.(*authz.Policy), old.(*authz.Policy))
 }
 
 // WarningsOnUpdate returns warnings for the given update.
 func (Strategy) WarningsOnUpdate(ctx context.Context, obj, old runtime.Object) []string {
 	return nil
-}
-
-// StatusStrategy implements verification logic for status of roletemplate request.
-type StatusStrategy struct {
-	*Strategy
-}
-
-var _ rest.RESTUpdateStrategy = &StatusStrategy{}
-
-// NewStatusStrategy create the StatusStrategy object by given strategy.
-func NewStatusStrategy(strategy *Strategy) *StatusStrategy {
-	return &StatusStrategy{strategy}
-}
-
-// PrepareForUpdate is invoked on update before validation to normalize
-// the object.  For example: remove fields that are not to be persisted,
-// sort order-insensitive list fields, etc.  This should not remove fields
-// whose presence would be considered a validation error.
-func (StatusStrategy) PrepareForUpdate(_ context.Context, obj, old runtime.Object) {
-	newClusterRoleTemplateBinding := obj.(*authz.ClusterRoleTemplateBinding)
-	oldClusterRoleTemplateBinding := old.(*authz.ClusterRoleTemplateBinding)
-	newClusterRoleTemplateBinding.Spec = oldClusterRoleTemplateBinding.Spec
-}
-
-// ValidateUpdate is invoked after default fields in the object have been
-// filled in before the object is persisted.  This method should not mutate
-// the object.
-func (s *StatusStrategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
-	return ValidateClusterRoleTemplateBindingUpdate(obj.(*authz.ClusterRoleTemplateBinding), old.(*authz.ClusterRoleTemplateBinding))
 }

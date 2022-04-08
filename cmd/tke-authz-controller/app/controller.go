@@ -47,8 +47,7 @@ func KnownControllers() []string {
 // paired to their InitFunc.  This allows for structured downstream composition and subdivision.
 func NewControllerInitializers() map[string]InitFunc {
 	controllers := map[string]InitFunc{}
-	controllers["roletemplate"] = startRoleTemplateController
-	controllers["clusterroletemplatebinding"] = startClusterRoleTemplateBindingController
+	controllers["clusterpolicybindings"] = startClusterPolicyBindingController
 	controllers["rolebindings"] = startRoleBindingController
 	return controllers
 }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package roletemplate
+package clusterpolicybinding
 
 import (
 	"context"
@@ -73,7 +73,7 @@ func (Strategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
 
 // Validate validates a new configmap.
 func (Strategy) Validate(ctx context.Context, obj runtime.Object) field.ErrorList {
-	return ValidateRoleTemplate(obj.(*authz.RoleTemplate))
+	return ValidateClusterPolicyBinding(obj.(*authz.ClusterPolicyBinding))
 }
 
 // AllowCreateOnUpdate is false for persistent events
@@ -99,7 +99,7 @@ func (Strategy) Canonicalize(obj runtime.Object) {
 
 // ValidateUpdate is the default update validation for an end namespace set.
 func (Strategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
-	return ValidateRoleTemplateUpdate(obj.(*authz.RoleTemplate), old.(*authz.RoleTemplate))
+	return ValidateClusterPolicyBindingUpdate(obj.(*authz.ClusterPolicyBinding), old.(*authz.ClusterPolicyBinding))
 }
 
 // WarningsOnUpdate returns warnings for the given update.
@@ -124,14 +124,14 @@ func NewStatusStrategy(strategy *Strategy) *StatusStrategy {
 // sort order-insensitive list fields, etc.  This should not remove fields
 // whose presence would be considered a validation error.
 func (StatusStrategy) PrepareForUpdate(_ context.Context, obj, old runtime.Object) {
-	newRoleTemplate := obj.(*authz.RoleTemplate)
-	oldRoleTemplate := old.(*authz.RoleTemplate)
-	newRoleTemplate.Spec = oldRoleTemplate.Spec
+	newClusterPolicyBinding := obj.(*authz.ClusterPolicyBinding)
+	oldClusterPolicyBinding := old.(*authz.ClusterPolicyBinding)
+	newClusterPolicyBinding.Spec = oldClusterPolicyBinding.Spec
 }
 
 // ValidateUpdate is invoked after default fields in the object have been
 // filled in before the object is persisted.  This method should not mutate
 // the object.
 func (s *StatusStrategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
-	return ValidateRoleTemplateUpdate(obj.(*authz.RoleTemplate), old.(*authz.RoleTemplate))
+	return ValidateClusterPolicyBindingUpdate(obj.(*authz.ClusterPolicyBinding), old.(*authz.ClusterPolicyBinding))
 }

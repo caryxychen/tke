@@ -82,96 +82,74 @@ type RoleBindingList struct {
 // +genclient:skipVerbs=deleteCollection
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// RoleTemplate is a rbac template in TKE.
-type RoleTemplate struct {
+// Policy is a rbac template in TKE.
+type Policy struct {
 	metav1.TypeMeta `json:",inline"`
 	// +optional
 	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 
+	TenantID    string `json:"tenantID" protobuf:"bytes,2,opt,name=tenantID"`
+	DisplayName string `json:"displayName" protobuf:"bytes,3,opt,name=displayName"`
 	// +optional
-	Spec RoleTemplateSpec `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
-
+	Description string `json:"description" protobuf:"bytes,4,opt,name=description"`
 	// +optional
-	Status RoleTemplateStatus `json:"status,omitempty" protobuf:"bytes,3,opt,name=status"`
+	Scope Scope               `json:"scope" protobuf:"bytes,5,opt,name=scope"`
+	Rules []rbacv1.PolicyRule `json:"rules" protobuf:"bytes,6,rep,name=rules"`
 }
 
 type Scope string
 
 const (
+	PlatformScope Scope = "Platform"
 	ClusterScope  Scope = "Cluster"
 	BusinessScope Scope = "Business"
 )
 
-type RoleTemplateSpec struct {
-	TenantID    string `json:"tenantID" protobuf:"bytes,1,opt,name=tenantID"`
-	DisplayName string `json:"displayName" protobuf:"bytes,2,opt,name=displayName"`
-	// +optional
-	Description string `json:"description" protobuf:"bytes,3,opt,name=description"`
-	// +optional
-	Scope Scope               `json:"scope" protobuf:"bytes,4,opt,name=scope"`
-	Rules []rbacv1.PolicyRule `json:"rules" protobuf:"bytes,5,rep,name=rules"`
-}
-
-type RoleTemplatePhase string
-
-const (
-	Installing RoleTemplatePhase = "Installing"
-	Succeeded  RoleTemplatePhase = "Succeeded"
-	Failed     RoleTemplatePhase = "Failed"
-)
-
-type RoleTemplateStatus struct {
-	// Phase the release is in, one of ('Installing', 'Succeeded', 'Failed')
-	// +optional
-	Phase RoleTemplatePhase `json:"phase" protobuf:"bytes,1,opt,name=phase"`
-	// The last time the condition transitioned from one status to another.
-	// +optional
-	LastTransitionTime metav1.Time `json:"lastTransitionTime" protobuf:"bytes,2,opt,name=lastTransitionTime"`
-	// The reason for the condition's last transition.
-	// +optional
-	Reason string `json:"reason" protobuf:"bytes,3,opt,name=reason"`
-	// A human readable message indicating details about the transition.
-	// +optional
-	Message string `json:"message" protobuf:"bytes,4,opt,name=message"`
-}
-
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// RoleTemplateList is the whole list of all rbac templates.
-type RoleTemplateList struct {
+// PolicyList is the whole list of all rbac templates.
+type PolicyList struct {
 	metav1.TypeMeta `json:",inline"`
 	// +optional
 	metav1.ListMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 
-	// List of bootstraps
-	Items []RoleTemplate `json:"items" protobuf:"bytes,2,rep,name=items"`
+	// List of policies
+	Items []Policy `json:"items" protobuf:"bytes,2,rep,name=items"`
 }
 
 // +genclient
 // +genclient:skipVerbs=deleteCollection
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-type ClusterRoleTemplateBinding struct {
+type ClusterPolicyBinding struct {
 	metav1.TypeMeta `json:",inline"`
 	// +optional
 	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
-	Spec              ClusterRoleTemplateBindingSpec   `json:"spec" protobuf:"bytes,2,opt,name=spec"`
-	Status            ClusterRoleTemplateBindingStatus `json:"status,omitempty" protobuf:"bytes,3,opt,name=status"`
+	Spec              ClusterPolicyBindingSpec   `json:"spec" protobuf:"bytes,2,opt,name=spec"`
+	Status            ClusterPolicyBindingStatus `json:"status,omitempty" protobuf:"bytes,3,opt,name=status"`
 }
 
-type ClusterRoleTemplateBindingSpec struct {
+type ClusterPolicyBindingSpec struct {
 	// +optional
 	UserName string `json:"userName" protobuf:"bytes,1,opt,name=userName"`
 	// +optional
-	GroupName        string   `json:"groupName" protobuf:"bytes,2,opt,name=groupName"`
-	RoleTemplateName string   `json:"roleTemplateName" protobuf:"bytes,3,opt,name=roleTemplateName"`
-	Clusters         []string `json:"clusters" protobuf:"bytes,4,rep,name=clusters"`
+	GroupName  string   `json:"groupName" protobuf:"bytes,2,opt,name=groupName"`
+	PolicyName string   `json:"roleTemplateName" protobuf:"bytes,3,opt,name=roleTemplateName"`
+	Clusters   []string `json:"clusters" protobuf:"bytes,4,rep,name=clusters"`
 }
 
-type ClusterRoleTemplateBindingStatus struct {
+type Phase string
+
+const (
+	Installing Phase = "Installing"
+	Succeeded  Phase = "Succeeded"
+	Failed     Phase = "Failed"
+)
+
+type ClusterPolicyBindingStatus struct {
 	// Phase the release is in, one of ('Installing', 'Succeeded', 'Failed')
 	// +optional
-	Phase RoleTemplatePhase `json:"phase" protobuf:"bytes,1,opt,name=phase"`
+	Phase Phase `json:"phase" protobuf:"bytes,1,opt,name=phase"`
 	// The last time the condition transitioned from one status to another.
 	// +optional
 	LastTransitionTime metav1.Time `json:"lastTransitionTime" protobuf:"bytes,2,opt,name=lastTransitionTime"`
@@ -182,13 +160,13 @@ type ClusterRoleTemplateBindingStatus struct {
 	// +optional
 	Message string `json:"message" protobuf:"bytes,4,opt,name=message"`
 	// +optional
-	Clusters []ClusterRoleTemplateBindingStatusItem `json:"clusters" protobuf:"bytes,5,rep,name=clusters"`
+	Clusters []ClusterPolicyBindingStatusItem `json:"clusters" protobuf:"bytes,5,rep,name=clusters"`
 }
 
-type ClusterRoleTemplateBindingStatusItem struct {
+type ClusterPolicyBindingStatusItem struct {
 	// Phase the release is in, one of ('Installing', 'Succeeded', 'Failed')
 	// +optional
-	Phase RoleTemplatePhase `json:"phase" protobuf:"bytes,1,opt,name=phase"`
+	Phase Phase `json:"phase" protobuf:"bytes,1,opt,name=phase"`
 	// The last time the condition transitioned from one status to another.
 	// +optional
 	LastTransitionTime metav1.Time `json:"lastTransitionTime" protobuf:"bytes,2,opt,name=lastTransitionTime"`
@@ -202,13 +180,13 @@ type ClusterRoleTemplateBindingStatusItem struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// ClusterRoleTemplateBindingList is a resource containing a list of ClusterRoleTemplateBinding objects.
-type ClusterRoleTemplateBindingList struct {
+// ClusterPolicyBindingList is a resource containing a list of ClusterPolicyBinding objects.
+type ClusterPolicyBindingList struct {
 	metav1.TypeMeta `json:",inline"`
 	// +optional
 	metav1.ListMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 	// Items is the list of ConfigMaps.
-	Items []ClusterRoleTemplateBinding `json:"items" protobuf:"bytes,2,rep,name=items"`
+	Items []ClusterPolicyBinding `json:"items" protobuf:"bytes,2,rep,name=items"`
 }
 
 // +genclient

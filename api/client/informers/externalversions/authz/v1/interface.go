@@ -26,16 +26,16 @@ import (
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
-	// ClusterRoleTemplateBindings returns a ClusterRoleTemplateBindingInformer.
-	ClusterRoleTemplateBindings() ClusterRoleTemplateBindingInformer
+	// ClusterPolicyBindings returns a ClusterPolicyBindingInformer.
+	ClusterPolicyBindings() ClusterPolicyBindingInformer
 	// ConfigMaps returns a ConfigMapInformer.
 	ConfigMaps() ConfigMapInformer
+	// Policies returns a PolicyInformer.
+	Policies() PolicyInformer
 	// Roles returns a RoleInformer.
 	Roles() RoleInformer
 	// RoleBindings returns a RoleBindingInformer.
 	RoleBindings() RoleBindingInformer
-	// RoleTemplates returns a RoleTemplateInformer.
-	RoleTemplates() RoleTemplateInformer
 }
 
 type version struct {
@@ -49,14 +49,19 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
 }
 
-// ClusterRoleTemplateBindings returns a ClusterRoleTemplateBindingInformer.
-func (v *version) ClusterRoleTemplateBindings() ClusterRoleTemplateBindingInformer {
-	return &clusterRoleTemplateBindingInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+// ClusterPolicyBindings returns a ClusterPolicyBindingInformer.
+func (v *version) ClusterPolicyBindings() ClusterPolicyBindingInformer {
+	return &clusterPolicyBindingInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // ConfigMaps returns a ConfigMapInformer.
 func (v *version) ConfigMaps() ConfigMapInformer {
 	return &configMapInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
+}
+
+// Policies returns a PolicyInformer.
+func (v *version) Policies() PolicyInformer {
+	return &policyInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // Roles returns a RoleInformer.
@@ -67,9 +72,4 @@ func (v *version) Roles() RoleInformer {
 // RoleBindings returns a RoleBindingInformer.
 func (v *version) RoleBindings() RoleBindingInformer {
 	return &roleBindingInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
-}
-
-// RoleTemplates returns a RoleTemplateInformer.
-func (v *version) RoleTemplates() RoleTemplateInformer {
-	return &roleTemplateInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }

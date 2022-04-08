@@ -20,17 +20,25 @@
 
 package internalversion
 
-// ClusterRoleTemplateBindingListerExpansion allows custom methods to be added to
-// ClusterRoleTemplateBindingLister.
-type ClusterRoleTemplateBindingListerExpansion interface{}
+// ClusterPolicyBindingListerExpansion allows custom methods to be added to
+// ClusterPolicyBindingLister.
+type ClusterPolicyBindingListerExpansion interface{}
 
-// ClusterRoleTemplateBindingNamespaceListerExpansion allows custom methods to be added to
-// ClusterRoleTemplateBindingNamespaceLister.
-type ClusterRoleTemplateBindingNamespaceListerExpansion interface{}
+// ClusterPolicyBindingNamespaceListerExpansion allows custom methods to be added to
+// ClusterPolicyBindingNamespaceLister.
+type ClusterPolicyBindingNamespaceListerExpansion interface{}
 
 // ConfigMapListerExpansion allows custom methods to be added to
 // ConfigMapLister.
 type ConfigMapListerExpansion interface{}
+
+// PolicyListerExpansion allows custom methods to be added to
+// PolicyLister.
+type PolicyListerExpansion interface{}
+
+// PolicyNamespaceListerExpansion allows custom methods to be added to
+// PolicyNamespaceLister.
+type PolicyNamespaceListerExpansion interface{}
 
 // RoleListerExpansion allows custom methods to be added to
 // RoleLister.
@@ -47,11 +55,3 @@ type RoleBindingListerExpansion interface{}
 // RoleBindingNamespaceListerExpansion allows custom methods to be added to
 // RoleBindingNamespaceLister.
 type RoleBindingNamespaceListerExpansion interface{}
-
-// RoleTemplateListerExpansion allows custom methods to be added to
-// RoleTemplateLister.
-type RoleTemplateListerExpansion interface{}
-
-// RoleTemplateNamespaceListerExpansion allows custom methods to be added to
-// RoleTemplateNamespaceLister.
-type RoleTemplateNamespaceListerExpansion interface{}
