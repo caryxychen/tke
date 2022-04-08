@@ -24,7 +24,9 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/apiserver/pkg/registry/rest"
 	"k8s.io/apiserver/pkg/storage/names"
+	"k8s.io/client-go/tools/cache"
 	"tkestack.io/tke/api/authz"
+	"tkestack.io/tke/pkg/authz/constant"
 	namesutil "tkestack.io/tke/pkg/util/names"
 )
 
@@ -62,7 +64,19 @@ func (Strategy) Export(ctx context.Context, obj runtime.Object, exact bool) erro
 // PrepareForCreate is invoked on create before validation to normalize
 // the object.
 func (Strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
-
+	cbp, _ := obj.(*authz.ClusterPolicyBinding)
+	policyNs, policyName, err := cache.SplitMetaNamespaceKey(cbp.Spec.PolicyName)
+	if err != nil {
+		return
+	}
+	labels := cbp.Labels
+	if labels == nil {
+		labels = map[string]string{}
+	}
+	labels[constant.PolicyNamespace] = policyNs
+	labels[constant.PolicyName] = policyName
+	cbp.Labels = labels
+	cbp.Status.Phase = authz.Installing
 }
 
 // PrepareForUpdate is invoked on update before validation to normalize the
@@ -72,6 +86,7 @@ func (Strategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
 }
 
 // Validate validates a new configmap.
+// TODO
 func (Strategy) Validate(ctx context.Context, obj runtime.Object) field.ErrorList {
 	return ValidateClusterPolicyBinding(obj.(*authz.ClusterPolicyBinding))
 }

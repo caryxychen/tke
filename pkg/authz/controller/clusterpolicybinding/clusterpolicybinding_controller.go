@@ -23,6 +23,7 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
@@ -34,6 +35,7 @@ import (
 	platformversionedclient "tkestack.io/tke/api/client/clientset/versioned/typed/platform/v1"
 	authzv1informer "tkestack.io/tke/api/client/informers/externalversions/authz/v1"
 	authzv1 "tkestack.io/tke/api/client/listers/authz/v1"
+	"tkestack.io/tke/pkg/authz/constant"
 	authzprovider "tkestack.io/tke/pkg/authz/provider"
 	controllerutil "tkestack.io/tke/pkg/controller"
 	clusterprovider "tkestack.io/tke/pkg/platform/provider/cluster"
@@ -87,6 +89,23 @@ func NewController(
 		_ = metrics.RegisterMetricAndTrackRateLimiterUsage(controllerName, client.AuthzV1().RESTClient().GetRateLimiter())
 	}
 
+	policyInformer.Informer().AddEventHandlerWithResyncPeriod(
+		cache.FilteringResourceEventHandler{
+			Handler: cache.ResourceEventHandlerFuncs{
+				AddFunc: controller.addPolicy,
+				UpdateFunc: func(oldObj, newObj interface{}) {
+					old, ok1 := oldObj.(*apiauthzv1.Policy)
+					cur, ok2 := newObj.(*apiauthzv1.Policy)
+					if ok1 && ok2 && controller.needsAddPolicy(old, cur) {
+						controller.addPolicy(newObj)
+					}
+				},
+			},
+			FilterFunc: func(obj interface{}) bool {
+				return true
+			},
+		}, resyncPeriod)
+
 	clusterPolicyBindingInformer.Informer().AddEventHandlerWithResyncPeriod(
 		cache.FilteringResourceEventHandler{
 			Handler: cache.ResourceEventHandlerFuncs{
@@ -112,6 +131,41 @@ func NewController(
 	controller.policyLister = policyInformer.Lister()
 	controller.policySynced = policyInformer.Informer().HasSynced
 	return controller
+}
+
+func (c *Controller) needsAddPolicy(old *apiauthzv1.Policy, new *apiauthzv1.Policy) bool {
+	if old.UID != new.UID {
+		return true
+	}
+	if !reflect.DeepEqual(old.Rules, new.Rules) {
+		return true
+	}
+	return false
+}
+
+func (c *Controller) addPolicy(obj interface{}) {
+	policy := obj.(*apiauthzv1.Policy)
+	var (
+		cpbs []*apiauthzv1.ClusterPolicyBinding
+		err  error
+	)
+	selector := labels.SelectorFromSet(map[string]string{
+		constant.PolicyNamespace: policy.Namespace,
+		constant.PolicyName:      policy.Name,
+	})
+	if policy.Namespace == "" {
+		// 如果是默认策略，允许绑定到任何ns
+		cpbs, err = c.clusterPolicyBindingLister.List(selector)
+	} else {
+		cpbs, err = c.clusterPolicyBindingLister.ClusterPolicyBindings(policy.Namespace).List(selector)
+	}
+	if err != nil {
+		log.Warnf("Failed to list clusterpolicybindings by policy %s/%s", policy.Namespace, policy.Name)
+		return
+	}
+	for _, cpb := range cpbs {
+		c.enqueue(cpb)
+	}
 }
 
 func (c *Controller) enqueue(obj interface{}) {
