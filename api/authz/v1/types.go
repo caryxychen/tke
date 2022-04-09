@@ -147,7 +147,7 @@ const (
 
 type ClusterPolicyBindingStatus struct {
 	// +optional
-	Phase BindingPhase `json:"phase" protobuf:"bytes,1,opt,name=phase,casttype=BindingPhase"`
+	Phase BindingPhase `json:"phase" protobuf:"bytes,1,opt,name=phase"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
