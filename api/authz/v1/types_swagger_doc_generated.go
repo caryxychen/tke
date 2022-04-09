@@ -38,28 +38,6 @@ func (ClusterPolicyBindingList) SwaggerDoc() map[string]string {
 	return map_ClusterPolicyBindingList
 }
 
-var map_ClusterPolicyBindingStatus = map[string]string{
-	"phase":              "Phase the release is in, one of ('Installing', 'Succeeded', 'Failed')",
-	"lastTransitionTime": "The last time the condition transitioned from one status to another.",
-	"reason":             "The reason for the condition's last transition.",
-	"message":            "A human readable message indicating details about the transition.",
-}
-
-func (ClusterPolicyBindingStatus) SwaggerDoc() map[string]string {
-	return map_ClusterPolicyBindingStatus
-}
-
-var map_ClusterPolicyBindingStatusItem = map[string]string{
-	"phase":              "Phase the release is in, one of ('Installing', 'Succeeded', 'Failed')",
-	"lastTransitionTime": "The last time the condition transitioned from one status to another.",
-	"reason":             "The reason for the condition's last transition.",
-	"message":            "A human readable message indicating details about the transition.",
-}
-
-func (ClusterPolicyBindingStatusItem) SwaggerDoc() map[string]string {
-	return map_ClusterPolicyBindingStatusItem
-}
-
 var map_ConfigMap = map[string]string{
 	"":           "ConfigMap holds configuration data for tke to consume.",
 	"data":       "Data contains the configuration data. Each key must consist of alphanumeric characters, '-', '_' or '.'. Values with non-UTF-8 byte sequences must use the BinaryData field. The keys stored in Data must not overlap with the keys in the BinaryData field, this is enforced during validation process.",

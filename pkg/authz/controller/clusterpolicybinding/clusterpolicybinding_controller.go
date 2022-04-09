@@ -104,7 +104,8 @@ func NewController(
 			FilterFunc: func(obj interface{}) bool {
 				return true
 			},
-		}, resyncPeriod)
+		}, resyncPeriod,
+	)
 
 	clusterPolicyBindingInformer.Informer().AddEventHandlerWithResyncPeriod(
 		cache.FilteringResourceEventHandler{
@@ -256,7 +257,7 @@ func (c *Controller) syncItem(key string) error {
 	cpb, err := c.clusterPolicyBindingLister.ClusterPolicyBindings(ns).Get(name)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			log.Info("App has been deleted. Attempting to cleanup resources",
+			log.Info("ClusterPolicyBinding has been deleted. Attempting to cleanup resources",
 				log.String("namespace", ns),
 				log.String("name", name))
 			return nil
@@ -276,6 +277,29 @@ func (c *Controller) syncItem(key string) error {
 		return err
 	}
 	ctx := provider.InitContext(cpb)
+
+	policyFinalize := apiauthzv1.ClusterPolicyBinding{}
+	// 执行清理动作，最终抹去Finalizers
+	if cpb.Status.Phase == apiauthzv1.BindingTerminating {
+		time.Sleep(10 * time.Second)
+		log.Warnf("just a finalizer test ...")
+		if err = c.client.AuthzV1().RESTClient().Put().Resource("clusterpolicybindings").
+			Namespace(ns).
+			Name(name).
+			SubResource("finalize").
+			Body(&policyFinalize).
+			Do(ctx).
+			Into(&policyFinalize); err != nil {
+				log.Warnf("Unable to finalize clusterpolicybinding '%s/%s', err: %v", ns, name, err)
+				return err
+		}
+		if len(policyFinalize.Finalizers) == 0 {
+			log.Infof("666666")
+			return c.client.AuthzV1().ClusterPolicyBindings(ns).Delete(ctx, name, metav1.DeleteOptions{})
+		}
+		log.Infof("8888888")
+		return nil
+	}
 
 	policyNs, policyName, err := cache.SplitMetaNamespaceKey(cpb.Spec.PolicyName)
 	if err != nil {

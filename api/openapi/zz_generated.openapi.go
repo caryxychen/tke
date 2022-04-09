@@ -908,7 +908,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"tkestack.io/tke/api/authz/v1.ClusterPolicyBindingList":                       schema_tke_api_authz_v1_ClusterPolicyBindingList(ref),
 		"tkestack.io/tke/api/authz/v1.ClusterPolicyBindingSpec":                       schema_tke_api_authz_v1_ClusterPolicyBindingSpec(ref),
 		"tkestack.io/tke/api/authz/v1.ClusterPolicyBindingStatus":                     schema_tke_api_authz_v1_ClusterPolicyBindingStatus(ref),
-		"tkestack.io/tke/api/authz/v1.ClusterPolicyBindingStatusItem":                 schema_tke_api_authz_v1_ClusterPolicyBindingStatusItem(ref),
 		"tkestack.io/tke/api/authz/v1.ConfigMap":                                      schema_tke_api_authz_v1_ConfigMap(ref),
 		"tkestack.io/tke/api/authz/v1.ConfigMapList":                                  schema_tke_api_authz_v1_ConfigMapList(ref),
 		"tkestack.io/tke/api/authz/v1.Policy":                                         schema_tke_api_authz_v1_Policy(ref),
@@ -45680,98 +45679,14 @@ func schema_tke_api_authz_v1_ClusterPolicyBindingStatus(ref common.ReferenceCall
 				Properties: map[string]spec.Schema{
 					"phase": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Phase the release is in, one of ('Installing', 'Succeeded', 'Failed')",
-							Default:     "",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"lastTransitionTime": {
-						SchemaProps: spec.SchemaProps{
-							Description: "The last time the condition transitioned from one status to another.",
-							Default:     map[string]interface{}{},
-							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
-						},
-					},
-					"reason": {
-						SchemaProps: spec.SchemaProps{
-							Description: "The reason for the condition's last transition.",
-							Default:     "",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"message": {
-						SchemaProps: spec.SchemaProps{
-							Description: "A human readable message indicating details about the transition.",
-							Default:     "",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"clusters": {
-						SchemaProps: spec.SchemaProps{
-							Type: []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: map[string]interface{}{},
-										Ref:     ref("tkestack.io/tke/api/authz/v1.ClusterPolicyBindingStatusItem"),
-									},
-								},
-							},
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 				},
 			},
 		},
-		Dependencies: []string{
-			"k8s.io/apimachinery/pkg/apis/meta/v1.Time", "tkestack.io/tke/api/authz/v1.ClusterPolicyBindingStatusItem"},
-	}
-}
-
-func schema_tke_api_authz_v1_ClusterPolicyBindingStatusItem(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
-				Properties: map[string]spec.Schema{
-					"phase": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Phase the release is in, one of ('Installing', 'Succeeded', 'Failed')",
-							Default:     "",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"lastTransitionTime": {
-						SchemaProps: spec.SchemaProps{
-							Description: "The last time the condition transitioned from one status to another.",
-							Default:     map[string]interface{}{},
-							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
-						},
-					},
-					"reason": {
-						SchemaProps: spec.SchemaProps{
-							Description: "The reason for the condition's last transition.",
-							Default:     "",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"message": {
-						SchemaProps: spec.SchemaProps{
-							Description: "A human readable message indicating details about the transition.",
-							Default:     "",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-				},
-			},
-		},
-		Dependencies: []string{
-			"k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
 	}
 }
 

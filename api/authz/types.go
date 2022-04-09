@@ -139,44 +139,16 @@ type ClusterPolicyBindingSpec struct {
 	Clusters   []string
 }
 
-type Phase string
+type BindingPhase string
 
 const (
-	Installing Phase = "Installing"
-	Succeeded  Phase = "Succeeded"
-	Failed     Phase = "Failed"
+	BindingActive      BindingPhase = "Active"
+	BindingTerminating BindingPhase = "Terminating"
 )
 
 type ClusterPolicyBindingStatus struct {
-	// Phase the release is in, one of ('Installing', 'Succeeded', 'Failed')
 	// +optional
-	Phase Phase
-	// The last time the condition transitioned from one status to another.
-	// +optional
-	LastTransitionTime metav1.Time
-	// The reason for the condition's last transition.
-	// +optional
-	Reason string
-	// A human readable message indicating details about the transition.
-	// +optional
-	Message string
-	// +optional
-	Clusters []ClusterPolicyBindingStatusItem
-}
-
-type ClusterPolicyBindingStatusItem struct {
-	// Phase the release is in, one of ('Installing', 'Succeeded', 'Failed')
-	// +optional
-	Phase Phase
-	// The last time the condition transitioned from one status to another.
-	// +optional
-	LastTransitionTime metav1.Time
-	// The reason for the condition's last transition.
-	// +optional
-	Reason string
-	// A human readable message indicating details about the transition.
-	// +optional
-	Message string
+	Phase BindingPhase
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -189,6 +161,12 @@ type ClusterPolicyBindingList struct {
 	// Items is the list of ConfigMaps.
 	Items []ClusterPolicyBinding
 }
+
+type FinalizerName string
+
+const (
+	ClusterPolicyBindingFinalize FinalizerName = "clusterpolicybinding"
+)
 
 // +genclient
 // +genclient:nonNamespaced

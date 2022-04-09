@@ -138,44 +138,16 @@ type ClusterPolicyBindingSpec struct {
 	Clusters   []string `json:"clusters" protobuf:"bytes,4,rep,name=clusters"`
 }
 
-type Phase string
+type BindingPhase string
 
 const (
-	Installing Phase = "Installing"
-	Succeeded  Phase = "Succeeded"
-	Failed     Phase = "Failed"
+	BindingActive      BindingPhase = "Active"
+	BindingTerminating BindingPhase = "Terminating"
 )
 
 type ClusterPolicyBindingStatus struct {
-	// Phase the release is in, one of ('Installing', 'Succeeded', 'Failed')
 	// +optional
-	Phase Phase `json:"phase" protobuf:"bytes,1,opt,name=phase"`
-	// The last time the condition transitioned from one status to another.
-	// +optional
-	LastTransitionTime metav1.Time `json:"lastTransitionTime" protobuf:"bytes,2,opt,name=lastTransitionTime"`
-	// The reason for the condition's last transition.
-	// +optional
-	Reason string `json:"reason" protobuf:"bytes,3,opt,name=reason"`
-	// A human readable message indicating details about the transition.
-	// +optional
-	Message string `json:"message" protobuf:"bytes,4,opt,name=message"`
-	// +optional
-	Clusters []ClusterPolicyBindingStatusItem `json:"clusters" protobuf:"bytes,5,rep,name=clusters"`
-}
-
-type ClusterPolicyBindingStatusItem struct {
-	// Phase the release is in, one of ('Installing', 'Succeeded', 'Failed')
-	// +optional
-	Phase Phase `json:"phase" protobuf:"bytes,1,opt,name=phase"`
-	// The last time the condition transitioned from one status to another.
-	// +optional
-	LastTransitionTime metav1.Time `json:"lastTransitionTime" protobuf:"bytes,2,opt,name=lastTransitionTime"`
-	// The reason for the condition's last transition.
-	// +optional
-	Reason string `json:"reason" protobuf:"bytes,3,opt,name=reason"`
-	// A human readable message indicating details about the transition.
-	// +optional
-	Message string `json:"message" protobuf:"bytes,4,opt,name=message"`
+	Phase BindingPhase `json:"phase" protobuf:"bytes,1,opt,name=phase,casttype=BindingPhase"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
