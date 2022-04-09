@@ -270,7 +270,9 @@ func (c *Controller) syncItem(key string) error {
 	cpb = cpb.DeepCopy()
 
 	policyFinalize := apiauthzv1.ClusterPolicyBinding{}
-	cpb.Finalizers = nil
+	policyFinalize.ObjectMeta = cpb.ObjectMeta
+	policyFinalize.Finalizers = []string{}
+
 	// 执行清理动作，最终抹去Finalizers
 	if cpb.Status.Phase == apiauthzv1.BindingTerminating {
 		time.Sleep(10 * time.Second)
@@ -279,11 +281,11 @@ func (c *Controller) syncItem(key string) error {
 			Namespace(ns).
 			Name(name).
 			SubResource("finalize").
-			Body(&cpb).
+			Body(&policyFinalize).
 			Do(context.Background()).
 			Into(&policyFinalize); err != nil {
-				log.Warnf("Unable to finalize clusterpolicybinding '%s/%s', err: %v", ns, name, err)
-				return err
+			log.Warnf("Unable to finalize clusterpolicybinding '%s/%s', err: %v", ns, name, err)
+			return err
 		}
 		if len(policyFinalize.Finalizers) == 0 {
 			log.Infof("666666")
