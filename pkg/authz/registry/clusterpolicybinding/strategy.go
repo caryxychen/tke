@@ -153,7 +153,9 @@ func NewStatusStrategy(strategy *Strategy) *StatusStrategy {
 func (StatusStrategy) PrepareForUpdate(_ context.Context, obj, old runtime.Object) {
 	newClusterPolicyBinding := obj.(*authz.ClusterPolicyBinding)
 	oldClusterPolicyBinding := old.(*authz.ClusterPolicyBinding)
-	newClusterPolicyBinding.Spec = oldClusterPolicyBinding.Spec
+	status := newClusterPolicyBinding.Status
+	newClusterPolicyBinding = oldClusterPolicyBinding
+	newClusterPolicyBinding.Status = status
 }
 
 // ValidateUpdate is invoked after default fields in the object have been
@@ -183,8 +185,7 @@ func (FinalizeStrategy) PrepareForUpdate(ctx context.Context, obj, old runtime.O
 	newBinding := obj.(*authz.ClusterPolicyBinding)
 	oldBinding := old.(*authz.ClusterPolicyBinding)
 	finalizers := newBinding.Finalizers
-	newBinding.Status = oldBinding.Status
-	newBinding.Spec = oldBinding.Spec
+	newBinding = oldBinding
 	newBinding.Finalizers = finalizers
 }
 
