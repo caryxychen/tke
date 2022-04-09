@@ -225,7 +225,7 @@ var _ = rest.Patcher(&StatusREST{})
 
 // New returns an empty object that can be used with Create and Update after request data has been put into it.
 func (r *StatusREST) New() runtime.Object {
-	return r.New()
+	return r.Store.New()
 }
 
 // FinalizeREST implements Patcher.
@@ -239,5 +239,5 @@ type FinalizeREST struct {
 // New returns an empty object that can be used with Create and Update after
 // request data has been put into it.
 func (r *FinalizeREST) New() runtime.Object {
-	return r.New()
+	return r.Store.New()
 }
