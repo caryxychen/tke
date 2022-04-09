@@ -269,16 +269,8 @@ func (c *Controller) syncItem(key string) error {
 	}
 	cpb = cpb.DeepCopy()
 
-	provider, err := authzprovider.GetProvider(cpb.Annotations)
-	if err != nil {
-		log.Warn("Unable to retrieve provider",
-			log.String("namespace", ns),
-			log.String("name", name), log.Err(err))
-		return err
-	}
-	ctx := provider.InitContext(cpb)
-
 	policyFinalize := apiauthzv1.ClusterPolicyBinding{}
+	cpb.Finalizers = nil
 	// 执行清理动作，最终抹去Finalizers
 	if cpb.Status.Phase == apiauthzv1.BindingTerminating {
 		time.Sleep(10 * time.Second)
@@ -287,19 +279,28 @@ func (c *Controller) syncItem(key string) error {
 			Namespace(ns).
 			Name(name).
 			SubResource("finalize").
-			Body(&policyFinalize).
-			Do(ctx).
+			Body(&cpb).
+			Do(context.Background()).
 			Into(&policyFinalize); err != nil {
 				log.Warnf("Unable to finalize clusterpolicybinding '%s/%s', err: %v", ns, name, err)
 				return err
 		}
 		if len(policyFinalize.Finalizers) == 0 {
 			log.Infof("666666")
-			return c.client.AuthzV1().ClusterPolicyBindings(ns).Delete(ctx, name, metav1.DeleteOptions{})
+			return c.client.AuthzV1().ClusterPolicyBindings(ns).Delete(context.Background(), name, metav1.DeleteOptions{})
 		}
 		log.Infof("8888888")
 		return nil
 	}
+
+	provider, err := authzprovider.GetProvider(cpb.Annotations)
+	if err != nil {
+		log.Warn("Unable to retrieve provider",
+			log.String("namespace", ns),
+			log.String("name", name), log.Err(err))
+		return err
+	}
+	ctx := provider.InitContext(cpb)
 
 	policyNs, policyName, err := cache.SplitMetaNamespaceKey(cpb.Spec.PolicyName)
 	if err != nil {
