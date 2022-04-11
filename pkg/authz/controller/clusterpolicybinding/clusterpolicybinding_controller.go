@@ -20,9 +20,9 @@ package clusterpolicybinding
 
 import (
 	"context"
+	"fmt"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -36,6 +36,7 @@ import (
 	authzv1informer "tkestack.io/tke/api/client/informers/externalversions/authz/v1"
 	authzv1 "tkestack.io/tke/api/client/listers/authz/v1"
 	"tkestack.io/tke/pkg/authz/constant"
+	"tkestack.io/tke/pkg/authz/controller/clusterpolicybinding/deletion"
 	authzprovider "tkestack.io/tke/pkg/authz/provider"
 	controllerutil "tkestack.io/tke/pkg/controller"
 	clusterprovider "tkestack.io/tke/pkg/platform/provider/cluster"
@@ -58,14 +59,15 @@ const (
 )
 
 type Controller struct {
-	client                     clientset.Interface
-	platformClient             platformversionedclient.PlatformV1Interface
-	queue                      workqueue.RateLimitingInterface
-	policyLister               authzv1.PolicyLister
-	clusterPolicyBindingLister authzv1.ClusterPolicyBindingLister
-	policySynced               cache.InformerSynced
-	clusterPolicyBindingSynced cache.InformerSynced
-	stopCh                     <-chan struct{}
+	client                      clientset.Interface
+	platformClient              platformversionedclient.PlatformV1Interface
+	queue                       workqueue.RateLimitingInterface
+	policyLister                authzv1.PolicyLister
+	clusterPolicyBindingLister  authzv1.ClusterPolicyBindingLister
+	policySynced                cache.InformerSynced
+	clusterPolicyBindingSynced  cache.InformerSynced
+	clusterPolicyBindingDeleter deletion.ClusterPolicyBindingDeleter
+	stopCh                      <-chan struct{}
 }
 
 // NewController creates a new Controller object.
@@ -78,9 +80,10 @@ func NewController(
 ) *Controller {
 	// create the controller so we can inject the enqueue function
 	controller := &Controller{
-		client:         client,
-		platformClient: platformClient,
-		queue:          workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), controllerName),
+		client:                      client,
+		platformClient:              platformClient,
+		queue:                       workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), controllerName),
+		clusterPolicyBindingDeleter: deletion.New(client),
 	}
 	if client != nil &&
 		client.AuthzV1().RESTClient() != nil &&
@@ -268,33 +271,6 @@ func (c *Controller) syncItem(key string) error {
 		return err
 	}
 	cpb = cpb.DeepCopy()
-
-	policyFinalize := apiauthzv1.ClusterPolicyBinding{}
-	policyFinalize.ObjectMeta = cpb.ObjectMeta
-	policyFinalize.Finalizers = []string{}
-
-	// 执行清理动作，最终抹去Finalizers
-	if cpb.Status.Phase == apiauthzv1.BindingTerminating {
-		time.Sleep(10 * time.Second)
-		log.Warnf("just a finalizer test ...")
-		if err = c.client.AuthzV1().RESTClient().Put().Resource("clusterpolicybindings").
-			Namespace(ns).
-			Name(name).
-			SubResource("finalize").
-			Body(&policyFinalize).
-			Do(context.Background()).
-			Into(&policyFinalize); err != nil {
-			log.Warnf("Unable to finalize clusterpolicybinding '%s/%s', err: %v", ns, name, err)
-			return err
-		}
-		if len(policyFinalize.Finalizers) == 0 {
-			log.Infof("666666")
-			return c.client.AuthzV1().ClusterPolicyBindings(ns).Delete(context.Background(), name, metav1.DeleteOptions{})
-		}
-		log.Infof("8888888")
-		return nil
-	}
-
 	provider, err := authzprovider.GetProvider(cpb.Annotations)
 	if err != nil {
 		log.Warn("Unable to retrieve provider",
@@ -304,45 +280,49 @@ func (c *Controller) syncItem(key string) error {
 	}
 	ctx := provider.InitContext(cpb)
 
+	switch cpb.Status.Phase {
+	case apiauthzv1.BindingActive:
+		return c.handleActive(ctx, cpb, provider)
+	case apiauthzv1.BindingTerminating:
+		return c.clusterPolicyBindingDeleter.Delete(ctx, cpb, provider)
+	default:
+		return fmt.Errorf("unknown clusterpolicybinding phase '%s'", cpb.Status.Phase)
+	}
+}
+
+func (c *Controller) handleActive(ctx context.Context, cpb *apiauthzv1.ClusterPolicyBinding, provider authzprovider.Provider) error {
 	policyNs, policyName, err := cache.SplitMetaNamespaceKey(cpb.Spec.PolicyName)
 	if err != nil {
-		log.Warnf("failed to parse policy name '%s'", cpb.Spec.PolicyName)
+		log.Warnf("failed to parse clusterpolicybinding namespace/name '%s'", cpb.Spec.PolicyName)
 		return err
 	}
 	policy, err := c.policyLister.Policies(policyNs).Get(policyName)
 	if err != nil {
-		log.Warn("Unable to retrieve policy from store",
+		log.Warn("Unable to retrieve clusterpolicybinding from store",
 			log.String("namespace", policyNs),
 			log.String("name", policyName), log.Err(err))
 		return err
 	}
-
 	// 获取user在各个cluster内的subject
 	clusterSubjects := map[string]*rbacv1.Subject{}
 	for _, cls := range cpb.Spec.Clusters {
 		cluster, err := clusterprovider.GetV1ClusterByName(ctx, c.platformClient, cls, cpb.Spec.UserName)
 		if err != nil {
-			log.Warnf("GetV1ClusterByName failed, cluster: '%s', user: '%s', err: '%#v'", ns, cpb.Spec.UserName, err)
+			log.Warnf("GetV1ClusterByName failed, cluster: '%s', user: '%s', err: '%#v'", cls, cpb.Spec.UserName, err)
 			return err
 		}
 		subject, err := provider.GetSubject(ctx, cpb.Spec.UserName, cluster)
 		if err != nil {
-			log.Warnf("GetSubject failed, cluster: '%s',  user: '%s', err: '%#v'", ns, cpb.Spec.UserName, err)
+			log.Warnf("GetSubject failed, cluster: '%s',  user: '%s', err: '%#v'", cls, cpb.Spec.UserName, err)
 			return err
 		}
 		clusterSubjects[cls] = subject
 	}
-
 	// 执行权限分发
 	err = provider.DispatchPolicy(ctx, c.platformClient, policy, cpb, clusterSubjects)
 	if err != nil {
 		log.Warnf("DispatchPolicy failed, clusterpolicybinding: '%s', err: '%#v'", cpb.Name, err)
 		return err
 	}
-
-	// 更新Status
-	if _, err = c.client.AuthzV1().ClusterPolicyBindings(ns).Update(context.Background(), cpb, metav1.UpdateOptions{}); err != nil {
-		log.Warnf("Failed to clusterpolicybinding '%s', err: '%#v'", cpb.Name, err)
-	}
-	return err
+	return nil
 }

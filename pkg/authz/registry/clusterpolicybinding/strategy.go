@@ -77,6 +77,8 @@ func (Strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
 	}
 	labels[constant.PolicyNamespace] = policyNs
 	labels[constant.PolicyName] = policyName
+	labels[constant.UserName] = cbp.Spec.UserName
+	labels[constant.UserName] = cbp.Spec.GroupName
 	cbp.Labels = labels
 	cbp.Status.Phase = authz.BindingActive
 	cbp.ObjectMeta.Finalizers = []string{string(authz.ClusterPolicyBindingFinalize)}
