@@ -165,6 +165,7 @@ type ClusterPolicyBindingList struct {
 type FinalizerName string
 
 const (
+	PolicyFinalize FinalizerName = "policy"
 	ClusterPolicyBindingFinalize FinalizerName = "clusterpolicybinding"
 )
 

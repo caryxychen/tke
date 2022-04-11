@@ -31,7 +31,6 @@ import (
 	"k8s.io/apiserver/pkg/storage"
 	storageerr "k8s.io/apiserver/pkg/storage/errors"
 	"k8s.io/apiserver/pkg/util/dryrun"
-	"tkestack.io/tke/api/auth"
 	"tkestack.io/tke/api/authz"
 	apiserverutil "tkestack.io/tke/pkg/apiserver/util"
 	"tkestack.io/tke/pkg/authz/registry/clusterpolicybinding"
@@ -123,7 +122,7 @@ func (r *REST) Delete(ctx context.Context, name string, deleteValidation rest.Va
 		options.Preconditions.UID = &cpb.UID
 	} else if *options.Preconditions.UID != cpb.UID {
 		err = apierrors.NewConflict(
-			auth.Resource("ClusterPolicyBindings"),
+			authz.Resource("ClusterPolicyBindings"),
 			name,
 			fmt.Errorf("precondition failed: UID in precondition: %v, UID in object meta: %v", *options.Preconditions.UID, cpb.UID),
 		)
@@ -196,8 +195,8 @@ func (r *REST) Delete(ctx context.Context, name string, deleteValidation rest.Va
 		)
 
 		if err != nil {
-			err = storageerr.InterpretGetError(err, auth.Resource("ClusterPolicyBindings"), name)
-			err = storageerr.InterpretUpdateError(err, auth.Resource("ClusterPolicyBindings"), name)
+			err = storageerr.InterpretGetError(err, authz.Resource("ClusterPolicyBindings"), name)
+			err = storageerr.InterpretUpdateError(err, authz.Resource("ClusterPolicyBindings"), name)
 			if _, ok := err.(*apierrors.StatusError); !ok {
 				err = apierrors.NewInternalError(err)
 			}
@@ -209,7 +208,7 @@ func (r *REST) Delete(ctx context.Context, name string, deleteValidation rest.Va
 
 	// prior to final deletion, we must ensure that finalizers is empty
 	if len(cpb.Finalizers) != 0 {
-		err = apierrors.NewConflict(auth.Resource("ClusterPolicyBindings"), cpb.Name, fmt.Errorf("the system is ensuring all content is removed from this cpb.  Upon completion, this cpb will automatically be purged by the system"))
+		err = apierrors.NewConflict(authz.Resource("ClusterPolicyBindings"), cpb.Name, fmt.Errorf("the system is ensuring all content is removed from this cpb.  Upon completion, this cpb will automatically be purged by the system"))
 		return nil, false, err
 	}
 	return r.Store.Delete(ctx, name, deleteValidation, options)

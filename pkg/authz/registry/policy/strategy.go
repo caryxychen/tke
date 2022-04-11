@@ -22,9 +22,11 @@ import (
 	"context"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	"k8s.io/apiserver/pkg/registry/generic/registry"
 	"k8s.io/apiserver/pkg/registry/rest"
 	"k8s.io/apiserver/pkg/storage/names"
 	"tkestack.io/tke/api/authz"
+	"tkestack.io/tke/pkg/util/log"
 	namesutil "tkestack.io/tke/pkg/util/names"
 )
 
@@ -42,6 +44,15 @@ var _ rest.RESTDeleteStrategy = &Strategy{}
 // creating and updating namespace set objects.
 func NewStrategy() *Strategy {
 	return &Strategy{authz.Scheme, namesutil.Generator}
+}
+
+func ShouldDeleteDuringUpdate(ctx context.Context, key string, obj, existing runtime.Object) bool {
+	pol, ok := obj.(*authz.Policy)
+	if !ok {
+		log.Errorf("unexpected object, key:%s", key)
+		return false
+	}
+	return len(pol.Finalizers) == 0 && registry.ShouldDeleteDuringUpdate(ctx, key, obj, existing)
 }
 
 // DefaultGarbageCollectionPolicy returns the default garbage collection behavior.
@@ -62,7 +73,8 @@ func (Strategy) Export(ctx context.Context, obj runtime.Object, exact bool) erro
 // PrepareForCreate is invoked on create before validation to normalize
 // the object.
 func (Strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
-
+	policy := obj.(*authz.Policy)
+	policy.ObjectMeta.Finalizers = []string{string(authz.PolicyFinalize)}
 }
 
 // PrepareForUpdate is invoked on update before validation to normalize the
@@ -104,5 +116,36 @@ func (Strategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) fie
 
 // WarningsOnUpdate returns warnings for the given update.
 func (Strategy) WarningsOnUpdate(ctx context.Context, obj, old runtime.Object) []string {
+	return nil
+}
+
+// FinalizeStrategy implements finalizer logic for Machine.
+type FinalizeStrategy struct {
+	*Strategy
+}
+
+var _ rest.RESTUpdateStrategy = &FinalizeStrategy{}
+
+// NewFinalizerStrategy create the FinalizeStrategy object by given strategy.
+func NewFinalizerStrategy(strategy *Strategy) *FinalizeStrategy {
+	return &FinalizeStrategy{strategy}
+}
+
+// PrepareForUpdate is invoked on update before validation to normalize
+// the object.  For example: remove fields that are not to be persisted,
+// sort order-insensitive list fields, etc.  This should not remove fields
+// whose presence would be considered a validation error.
+func (FinalizeStrategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
+	newPolicy := obj.(*authz.Policy)
+	oldPolicy := old.(*authz.Policy)
+	finalizers := newPolicy.Finalizers
+	newPolicy = oldPolicy
+	newPolicy.Finalizers = finalizers
+}
+
+// ValidateUpdate is invoked after default fields in the object have been
+// filled in before the object is persisted.  This method should not mutate
+// the object.
+func (s *FinalizeStrategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
 	return nil
 }

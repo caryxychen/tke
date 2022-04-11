@@ -161,6 +161,13 @@ type ClusterPolicyBindingList struct {
 	Items []ClusterPolicyBinding `json:"items" protobuf:"bytes,2,rep,name=items"`
 }
 
+type FinalizerName string
+
+const (
+	PolicyFinalize               FinalizerName = "policy"
+	ClusterPolicyBindingFinalize FinalizerName = "clusterpolicybinding"
+)
+
 // +genclient
 // +genclient:nonNamespaced
 // +genclient:skipVerbs=deleteCollection

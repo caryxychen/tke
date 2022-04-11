@@ -182,13 +182,7 @@ func (c *Controller) enqueue(obj interface{}) {
 }
 
 func (c *Controller) needsUpdate(old *apiauthzv1.ClusterPolicyBinding, new *apiauthzv1.ClusterPolicyBinding) bool {
-	if old.UID != new.UID {
-		return true
-	}
-	if !reflect.DeepEqual(old.Spec, new.Spec) {
-		return true
-	}
-	return false
+	return true
 }
 
 // Run will set up the event handlers for types we are interested in, as well

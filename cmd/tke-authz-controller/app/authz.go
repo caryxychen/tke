@@ -24,6 +24,7 @@ import (
 	"time"
 	authzv1 "tkestack.io/tke/api/authz/v1"
 	"tkestack.io/tke/pkg/authz/controller/clusterpolicybinding"
+	"tkestack.io/tke/pkg/authz/controller/policy"
 	"tkestack.io/tke/pkg/authz/controller/rolebinding"
 )
 
@@ -52,6 +53,20 @@ func startRoleBindingController(ctx ControllerContext) (http.Handler, bool, erro
 		ctx.InformerFactory.Authz().V1().Roles(),
 		ctx.InformerFactory.Authz().V1().RoleBindings(),
 		ctx.InformerFactory.Authz().V1().Policies(),
+		5*time.Second,
+	)
+	go ctrl.Run(4, ctx.Stop)
+	return nil, true, nil
+}
+
+func startPolicyController(ctx ControllerContext) (http.Handler, bool, error) {
+	if !ctx.AvailableResources[schema.GroupVersionResource{Group: authzv1.GroupName, Version: "v1", Resource: "policies"}] {
+		return nil, false, nil
+	}
+	ctrl := policy.NewController(
+		ctx.ClientBuilder.ClientOrDie("policy-controller"),
+		ctx.InformerFactory.Authz().V1().Policies(),
+		ctx.InformerFactory.Authz().V1().ClusterPolicyBindings(),
 		5*time.Second,
 	)
 	go ctrl.Run(4, ctx.Stop)
