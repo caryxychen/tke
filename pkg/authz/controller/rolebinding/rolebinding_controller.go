@@ -219,7 +219,7 @@ func (c *Controller) syncItem(key string) error {
 	}
 	rb = rb.DeepCopy()
 
-	// 构造 Policy和PolicyBinding资源并提交
+	// 构造 Policy和ClusterPolicyBinding资源并提交
 	roleNs, roleName, err := cache.SplitMetaNamespaceKey(rb.Spec.RoleName)
 	if err != nil {
 		return err

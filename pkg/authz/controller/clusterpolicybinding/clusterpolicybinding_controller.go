@@ -83,7 +83,7 @@ func NewController(
 		client:                      client,
 		platformClient:              platformClient,
 		queue:                       workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), controllerName),
-		clusterPolicyBindingDeleter: deletion.New(client),
+		clusterPolicyBindingDeleter: deletion.New(client, platformClient),
 	}
 	if client != nil &&
 		client.AuthzV1().RESTClient() != nil &&

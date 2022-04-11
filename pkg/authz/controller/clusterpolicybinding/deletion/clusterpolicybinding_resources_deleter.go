@@ -5,6 +5,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apiauthzv1 "tkestack.io/tke/api/authz/v1"
 	clientset "tkestack.io/tke/api/client/clientset/versioned"
+	platformversionedclient "tkestack.io/tke/api/client/clientset/versioned/typed/platform/v1"
 	"tkestack.io/tke/pkg/authz/provider"
 	"tkestack.io/tke/pkg/util/log"
 )
@@ -13,19 +14,21 @@ type ClusterPolicyBindingDeleter interface {
 	Delete(ctx context.Context, cpb *apiauthzv1.ClusterPolicyBinding, provider provider.Provider) error
 }
 
-func New(client clientset.Interface) ClusterPolicyBindingDeleter {
+func New(client clientset.Interface, platformClient platformversionedclient.PlatformV1Interface) ClusterPolicyBindingDeleter {
 	return &clusterPolicyBindingResourcesDeleter{
-		client: client,
+		client:         client,
+		platformClient: platformClient,
 	}
 }
 
 type clusterPolicyBindingResourcesDeleter struct {
-	client clientset.Interface
+	client         clientset.Interface
+	platformClient platformversionedclient.PlatformV1Interface
 }
 
 func (c *clusterPolicyBindingResourcesDeleter) Delete(ctx context.Context, cpb *apiauthzv1.ClusterPolicyBinding, provider provider.Provider) error {
 	// 删除集群中对应的资源
-	if err := provider.DeleteClusterPolicyBindingResources(cpb); err != nil {
+	if err := provider.DeleteClusterPolicyBindingResources(ctx, cpb, c.platformClient); err != nil {
 		log.Warnf("Unable to finalize clusterpolicybinding '%s/%s', err: %v", cpb.Namespace, cpb.Name, err)
 		return err
 	}

@@ -14,7 +14,7 @@ type Provider interface {
 	GetSubject(ctx context.Context, userName string, cluster *platformv1.Cluster) (*rbacv1.Subject, error)
 	DispatchPolicy(ctx context.Context, platformClient platformversionedclient.PlatformV1Interface, policy *authzv1.Policy, cpb *authzv1.ClusterPolicyBinding, clusterSubjects map[string]*rbacv1.Subject) error
 	RenderClusterPolicyBinding(ctx context.Context, cpb *authzv1.ClusterPolicyBinding) error
-	DeleteClusterPolicyBindingResources(cpb *authzv1.ClusterPolicyBinding) error
+	DeleteClusterPolicyBindingResources(ctx context.Context, cpb *authzv1.ClusterPolicyBinding, platformClient platformversionedclient.PlatformV1Interface) error
 }
 
 var _ Provider = &DelegateProvider{}
@@ -50,6 +50,6 @@ func (p *DelegateProvider) RenderClusterPolicyBinding(ctx context.Context, cpb *
 	return nil
 }
 
-func (p *DelegateProvider) DeleteClusterPolicyBindingResources(cpb *authzv1.ClusterPolicyBinding) error {
+func (p *DelegateProvider) DeleteClusterPolicyBindingResources(ctx context.Context, cpb *authzv1.ClusterPolicyBinding, platformClient platformversionedclient.PlatformV1Interface) error {
 	return nil
 }
