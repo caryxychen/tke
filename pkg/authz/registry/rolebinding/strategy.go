@@ -22,9 +22,13 @@ import (
 	"context"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	"k8s.io/apiserver/pkg/registry/generic/registry"
 	"k8s.io/apiserver/pkg/registry/rest"
 	"k8s.io/apiserver/pkg/storage/names"
+	"k8s.io/client-go/tools/cache"
 	"tkestack.io/tke/api/authz"
+	"tkestack.io/tke/pkg/authz/constant"
+	"tkestack.io/tke/pkg/util/log"
 	namesutil "tkestack.io/tke/pkg/util/names"
 )
 
@@ -37,6 +41,15 @@ type Strategy struct {
 var _ rest.RESTCreateStrategy = &Strategy{}
 var _ rest.RESTUpdateStrategy = &Strategy{}
 var _ rest.RESTDeleteStrategy = &Strategy{}
+
+func ShouldDeleteDuringUpdate(ctx context.Context, key string, obj, existing runtime.Object) bool {
+	rb, ok := obj.(*authz.RoleBinding)
+	if !ok {
+		log.Errorf("unexpected object, key:%s", key)
+		return false
+	}
+	return len(rb.Finalizers) == 0 && registry.ShouldDeleteDuringUpdate(ctx, key, obj, existing)
+}
 
 // NewStrategy creates a strategy that is the default logic that applies when
 // creating and updating namespace set objects.
@@ -62,7 +75,22 @@ func (Strategy) Export(ctx context.Context, obj runtime.Object, exact bool) erro
 // PrepareForCreate is invoked on create before validation to normalize
 // the object.
 func (Strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
-
+	rb := obj.(*authz.RoleBinding)
+	roleNs, roleName, err := cache.SplitMetaNamespaceKey(rb.Spec.RoleName)
+	if err != nil {
+		return
+	}
+	labels := rb.Labels
+	if labels == nil {
+		labels = map[string]string{}
+	}
+	labels[constant.RoleNamespace] = roleNs
+	labels[constant.RoleName] = roleName
+	labels[constant.UserName] = rb.Spec.UserName
+	labels[constant.GroupName] = rb.Spec.GroupName
+	rb.Labels = labels
+	rb.Status.Phase = authz.BindingActive
+	rb.ObjectMeta.Finalizers = []string{string(authz.RoleBindingFinalize)}
 }
 
 // PrepareForUpdate is invoked on update before validation to normalize the
@@ -124,4 +152,47 @@ func NewStatusStrategy(strategy *Strategy) *StatusStrategy {
 // the object.
 func (s *StatusStrategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
 	return ValidateRoleBindingUpdate(obj.(*authz.RoleBinding), old.(*authz.RoleBinding))
+}
+
+// PrepareForUpdate is invoked on update before validation to normalize
+// the object.  For example: remove fields that are not to be persisted,
+// sort order-insensitive list fields, etc.  This should not remove fields
+// whose presence would be considered a validation error.
+func (StatusStrategy) PrepareForUpdate(_ context.Context, obj, old runtime.Object) {
+	newBinding := obj.(*authz.RoleBinding)
+	oldBinding := old.(*authz.RoleBinding)
+	status := newBinding.Status
+	newBinding = oldBinding
+	newBinding.Status = status
+}
+
+// FinalizeStrategy implements finalizer logic for Machine.
+type FinalizeStrategy struct {
+	*Strategy
+}
+
+var _ rest.RESTUpdateStrategy = &FinalizeStrategy{}
+
+// NewFinalizerStrategy create the FinalizeStrategy object by given strategy.
+func NewFinalizerStrategy(strategy *Strategy) *FinalizeStrategy {
+	return &FinalizeStrategy{strategy}
+}
+
+// PrepareForUpdate is invoked on update before validation to normalize
+// the object.  For example: remove fields that are not to be persisted,
+// sort order-insensitive list fields, etc.  This should not remove fields
+// whose presence would be considered a validation error.
+func (FinalizeStrategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
+	newBinding := obj.(*authz.RoleBinding)
+	oldBinding := old.(*authz.RoleBinding)
+	finalizers := newBinding.Finalizers
+	newBinding = oldBinding
+	newBinding.Finalizers = finalizers
+}
+
+// ValidateUpdate is invoked after default fields in the object have been
+// filled in before the object is persisted.  This method should not mutate
+// the object.
+func (s *FinalizeStrategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
+	return nil
 }

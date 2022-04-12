@@ -50,6 +50,7 @@ func NewControllerInitializers() map[string]InitFunc {
 	controllers["clusterpolicybindings"] = startClusterPolicyBindingController
 	controllers["rolebindings"] = startRoleBindingController
 	controllers["policies"] = startPolicyController
+	controllers["roles"] = startRoleController
 	return controllers
 }
 

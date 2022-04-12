@@ -143,6 +143,8 @@ message RoleBinding {
   optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
 
   optional RoleBindingSpec spec = 2;
+
+  optional RoleBindingStatus status = 3;
 }
 
 message RoleBindingList {
@@ -162,6 +164,11 @@ message RoleBindingSpec {
   optional string roleName = 3;
 
   repeated string clusters = 4;
+}
+
+message RoleBindingStatus {
+  // +optional
+  optional string phase = 1;
 }
 
 // RoleList is the whole list of policy.

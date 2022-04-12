@@ -57,7 +57,8 @@ type RoleList struct {
 type RoleBinding struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
-	Spec              RoleBindingSpec `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
+	Spec              RoleBindingSpec   `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
+	Status            RoleBindingStatus `json:"status,omitempty" protobuf:"bytes,3,opt,name=status"`
 }
 
 type RoleBindingSpec struct {
@@ -67,6 +68,11 @@ type RoleBindingSpec struct {
 	GroupName string   `json:"groupName" protobuf:"bytes,2,opt,name=groupName"`
 	RoleName  string   `json:"roleName" protobuf:"bytes,3,opt,name=roleName"`
 	Clusters  []string `json:"clusters" protobuf:"bytes,4,rep,name=clusters"`
+}
+
+type RoleBindingStatus struct {
+	// +optional
+	Phase BindingPhase `json:"phase" protobuf:"bytes,1,opt,name=phase"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

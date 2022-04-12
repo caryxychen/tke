@@ -22,9 +22,11 @@ import (
 	"context"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	"k8s.io/apiserver/pkg/registry/generic/registry"
 	"k8s.io/apiserver/pkg/registry/rest"
 	"k8s.io/apiserver/pkg/storage/names"
 	"tkestack.io/tke/api/authz"
+	"tkestack.io/tke/pkg/util/log"
 	namesutil "tkestack.io/tke/pkg/util/names"
 )
 
@@ -37,6 +39,15 @@ type Strategy struct {
 var _ rest.RESTCreateStrategy = &Strategy{}
 var _ rest.RESTUpdateStrategy = &Strategy{}
 var _ rest.RESTDeleteStrategy = &Strategy{}
+
+func ShouldDeleteDuringUpdate(ctx context.Context, key string, obj, existing runtime.Object) bool {
+	pol, ok := obj.(*authz.Role)
+	if !ok {
+		log.Errorf("unexpected object, key:%s", key)
+		return false
+	}
+	return len(pol.Finalizers) == 0 && registry.ShouldDeleteDuringUpdate(ctx, key, obj, existing)
+}
 
 // NewStrategy creates a strategy that is the default logic that applies when
 // creating and updating namespace set objects.
@@ -107,21 +118,33 @@ func (Strategy) WarningsOnUpdate(ctx context.Context, obj, old runtime.Object) [
 	return nil
 }
 
-// StatusStrategy implements verification logic for status of roletemplate request.
-type StatusStrategy struct {
+// FinalizeStrategy implements finalizer logic for Machine.
+type FinalizeStrategy struct {
 	*Strategy
 }
 
-var _ rest.RESTUpdateStrategy = &StatusStrategy{}
+var _ rest.RESTUpdateStrategy = &FinalizeStrategy{}
 
-// NewStatusStrategy create the StatusStrategy object by given strategy.
-func NewStatusStrategy(strategy *Strategy) *StatusStrategy {
-	return &StatusStrategy{strategy}
+// NewFinalizerStrategy create the FinalizeStrategy object by given strategy.
+func NewFinalizerStrategy(strategy *Strategy) *FinalizeStrategy {
+	return &FinalizeStrategy{strategy}
+}
+
+// PrepareForUpdate is invoked on update before validation to normalize
+// the object.  For example: remove fields that are not to be persisted,
+// sort order-insensitive list fields, etc.  This should not remove fields
+// whose presence would be considered a validation error.
+func (FinalizeStrategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
+	newRole := obj.(*authz.Role)
+	oldRole := old.(*authz.Role)
+	finalizers := newRole.Finalizers
+	newRole = oldRole
+	newRole.Finalizers = finalizers
 }
 
 // ValidateUpdate is invoked after default fields in the object have been
 // filled in before the object is persisted.  This method should not mutate
 // the object.
-func (s *StatusStrategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
-	return ValidateRoleUpdate(obj.(*authz.Role), old.(*authz.Role))
+func (s *FinalizeStrategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
+	return nil
 }

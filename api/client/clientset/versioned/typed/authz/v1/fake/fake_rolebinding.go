@@ -104,6 +104,18 @@ func (c *FakeRoleBindings) Update(ctx context.Context, roleBinding *authzv1.Role
 	return obj.(*authzv1.RoleBinding), err
 }
 
+// UpdateStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+func (c *FakeRoleBindings) UpdateStatus(ctx context.Context, roleBinding *authzv1.RoleBinding, opts v1.UpdateOptions) (*authzv1.RoleBinding, error) {
+	obj, err := c.Fake.
+		Invokes(testing.NewUpdateSubresourceAction(rolebindingsResource, "status", c.ns, roleBinding), &authzv1.RoleBinding{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*authzv1.RoleBinding), err
+}
+
 // Delete takes name of the roleBinding and deletes it. Returns an error if one occurs.
 func (c *FakeRoleBindings) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.

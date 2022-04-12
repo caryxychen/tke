@@ -58,7 +58,8 @@ type RoleList struct {
 type RoleBinding struct {
 	metav1.TypeMeta
 	metav1.ObjectMeta
-	Spec RoleBindingSpec
+	Spec   RoleBindingSpec
+	Status RoleBindingStatus
 }
 
 type RoleBindingSpec struct {
@@ -68,6 +69,11 @@ type RoleBindingSpec struct {
 	GroupName string
 	RoleName  string
 	Clusters  []string
+}
+
+type RoleBindingStatus struct {
+	// +optional
+	Phase BindingPhase
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -165,8 +171,9 @@ type ClusterPolicyBindingList struct {
 type FinalizerName string
 
 const (
-	PolicyFinalize FinalizerName = "policy"
+	PolicyFinalize               FinalizerName = "policy"
 	ClusterPolicyBindingFinalize FinalizerName = "clusterpolicybinding"
+	RoleBindingFinalize          FinalizerName = "rolebinding"
 )
 
 // +genclient

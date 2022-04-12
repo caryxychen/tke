@@ -916,6 +916,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"tkestack.io/tke/api/authz/v1.RoleBinding":                                    schema_tke_api_authz_v1_RoleBinding(ref),
 		"tkestack.io/tke/api/authz/v1.RoleBindingList":                                schema_tke_api_authz_v1_RoleBindingList(ref),
 		"tkestack.io/tke/api/authz/v1.RoleBindingSpec":                                schema_tke_api_authz_v1_RoleBindingSpec(ref),
+		"tkestack.io/tke/api/authz/v1.RoleBindingStatus":                              schema_tke_api_authz_v1_RoleBindingStatus(ref),
 		"tkestack.io/tke/api/authz/v1.RoleList":                                       schema_tke_api_authz_v1_RoleList(ref),
 		"tkestack.io/tke/api/business/v1.ChartGroup":                                  schema_tke_api_business_v1_ChartGroup(ref),
 		"tkestack.io/tke/api/business/v1.ChartGroupList":                              schema_tke_api_business_v1_ChartGroupList(ref),
@@ -46044,11 +46045,17 @@ func schema_tke_api_authz_v1_RoleBinding(ref common.ReferenceCallback) common.Op
 							Ref:     ref("tkestack.io/tke/api/authz/v1.RoleBindingSpec"),
 						},
 					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("tkestack.io/tke/api/authz/v1.RoleBindingStatus"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta", "tkestack.io/tke/api/authz/v1.RoleBindingSpec"},
+			"k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta", "tkestack.io/tke/api/authz/v1.RoleBindingSpec", "tkestack.io/tke/api/authz/v1.RoleBindingStatus"},
 	}
 }
 
@@ -46144,6 +46151,25 @@ func schema_tke_api_authz_v1_RoleBindingSpec(ref common.ReferenceCallback) commo
 					},
 				},
 				Required: []string{"roleName", "clusters"},
+			},
+		},
+	}
+}
+
+func schema_tke_api_authz_v1_RoleBindingStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"phase": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+				},
 			},
 		},
 	}

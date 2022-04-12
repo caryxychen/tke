@@ -42,6 +42,7 @@ type RoleBindingsGetter interface {
 type RoleBindingInterface interface {
 	Create(ctx context.Context, roleBinding *authz.RoleBinding, opts v1.CreateOptions) (*authz.RoleBinding, error)
 	Update(ctx context.Context, roleBinding *authz.RoleBinding, opts v1.UpdateOptions) (*authz.RoleBinding, error)
+	UpdateStatus(ctx context.Context, roleBinding *authz.RoleBinding, opts v1.UpdateOptions) (*authz.RoleBinding, error)
 	Delete(ctx context.Context, name string, opts v1.DeleteOptions) error
 	Get(ctx context.Context, name string, opts v1.GetOptions) (*authz.RoleBinding, error)
 	List(ctx context.Context, opts v1.ListOptions) (*authz.RoleBindingList, error)
@@ -129,6 +130,22 @@ func (c *roleBindings) Update(ctx context.Context, roleBinding *authz.RoleBindin
 		Namespace(c.ns).
 		Resource("rolebindings").
 		Name(roleBinding.Name).
+		VersionedParams(&opts, scheme.ParameterCodec).
+		Body(roleBinding).
+		Do(ctx).
+		Into(result)
+	return
+}
+
+// UpdateStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+func (c *roleBindings) UpdateStatus(ctx context.Context, roleBinding *authz.RoleBinding, opts v1.UpdateOptions) (result *authz.RoleBinding, err error) {
+	result = &authz.RoleBinding{}
+	err = c.client.Put().
+		Namespace(c.ns).
+		Resource("rolebindings").
+		Name(roleBinding.Name).
+		SubResource("status").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(roleBinding).
 		Do(ctx).

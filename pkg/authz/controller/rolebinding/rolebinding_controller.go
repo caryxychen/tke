@@ -24,6 +24,7 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
@@ -35,6 +36,9 @@ import (
 	platformversionedclient "tkestack.io/tke/api/client/clientset/versioned/typed/platform/v1"
 	authzv1informer "tkestack.io/tke/api/client/informers/externalversions/authz/v1"
 	authzv1 "tkestack.io/tke/api/client/listers/authz/v1"
+	"tkestack.io/tke/pkg/authz/constant"
+	"tkestack.io/tke/pkg/authz/controller/rolebinding/deletion"
+	"tkestack.io/tke/pkg/authz/controller/rolebinding/policyrolecache"
 	authzprovider "tkestack.io/tke/pkg/authz/provider"
 	controllerutil "tkestack.io/tke/pkg/controller"
 	"tkestack.io/tke/pkg/util/log"
@@ -56,16 +60,17 @@ const (
 )
 
 type Controller struct {
-	client            clientset.Interface
-	platformClient    platformversionedclient.PlatformV1Interface
-	queue             workqueue.RateLimitingInterface
-	roleLister        authzv1.RoleLister
-	rolebindingLister authzv1.RoleBindingLister
-	policyLister      authzv1.PolicyLister
-	roleSynced        cache.InformerSynced
-	rolebindingSynced cache.InformerSynced
-	policySynced      cache.InformerSynced
-	stopCh            <-chan struct{}
+	client             clientset.Interface
+	platformClient     platformversionedclient.PlatformV1Interface
+	queue              workqueue.RateLimitingInterface
+	roleLister         authzv1.RoleLister
+	rolebindingLister  authzv1.RoleBindingLister
+	policyLister       authzv1.PolicyLister
+	roleSynced         cache.InformerSynced
+	rolebindingSynced  cache.InformerSynced
+	policySynced       cache.InformerSynced
+	rolebindingDeleter deletion.RoleBindingDeleter
+	stopCh             <-chan struct{}
 }
 
 // NewController creates a new Controller object.
@@ -79,9 +84,10 @@ func NewController(
 ) *Controller {
 	// create the controller so we can inject the enqueue function
 	controller := &Controller{
-		client:         client,
-		platformClient: platformClient,
-		queue:          workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), controllerName),
+		client:             client,
+		platformClient:     platformClient,
+		queue:              workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), controllerName),
+		rolebindingDeleter: deletion.New(client),
 	}
 	if client != nil &&
 		client.AuthzV1().RESTClient() != nil &&
@@ -103,13 +109,62 @@ func NewController(
 				},
 				DeleteFunc: controller.enqueue,
 			},
-			// TODO
 			FilterFunc: func(obj interface{}) bool {
 				return true
 			},
 		},
 		resyncPeriod,
 	)
+
+	roleInformer.Informer().AddEventHandlerWithResyncPeriod(
+		cache.FilteringResourceEventHandler{
+			Handler: cache.ResourceEventHandlerFuncs{
+				AddFunc: func(obj interface{}) {
+					policyrolecache.Cache.PutByRole(obj.(*apiauthzv1.Role))
+					controller.addRole(obj)
+				},
+				UpdateFunc: func(oldObj, newObj interface{}) {
+					old, ok1 := oldObj.(*apiauthzv1.Role)
+					cur, ok2 := newObj.(*apiauthzv1.Role)
+					if ok1 && ok2 && controller.needsAddRole(old, cur) {
+						policyrolecache.Cache.UpdateByRole(cur)
+						controller.addRole(cur)
+					}
+				},
+				DeleteFunc: func(obj interface{}) {
+					policyrolecache.Cache.DeleteRole(obj.(*apiauthzv1.Role))
+				},
+			},
+			FilterFunc: func(obj interface{}) bool {
+				return true
+			},
+		},
+		resyncPeriod,
+	)
+
+	policyInformer.Informer().AddEventHandlerWithResyncPeriod(
+		cache.FilteringResourceEventHandler{
+			Handler: cache.ResourceEventHandlerFuncs{
+				AddFunc: controller.addPolicy,
+				UpdateFunc: func(oldObj, newObj interface{}) {
+					old, ok1 := oldObj.(*apiauthzv1.Policy)
+					cur, ok2 := newObj.(*apiauthzv1.Policy)
+					if ok1 && ok2 && controller.needsAddPolicy(old, cur) {
+						controller.addPolicy(cur)
+					}
+				},
+				DeleteFunc: func(obj interface{}) {
+					controller.addPolicy(obj)
+					policyrolecache.Cache.DeletePolicy(obj.(*apiauthzv1.Policy))
+				},
+			},
+			FilterFunc: func(obj interface{}) bool {
+				return true
+			},
+		},
+		resyncPeriod,
+	)
+
 	controller.roleLister = roleInformer.Lister()
 	controller.roleSynced = roleInformer.Informer().HasSynced
 	controller.rolebindingLister = rolebindingInformer.Lister()
@@ -117,6 +172,64 @@ func NewController(
 	controller.policyLister = policyInformer.Lister()
 	controller.policySynced = policyInformer.Informer().HasSynced
 	return controller
+}
+
+func (c *Controller) addPolicy(obj interface{}) {
+	pol := obj.(*apiauthzv1.Policy)
+	roleSet := policyrolecache.Cache.GetRolesByPolicy(pol)
+	for roleName, _ := range roleSet {
+		ns, name, _ := cache.SplitMetaNamespaceKey(roleName)
+		role, err := c.roleLister.Roles(ns).Get(name)
+		if err != nil {
+			log.Warnf("Unable to get role '%/%s', err: '%v'", ns, name, err)
+			continue
+		}
+		c.addRole(role)
+	}
+}
+
+func (c *Controller) needsAddPolicy(old *apiauthzv1.Policy, new *apiauthzv1.Policy) bool {
+	if old.UID != new.UID {
+		return true
+	}
+	if !reflect.DeepEqual(old.Rules, new.Rules) {
+		return true
+	}
+	return false
+}
+
+func (c *Controller) addRole(obj interface{}) {
+	role := obj.(*apiauthzv1.Role)
+	var (
+		rbs []*apiauthzv1.RoleBinding
+		err error
+	)
+	selector := labels.SelectorFromSet(map[string]string{
+		constant.RoleNamespace: role.Namespace,
+		constant.RoleName:      role.Name,
+	})
+	if role.Namespace == "" {
+		rbs, err = c.rolebindingLister.List(selector)
+	} else {
+		rbs, err = c.rolebindingLister.RoleBindings(role.Namespace).List(selector)
+	}
+	if err != nil {
+		log.Warnf("Failed to list rolebindings by role %s/%s", role.Namespace, role.Name)
+		return
+	}
+	for _, rb := range rbs {
+		c.enqueue(rb)
+	}
+}
+
+func (c *Controller) needsAddRole(old *apiauthzv1.Role, new *apiauthzv1.Role) bool {
+	if old.UID != new.UID {
+		return true
+	}
+	if !reflect.DeepEqual(old.Policies, new.Policies) {
+		return true
+	}
+	return false
 }
 
 func (c *Controller) enqueue(obj interface{}) {
@@ -218,88 +331,105 @@ func (c *Controller) syncItem(key string) error {
 		return err
 	}
 	rb = rb.DeepCopy()
-
-	// 构造 Policy和ClusterPolicyBinding资源并提交
-	roleNs, roleName, err := cache.SplitMetaNamespaceKey(rb.Spec.RoleName)
-	if err != nil {
-		return err
+	switch rb.Status.Phase {
+	case apiauthzv1.BindingActive:
+		return c.handleActive(context.Background(), rb)
+	case apiauthzv1.BindingTerminating:
+		return c.rolebindingDeleter.Delete(context.Background(), rb)
+	default:
+		return fmt.Errorf("unknown rolebinding '%s/%s' phase '%s'", rb.Namespace, rb.Name, rb.Status.Phase)
 	}
+}
+
+func (c *Controller) handleActive(ctx context.Context, rb *apiauthzv1.RoleBinding) error {
+	// 构造Policy和ClusterPolicyBinding资源并提交
+	roleNs, roleName, _ := cache.SplitMetaNamespaceKey(rb.Spec.RoleName)
 	role, err := c.roleLister.Roles(roleNs).Get(roleName)
 	if err != nil {
+		log.Warnf("Unable get role '%s/%s', err: '%v'", roleNs, roleName, err)
 		return err
 	}
+
+	// 将Role关联的多个Policy合并为一个特殊的Policy
 	var policyRules []rbacv1.PolicyRule
 	for _, policy := range role.Policies {
-		policyNamespace, policyName, err := cache.SplitMetaNamespaceKey(policy)
-		if err != nil {
-			return err
-		}
+		policyNamespace, policyName, _ := cache.SplitMetaNamespaceKey(policy)
 		pol, err := c.policyLister.Policies(policyNamespace).Get(policyName)
 		if err != nil {
 			if errors.IsNotFound(err) {
+				log.Warnf("Policy '%s/%s' is not exist", policyNamespace, policyName)
 				continue
 			}
+			log.Warnf("Unable get policy '%s/%s', err: '%v'", policyNamespace, policyName, err)
 			return err
 		}
 		policyRules = append(policyRules, pol.Rules...)
 	}
-	combinedPolicyName := fmt.Sprintf("role-%s", name)
+	combinedPolicyName := fmt.Sprintf("role-%s", rb.Name)
 	combinedPolicy := &apiauthzv1.Policy{
 		ObjectMeta: metav1.ObjectMeta{
+			Namespace: rb.Namespace,
 			Name:      combinedPolicyName,
-			Namespace: ns,
 		},
 		Scope: apiauthzv1.ClusterScope,
 		Rules: policyRules,
 	}
-	_, err = c.client.AuthzV1().Policies(ns).Get(context.Background(), combinedPolicyName, metav1.GetOptions{})
+	_, err = c.client.AuthzV1().Policies(rb.Namespace).Get(ctx, combinedPolicyName, metav1.GetOptions{})
 	if err != nil {
 		if errors.IsNotFound(err) {
-			if _, err = c.client.AuthzV1().Policies(ns).Create(context.Background(), combinedPolicy, metav1.CreateOptions{}); err != nil {
+			if _, err = c.client.AuthzV1().Policies(rb.Namespace).Create(ctx, combinedPolicy, metav1.CreateOptions{}); err != nil {
+				log.Warnf("Failed to crete policy '%s/%s', err: '%v'", rb.Namespace, combinedPolicyName, err)
 				return err
 			}
 		} else {
+			log.Warnf("Failed to get policy '%s/%s', err: '%v'", rb.Namespace, combinedPolicyName, err)
 			return err
 		}
 	} else {
-		if _, err = c.client.AuthzV1().Policies(ns).Update(context.Background(), combinedPolicy, metav1.UpdateOptions{}); err != nil {
+		if _, err = c.client.AuthzV1().Policies(rb.Namespace).Update(ctx, combinedPolicy, metav1.UpdateOptions{}); err != nil {
+			log.Warnf("Failed to update policy '%s/%s', err: '%v'", rb.Namespace, combinedPolicyName, err)
 			return err
 		}
-	}
-
-	provider, err := authzprovider.GetProvider(rb.Annotations)
-	if err != nil {
-		log.Warn("Unable to retrieve provider",
-			log.String("namespace", ns),
-			log.String("name", name), log.Err(err))
-		return err
 	}
 
 	// 创建ClusterPolicyBinding
 	cpb := &apiauthzv1.ClusterPolicyBinding{
 		ObjectMeta: metav1.ObjectMeta{
+			Namespace: rb.Namespace,
 			Name:      combinedPolicyName,
-			Namespace: ns,
 		},
 		Spec: apiauthzv1.ClusterPolicyBindingSpec{
-			PolicyName: fmt.Sprintf("%s/%s", ns, combinedPolicyName),
+			PolicyName: fmt.Sprintf("%s/%s", rb.Namespace, combinedPolicyName),
 			UserName:   rb.Spec.UserName,
 			Clusters:   rb.Spec.Clusters,
 		},
 	}
-	provider.RenderClusterPolicyBinding(context.Background(), cpb)
-	if _, err = c.client.AuthzV1().ClusterPolicyBindings(ns).Get(context.Background(), cpb.Name, metav1.GetOptions{}); err != nil {
+	provider, err := authzprovider.GetProvider(rb.Annotations)
+	if err != nil {
+		log.Warn("Unable to retrieve provider",
+			log.String("namespace", rb.Namespace),
+			log.String("name", rb.Name), log.Err(err))
+		return err
+	}
+	if err = provider.RenderClusterPolicyBinding(ctx, cpb); err != nil {
+		log.Warnf("Unable render clusterpolicybinding, err '%v'", err)
+		return err
+	}
+	if _, err = c.client.AuthzV1().ClusterPolicyBindings(rb.Namespace).Get(ctx, cpb.Name, metav1.GetOptions{}); err != nil {
 		if errors.IsNotFound(err) {
-			if _, err = c.client.AuthzV1().ClusterPolicyBindings(ns).Create(context.Background(), cpb, metav1.CreateOptions{}); err != nil {
+			if _, err = c.client.AuthzV1().ClusterPolicyBindings(rb.Namespace).Create(ctx, cpb, metav1.CreateOptions{}); err != nil {
+				log.Warnf("Failed to create clusterpolicybinding '%s/%s', err: '%v'", rb.Namespace, cpb.Name, err)
 				return err
 			}
 		} else {
+			log.Warnf("Failed to get clusterpolicybinding '%s/%s', err: '%v'", rb.Namespace, cpb.Name, err)
 			return err
 		}
 	} else {
-		if _, err = c.client.AuthzV1().ClusterPolicyBindings(ns).Update(context.Background(), cpb, metav1.UpdateOptions{}); err != nil {
+		if _, err = c.client.AuthzV1().ClusterPolicyBindings(rb.Namespace).Update(ctx, cpb, metav1.UpdateOptions{}); err != nil {
+			log.Warnf("Failed to update clusterpolicybinding '%s/%s', err: '%v'", rb.Namespace, cpb.Name, err)
 			return err
 		}
 	}
-	return err
+	return nil
 }
