@@ -21,6 +21,7 @@ package dex
 import (
 	"context"
 	"fmt"
+	"tkestack.io/tke/pkg/util/log"
 
 	dexstorage "github.com/dexidp/dex/storage"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -61,6 +62,7 @@ func (c *conn) UpdateConnector(id string, updater func(s dexstorage.Connector) (
 	}
 
 	administrators := current.Spec.Administrators
+	log.Infof("update connector '%s', administrators '%s'",  id, administrators)
 	currConn := toDexConnector(current)
 	updatedConn, err := updater(currConn)
 	if err != nil {

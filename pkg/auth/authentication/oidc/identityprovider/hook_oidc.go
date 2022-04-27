@@ -83,8 +83,16 @@ func (d *dexHookHandler) PostStartHook() (string, genericapiserver.PostStartHook
 				continue
 			}
 
-			if _, err := d.authClient.IdentityProviders().Create(context.Background(), idp, metav1.CreateOptions{}); err != nil && !errors.IsAlreadyExists(err) {
-				log.Error("Create idp for tenant failed", log.String("tenantID", tenantID), log.Any("idp", *idp), log.Err(err))
+			_, err = d.authClient.IdentityProviders().Get(context.Background(), idp.Name, metav1.GetOptions{})
+			if err != nil {
+				if errors.IsNotFound(err) {
+					if _, err = d.authClient.IdentityProviders().Create(context.Background(), idp, metav1.CreateOptions{}); err != nil {
+						log.Error("Create idp for tenant failed", log.String("tenantID", tenantID), log.Any("idp", *idp), log.Err(err))
+						return err
+					}
+				} else {
+					log.Error("Get idp for tenant failed", log.String("tenantID", tenantID), log.Any("idp", *idp), log.Err(err))
+				}
 			}
 		}
 
