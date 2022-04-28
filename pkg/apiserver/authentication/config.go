@@ -20,6 +20,7 @@ package authentication
 
 import (
 	"time"
+	"tkestack.io/tke/pkg/util/log"
 
 	"k8s.io/apiserver/pkg/authentication/authenticator"
 	"k8s.io/apiserver/pkg/authentication/authenticatorfactory"
@@ -188,6 +189,7 @@ func newAuthenticatorFromOIDCIssuerURL(opts *oidc.Options) (authenticator.Token,
 	if err != nil {
 		return nil, err
 	}
+	log.Infof("new oidc authenticator...")
 
 	return tokenAuthenticator, nil
 }

@@ -499,6 +499,8 @@ func (r *claimResolver) resolve(ctx context.Context, endpoint endpoint, allClaim
 // AuthenticateToken checks a string value against a backing authentication store
 // and returns a Response or an error if the token could not be checked.
 func (a *Authenticator) AuthenticateToken(ctx context.Context, token string) (*authenticator.Response, bool, error) {
+	log.Debugf("authenticateToken '%s'", token)
+
 	if reqAuds, ok := authenticator.AudiencesFrom(ctx); ok {
 		if len(reqAuds.Intersect(a.clientIDs)) == 0 && len(reqAuds.Intersect(a.apiAudiences)) == 0 {
 			return nil, false, nil
@@ -620,6 +622,7 @@ func (a *Authenticator) AuthenticateToken(ctx context.Context, token string) (*a
 		}
 	}
 
+	log.Infof("validated user '%v'", info)
 	return &authenticator.Response{User: info}, true, nil
 }
 
