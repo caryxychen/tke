@@ -73,8 +73,6 @@ func (Strategy) Export(ctx context.Context, obj runtime.Object, exact bool) erro
 // PrepareForCreate is invoked on create before validation to normalize
 // the object.
 func (Strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
-	policy := obj.(*authz.Policy)
-	policy.ObjectMeta.Finalizers = []string{string(authz.PolicyFinalize)}
 }
 
 // PrepareForUpdate is invoked on update before validation to normalize the

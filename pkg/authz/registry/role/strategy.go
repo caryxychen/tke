@@ -73,13 +73,13 @@ func (Strategy) Export(ctx context.Context, obj runtime.Object, exact bool) erro
 // PrepareForCreate is invoked on create before validation to normalize
 // the object.
 func (Strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
-
+	role, _ := obj.(*authz.Role)
+	role.Finalizers = []string{string(authz.RoleFinalize)}
 }
 
 // PrepareForUpdate is invoked on update before validation to normalize the
 // object.
 func (Strategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
-
 }
 
 // Validate validates a new configmap.
