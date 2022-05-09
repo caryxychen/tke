@@ -102,16 +102,14 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Auth().V1().Users().Informer()}, nil
 
 		// Group=authz.tkestack.io, Version=v1
-	case authzv1.SchemeGroupVersion.WithResource("clusterpolicybindings"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Authz().V1().ClusterPolicyBindings().Informer()}, nil
 	case authzv1.SchemeGroupVersion.WithResource("configmaps"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Authz().V1().ConfigMaps().Informer()}, nil
+	case authzv1.SchemeGroupVersion.WithResource("multiclusterrolebindings"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Authz().V1().MultiClusterRoleBindings().Informer()}, nil
 	case authzv1.SchemeGroupVersion.WithResource("policies"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Authz().V1().Policies().Informer()}, nil
 	case authzv1.SchemeGroupVersion.WithResource("roles"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Authz().V1().Roles().Informer()}, nil
-	case authzv1.SchemeGroupVersion.WithResource("rolebindings"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Authz().V1().RoleBindings().Informer()}, nil
 
 		// Group=business.tkestack.io, Version=v1
 	case businessv1.SchemeGroupVersion.WithResource("chartgroups"):

@@ -28,11 +28,10 @@ import (
 	"tkestack.io/tke/api/authz"
 	authzv1 "tkestack.io/tke/api/authz/v1"
 	"tkestack.io/tke/pkg/apiserver/storage"
-	clusterpolicybindingstorage "tkestack.io/tke/pkg/authz/registry/clusterpolicybinding/storage"
 	configmapstorage "tkestack.io/tke/pkg/authz/registry/configmap/storage"
+	mcrbstorage "tkestack.io/tke/pkg/authz/registry/multiclusterrolebinding/storage"
 	policystorage "tkestack.io/tke/pkg/authz/registry/policy/storage"
 	rolestorage "tkestack.io/tke/pkg/authz/registry/role/storage"
-	rolebindingstorage "tkestack.io/tke/pkg/authz/registry/rolebinding/storage"
 )
 
 // StorageProvider is a REST type for core resources storage that implement
@@ -66,24 +65,15 @@ func (s *StorageProvider) v1Storage(apiResourceConfigSource serverstorage.APIRes
 	{
 		configmapREST := configmapstorage.NewStorage(restOptionsGetter)
 		policyREST := policystorage.NewStorage(restOptionsGetter)
-		clusterpolicybindingREST := clusterpolicybindingstorage.NewStorage(restOptionsGetter)
 		rolestorageREST := rolestorage.NewStorage(restOptionsGetter)
-		rolebindingstorageREST := rolebindingstorage.NewStorage(restOptionsGetter)
+		mcrbREST := mcrbstorage.NewStorage(restOptionsGetter)
 
 		storageMap["policies"] = policyREST.Policy
-		storageMap["policies/finalize"] = policyREST.Finalize
-
-		storageMap["clusterpolicybindings"] = clusterpolicybindingREST.ClusterPolicyBinding
-		storageMap["clusterpolicybindings/status"] = clusterpolicybindingREST.Status
-		storageMap["clusterpolicybindings/finalize"] = clusterpolicybindingREST.Finalize
-
 		storageMap["roles"] = rolestorageREST.Role
 		storageMap["roles/finalize"] = rolestorageREST.Finalize
-
-		storageMap["rolebindings"] = rolebindingstorageREST.RoleBinding
-		storageMap["rolebindings/status"] = rolebindingstorageREST.Status
-		storageMap["rolebindings/finalize"] = rolebindingstorageREST.Finalize
-
+		storageMap["multiclusterrolebindings"] = mcrbREST.MultiClusterRoleBinding
+		storageMap["multiclusterrolebindings/status"] = mcrbREST.Status
+		storageMap["multiclusterrolebindings/finalize"] = mcrbREST.Finalize
 		storageMap["configmaps"] = configmapREST.ConfigMap
 	}
 	return storageMap

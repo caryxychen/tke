@@ -28,11 +28,10 @@ import (
 
 type AuthzV1Interface interface {
 	RESTClient() rest.Interface
-	ClusterPolicyBindingsGetter
 	ConfigMapsGetter
+	MultiClusterRoleBindingsGetter
 	PoliciesGetter
 	RolesGetter
-	RoleBindingsGetter
 }
 
 // AuthzV1Client is used to interact with features provided by the authz.tkestack.io group.
@@ -40,12 +39,12 @@ type AuthzV1Client struct {
 	restClient rest.Interface
 }
 
-func (c *AuthzV1Client) ClusterPolicyBindings(namespace string) ClusterPolicyBindingInterface {
-	return newClusterPolicyBindings(c, namespace)
-}
-
 func (c *AuthzV1Client) ConfigMaps() ConfigMapInterface {
 	return newConfigMaps(c)
+}
+
+func (c *AuthzV1Client) MultiClusterRoleBindings(namespace string) MultiClusterRoleBindingInterface {
+	return newMultiClusterRoleBindings(c, namespace)
 }
 
 func (c *AuthzV1Client) Policies(namespace string) PolicyInterface {
@@ -54,10 +53,6 @@ func (c *AuthzV1Client) Policies(namespace string) PolicyInterface {
 
 func (c *AuthzV1Client) Roles(namespace string) RoleInterface {
 	return newRoles(c, namespace)
-}
-
-func (c *AuthzV1Client) RoleBindings(namespace string) RoleBindingInterface {
-	return newRoleBindings(c, namespace)
 }
 
 // NewForConfig creates a new AuthzV1Client for the given config.

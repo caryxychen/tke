@@ -20,12 +20,10 @@
 
 package internalversion
 
-type ClusterPolicyBindingExpansion interface{}
-
 type ConfigMapExpansion interface{}
+
+type MultiClusterRoleBindingExpansion interface{}
 
 type PolicyExpansion interface{}
 
 type RoleExpansion interface{}
-
-type RoleBindingExpansion interface{}

@@ -34,59 +34,59 @@ import (
 	v1 "tkestack.io/tke/api/client/listers/authz/v1"
 )
 
-// RoleBindingInformer provides access to a shared informer and lister for
-// RoleBindings.
-type RoleBindingInformer interface {
+// MultiClusterRoleBindingInformer provides access to a shared informer and lister for
+// MultiClusterRoleBindings.
+type MultiClusterRoleBindingInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1.RoleBindingLister
+	Lister() v1.MultiClusterRoleBindingLister
 }
 
-type roleBindingInformer struct {
+type multiClusterRoleBindingInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
 	namespace        string
 }
 
-// NewRoleBindingInformer constructs a new informer for RoleBinding type.
+// NewMultiClusterRoleBindingInformer constructs a new informer for MultiClusterRoleBinding type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewRoleBindingInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredRoleBindingInformer(client, namespace, resyncPeriod, indexers, nil)
+func NewMultiClusterRoleBindingInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+	return NewFilteredMultiClusterRoleBindingInformer(client, namespace, resyncPeriod, indexers, nil)
 }
 
-// NewFilteredRoleBindingInformer constructs a new informer for RoleBinding type.
+// NewFilteredMultiClusterRoleBindingInformer constructs a new informer for MultiClusterRoleBinding type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFilteredRoleBindingInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
+func NewFilteredMultiClusterRoleBindingInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.AuthzV1().RoleBindings(namespace).List(context.TODO(), options)
+				return client.AuthzV1().MultiClusterRoleBindings(namespace).List(context.TODO(), options)
 			},
 			WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.AuthzV1().RoleBindings(namespace).Watch(context.TODO(), options)
+				return client.AuthzV1().MultiClusterRoleBindings(namespace).Watch(context.TODO(), options)
 			},
 		},
-		&authzv1.RoleBinding{},
+		&authzv1.MultiClusterRoleBinding{},
 		resyncPeriod,
 		indexers,
 	)
 }
 
-func (f *roleBindingInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredRoleBindingInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+func (f *multiClusterRoleBindingInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+	return NewFilteredMultiClusterRoleBindingInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
-func (f *roleBindingInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&authzv1.RoleBinding{}, f.defaultInformer)
+func (f *multiClusterRoleBindingInformer) Informer() cache.SharedIndexInformer {
+	return f.factory.InformerFor(&authzv1.MultiClusterRoleBinding{}, f.defaultInformer)
 }
 
-func (f *roleBindingInformer) Lister() v1.RoleBindingLister {
-	return v1.NewRoleBindingLister(f.Informer().GetIndexer())
+func (f *multiClusterRoleBindingInformer) Lister() v1.MultiClusterRoleBindingLister {
+	return v1.NewMultiClusterRoleBindingLister(f.Informer().GetIndexer())
 }

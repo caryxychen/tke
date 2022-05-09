@@ -10,7 +10,7 @@
  *
  * https://opensource.org/licenses/Apache-2.0
  *
- * Unless required by policylicable law or agreed to in writing, software
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OF ANY KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations under the License.
@@ -20,10 +20,8 @@ package policy
 
 import (
 	"context"
-	"fmt"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
@@ -35,19 +33,14 @@ import (
 	authzv1informer "tkestack.io/tke/api/client/informers/externalversions/authz/v1"
 	authzv1 "tkestack.io/tke/api/client/listers/authz/v1"
 	"tkestack.io/tke/pkg/authz/constant"
+	"tkestack.io/tke/pkg/authz/controller/policyrolecache"
 	controllerutil "tkestack.io/tke/pkg/controller"
 	"tkestack.io/tke/pkg/util/log"
 	"tkestack.io/tke/pkg/util/metrics"
 )
 
 const (
-	// policyDeletionGracePeriod is the time period to wait before processing a received channel event.
-	// This allows time for the following to occur:
-	// * lifecycle admission plugins on HA apiservers to also observe a channel
-	//   deletion and prevent new objects from being created in the terminating channel
-	// * non-leader etcd servers to observe last-minute object creations in a channel
-	//   so this controller's cleanup can actually clean up all objects
-	policyDeletionGracePeriod = 5 * time.Second
+	deletionGracePeriod = 5 * time.Second
 )
 
 const (
@@ -55,22 +48,18 @@ const (
 )
 
 type Controller struct {
-	client                     clientset.Interface
-	queue                      workqueue.RateLimitingInterface
-	policyLister               authzv1.PolicyLister
-	clusterPolicyBindingLister authzv1.ClusterPolicyBindingLister
-	policySynced               cache.InformerSynced
-	clusterPolicyBindingSynced cache.InformerSynced
-	stopCh                     <-chan struct{}
+	client       clientset.Interface
+	queue        workqueue.RateLimitingInterface
+	policyLister authzv1.PolicyLister
+	policySynced cache.InformerSynced
+	stopCh       <-chan struct{}
 }
 
 // NewController creates a new Controller object.
 func NewController(
 	client clientset.Interface,
 	policyInformer authzv1informer.PolicyInformer,
-	clusterPolicyBindingInformer authzv1informer.ClusterPolicyBindingInformer,
-	resyncPeriod time.Duration,
-) *Controller {
+	resyncPeriod time.Duration) *Controller {
 	// create the controller so we can inject the enqueue function
 	controller := &Controller{
 		client: client,
@@ -86,21 +75,43 @@ func NewController(
 	policyInformer.Informer().AddEventHandlerWithResyncPeriod(
 		cache.FilteringResourceEventHandler{
 			Handler: cache.ResourceEventHandlerFuncs{
-				AddFunc: controller.enqueue,
+				AddFunc: func(obj interface{}) {
+					controller.enqueue(obj)
+				},
 				UpdateFunc: func(oldObj, newObj interface{}) {
-					controller.enqueue(newObj)
+					old, ok1 := oldObj.(*apiauthzv1.Policy)
+					cur, ok2 := newObj.(*apiauthzv1.Policy)
+					if ok1 && ok2 && controller.needsUpdate(old, cur) {
+						controller.enqueue(cur)
+					}
+				},
+				DeleteFunc: func(obj interface{}) {
+					controller.enqueue(obj)
 				},
 			},
 			FilterFunc: func(obj interface{}) bool {
-				return true
+				role, ok := obj.(*apiauthzv1.Policy)
+				if ok && role.Scope == apiauthzv1.MultiClusterScope {
+					return true
+				}
+				return false
 			},
-		}, resyncPeriod,
+		},
+		resyncPeriod,
 	)
-	controller.clusterPolicyBindingLister = clusterPolicyBindingInformer.Lister()
-	controller.clusterPolicyBindingSynced = clusterPolicyBindingInformer.Informer().HasSynced
 	controller.policyLister = policyInformer.Lister()
 	controller.policySynced = policyInformer.Informer().HasSynced
 	return controller
+}
+
+func (c *Controller) needsUpdate(old *apiauthzv1.Policy, new *apiauthzv1.Policy) bool {
+	if old.UID != new.UID {
+		return true
+	}
+	if !reflect.DeepEqual(old.Rules, new.Rules) {
+		return true
+	}
+	return false
 }
 
 func (c *Controller) enqueue(obj interface{}) {
@@ -109,11 +120,7 @@ func (c *Controller) enqueue(obj interface{}) {
 		log.Error("Couldn't get key for object", log.Any("object", obj), log.Err(err))
 		return
 	}
-	policy := obj.(*apiauthzv1.Policy)
-	if policy.DeletionTimestamp != nil {
-		c.queue.AddAfter(key, policyDeletionGracePeriod)
-	}
-	return
+	c.queue.AddAfter(key, deletionGracePeriod)
 }
 
 // Run will set up the event handlers for types we are interested in, as well
@@ -126,7 +133,7 @@ func (c *Controller) Run(workers int, stopCh <-chan struct{}) {
 	log.Info("Starting policy controller")
 	defer log.Info("Shutting down policy controller")
 
-	if ok := cache.WaitForCacheSync(stopCh, c.clusterPolicyBindingSynced, c.policySynced); !ok {
+	if ok := cache.WaitForCacheSync(stopCh, c.policySynced); !ok {
 		log.Error("Failed to wait for policy caches to sync")
 		return
 	}
@@ -139,10 +146,10 @@ func (c *Controller) Run(workers int, stopCh <-chan struct{}) {
 	<-stopCh
 }
 
-// worker processes the queue of policy objects.
-// Each policy can be in the queue at most once.
+// worker processes the queue of app objects.
+// Each app can be in the queue at most once.
 // The system ensures that no two workers can process
-// the same policy at the same time.
+// the same app at the same time.
 func (c *Controller) worker() {
 	workFunc := func() bool {
 		key, quit := c.queue.Get()
@@ -158,7 +165,7 @@ func (c *Controller) worker() {
 			return false
 		}
 
-		// rather than wait for a full resync, re-add the policy to the queue to be processed
+		// rather than wait for a full resync, re-add the app to the queue to be processed
 		c.queue.AddRateLimited(key)
 		runtime.HandleError(err)
 		return false
@@ -172,7 +179,7 @@ func (c *Controller) worker() {
 	}
 }
 
-func (c *Controller) syncItem(key string) error {
+func (c *Controller) syncItem(key string) (retErr error) {
 	startTime := time.Now()
 	defer func() {
 		log.Info("Finished syncing policy", log.String("policy", key), log.Duration("processTime", time.Since(startTime)))
@@ -181,58 +188,81 @@ func (c *Controller) syncItem(key string) error {
 	if err != nil {
 		return err
 	}
-	pol, err := c.policyLister.Policies(ns).Get(name)
+
+	policyDeleted := false
+	defer func() {
+		if policyDeleted && retErr == nil {
+			log.Infof("Delete key '%s' from policy role cache", key)
+			policyrolecache.Cache.DeletePolicy(key)
+		}
+	}()
+
+	policy, err := c.policyLister.Policies(ns).Get(name)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			log.Info("Policy has been deleted. Attempting to cleanup resources",
 				log.String("namespace", ns),
 				log.String("name", name))
-			return nil
+			policyDeleted = true
+			return c.updateRelatedRoles(key, policyDeleted)
 		}
 		log.Warn("Unable to retrieve policy from store",
 			log.String("namespace", ns),
 			log.String("name", name), log.Err(err))
 		return err
 	}
+	policy = policy.DeepCopy()
+	policyDeleted = policy.DeletionTimestamp != nil
+	return c.updateRelatedRoles(key, policyDeleted)
+}
 
-	selector := labels.SelectorFromSet(map[string]string{
-		constant.PolicyNamespace: ns,
-		constant.PolicyName:      name,
-	})
-	var cpbs []*apiauthzv1.ClusterPolicyBinding
-	if ns == "" {
-		// 如果是默认策略，允许绑定到任何ns
-		cpbs, err = c.clusterPolicyBindingLister.List(selector)
-	} else {
-		cpbs, err = c.clusterPolicyBindingLister.ClusterPolicyBindings(ns).List(selector)
-	}
-
-	if len(cpbs) == 0 {
-		policyFinalize := apiauthzv1.Policy{}
-		policyFinalize.ObjectMeta = pol.ObjectMeta
-		policyFinalize.Finalizers = []string{}
-		if err := c.client.AuthzV1().RESTClient().Put().Resource("policies").
-			Namespace(ns).
-			Name(name).
-			SubResource("finalize").
-			Body(&policyFinalize).
-			Do(context.Background()).
-			Into(&policyFinalize); err != nil {
-			log.Warnf("Unable to finalize policy '%s/%s', err: %v", ns, name, err)
+func (c *Controller) updateRelatedRoles(policyName string, policyDeleted bool) error {
+	roles := policyrolecache.Cache.GetRolesByPolicy(policyName)
+	for roleName, _ := range roles {
+		roleNs, roleName, err := cache.SplitMetaNamespaceKey(roleName)
+		if err != nil {
 			return err
 		}
-		return c.client.AuthzV1().Policies(ns).Delete(context.Background(), name, metav1.DeleteOptions{})
-	} else {
-		for _, cpb := range cpbs {
-			if cpb.Status.Phase == apiauthzv1.BindingTerminating {
+		role, err := c.client.AuthzV1().Roles(roleNs).Get(context.Background(), roleName, metav1.GetOptions{ResourceVersion: "0"})
+		if err != nil {
+			if errors.IsNotFound(err) {
 				continue
-			}
-			deleteOpt := metav1.DeletePropagationBackground
-			if err = c.client.AuthzV1().ClusterPolicyBindings(cpb.Namespace).Delete(context.Background(), cpb.Name, metav1.DeleteOptions{PropagationPolicy: &deleteOpt}); err != nil {
-				log.Warnf("Unable to delete clusterpolicybinding '%s/%s', err: '%v'", cpb.Namespace, cpb.Name, err)
+			} else {
+				log.Warn("Unable to retrieve role from store",
+					log.String("namespace", roleNs),
+					log.String("name", roleName), log.Err(err))
 				return err
 			}
 		}
-		return fmt.Errorf("policy '%s/%s' will be retried later", ns, name)
+		annotations := role.Annotations
+		if annotations == nil {
+			annotations = map[string]string{}
+		}
+		annotations[constant.UpdatedByPolicyController] = time.Now().String()
+		role.Annotations = annotations
+		if policyDeleted {
+			role.Policies = removeItem(role.Policies, policyName)
+		}
+		_, err = c.client.AuthzV1().Roles(roleNs).Update(context.Background(), role, metav1.UpdateOptions{})
+		if err != nil {
+			if errors.IsNotFound(err) {
+				return nil
+			}
+			log.Warn("Unable to update role",
+				log.String("namespace", roleNs),
+				log.String("name", roleName), log.Err(err))
+			return err
+		}
 	}
+	return nil
+}
+
+func removeItem(raw []string, item string) []string {
+	result := []string{}
+	for _, str := range raw {
+		if str != item {
+			result = append(result, str)
+		}
+	}
+	return result
 }

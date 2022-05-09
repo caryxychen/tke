@@ -118,34 +118,3 @@ func (Strategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) fie
 func (Strategy) WarningsOnUpdate(ctx context.Context, obj, old runtime.Object) []string {
 	return nil
 }
-
-// FinalizeStrategy implements finalizer logic for Machine.
-type FinalizeStrategy struct {
-	*Strategy
-}
-
-var _ rest.RESTUpdateStrategy = &FinalizeStrategy{}
-
-// NewFinalizerStrategy create the FinalizeStrategy object by given strategy.
-func NewFinalizerStrategy(strategy *Strategy) *FinalizeStrategy {
-	return &FinalizeStrategy{strategy}
-}
-
-// PrepareForUpdate is invoked on update before validation to normalize
-// the object.  For example: remove fields that are not to be persisted,
-// sort order-insensitive list fields, etc.  This should not remove fields
-// whose presence would be considered a validation error.
-func (FinalizeStrategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
-	newPolicy := obj.(*authz.Policy)
-	oldPolicy := old.(*authz.Policy)
-	finalizers := newPolicy.Finalizers
-	newPolicy = oldPolicy
-	newPolicy.Finalizers = finalizers
-}
-
-// ValidateUpdate is invoked after default fields in the object have been
-// filled in before the object is persisted.  This method should not mutate
-// the object.
-func (s *FinalizeStrategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
-	return nil
-}

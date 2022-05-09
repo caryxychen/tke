@@ -30,12 +30,12 @@ type FakeAuthzV1 struct {
 	*testing.Fake
 }
 
-func (c *FakeAuthzV1) ClusterPolicyBindings(namespace string) v1.ClusterPolicyBindingInterface {
-	return &FakeClusterPolicyBindings{c, namespace}
-}
-
 func (c *FakeAuthzV1) ConfigMaps() v1.ConfigMapInterface {
 	return &FakeConfigMaps{c}
+}
+
+func (c *FakeAuthzV1) MultiClusterRoleBindings(namespace string) v1.MultiClusterRoleBindingInterface {
+	return &FakeMultiClusterRoleBindings{c, namespace}
 }
 
 func (c *FakeAuthzV1) Policies(namespace string) v1.PolicyInterface {
@@ -44,10 +44,6 @@ func (c *FakeAuthzV1) Policies(namespace string) v1.PolicyInterface {
 
 func (c *FakeAuthzV1) Roles(namespace string) v1.RoleInterface {
 	return &FakeRoles{c, namespace}
-}
-
-func (c *FakeAuthzV1) RoleBindings(namespace string) v1.RoleBindingInterface {
-	return &FakeRoleBindings{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate

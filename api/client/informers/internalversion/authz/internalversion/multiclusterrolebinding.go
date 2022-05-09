@@ -34,59 +34,59 @@ import (
 	internalversion "tkestack.io/tke/api/client/listers/authz/internalversion"
 )
 
-// ClusterPolicyBindingInformer provides access to a shared informer and lister for
-// ClusterPolicyBindings.
-type ClusterPolicyBindingInformer interface {
+// MultiClusterRoleBindingInformer provides access to a shared informer and lister for
+// MultiClusterRoleBindings.
+type MultiClusterRoleBindingInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() internalversion.ClusterPolicyBindingLister
+	Lister() internalversion.MultiClusterRoleBindingLister
 }
 
-type clusterPolicyBindingInformer struct {
+type multiClusterRoleBindingInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
 	namespace        string
 }
 
-// NewClusterPolicyBindingInformer constructs a new informer for ClusterPolicyBinding type.
+// NewMultiClusterRoleBindingInformer constructs a new informer for MultiClusterRoleBinding type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewClusterPolicyBindingInformer(client clientsetinternalversion.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredClusterPolicyBindingInformer(client, namespace, resyncPeriod, indexers, nil)
+func NewMultiClusterRoleBindingInformer(client clientsetinternalversion.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+	return NewFilteredMultiClusterRoleBindingInformer(client, namespace, resyncPeriod, indexers, nil)
 }
 
-// NewFilteredClusterPolicyBindingInformer constructs a new informer for ClusterPolicyBinding type.
+// NewFilteredMultiClusterRoleBindingInformer constructs a new informer for MultiClusterRoleBinding type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFilteredClusterPolicyBindingInformer(client clientsetinternalversion.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
+func NewFilteredMultiClusterRoleBindingInformer(client clientsetinternalversion.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.Authz().ClusterPolicyBindings(namespace).List(context.TODO(), options)
+				return client.Authz().MultiClusterRoleBindings(namespace).List(context.TODO(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.Authz().ClusterPolicyBindings(namespace).Watch(context.TODO(), options)
+				return client.Authz().MultiClusterRoleBindings(namespace).Watch(context.TODO(), options)
 			},
 		},
-		&authz.ClusterPolicyBinding{},
+		&authz.MultiClusterRoleBinding{},
 		resyncPeriod,
 		indexers,
 	)
 }
 
-func (f *clusterPolicyBindingInformer) defaultInformer(client clientsetinternalversion.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredClusterPolicyBindingInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+func (f *multiClusterRoleBindingInformer) defaultInformer(client clientsetinternalversion.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+	return NewFilteredMultiClusterRoleBindingInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
-func (f *clusterPolicyBindingInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&authz.ClusterPolicyBinding{}, f.defaultInformer)
+func (f *multiClusterRoleBindingInformer) Informer() cache.SharedIndexInformer {
+	return f.factory.InformerFor(&authz.MultiClusterRoleBinding{}, f.defaultInformer)
 }
 
-func (f *clusterPolicyBindingInformer) Lister() internalversion.ClusterPolicyBindingLister {
-	return internalversion.NewClusterPolicyBindingLister(f.Informer().GetIndexer())
+func (f *multiClusterRoleBindingInformer) Lister() internalversion.MultiClusterRoleBindingLister {
+	return internalversion.NewMultiClusterRoleBindingLister(f.Informer().GetIndexer())
 }

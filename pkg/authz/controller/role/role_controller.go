@@ -20,7 +20,6 @@ package role
 
 import (
 	"context"
-	"fmt"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -35,43 +34,33 @@ import (
 	authzv1informer "tkestack.io/tke/api/client/informers/externalversions/authz/v1"
 	authzv1 "tkestack.io/tke/api/client/listers/authz/v1"
 	"tkestack.io/tke/pkg/authz/constant"
+	"tkestack.io/tke/pkg/authz/controller/policyrolecache"
 	controllerutil "tkestack.io/tke/pkg/controller"
 	"tkestack.io/tke/pkg/util/log"
 	"tkestack.io/tke/pkg/util/metrics"
 )
 
 const (
-	// appDeletionGracePeriod is the time period to wait before processing a received channel event.
-	// This allows time for the following to occur:
-	// * lifecycle admission plugins on HA apiservers to also observe a channel
-	//   deletion and prevent new objects from being created in the terminating channel
-	// * non-leader etcd servers to observe last-minute object creations in a channel
-	//   so this controller's cleanup can actually clean up all objects
 	appDeletionGracePeriod = 5 * time.Second
-)
-
-const (
-	controllerName = "role-controller"
+	controllerName         = "role-controller"
 )
 
 type Controller struct {
-	client            clientset.Interface
-	queue             workqueue.RateLimitingInterface
-	roleLister        authzv1.RoleLister
-	roleBindingLister authzv1.RoleBindingLister
-	roleSynced        cache.InformerSynced
-	roleBindingSynced cache.InformerSynced
-	stopCh            <-chan struct{}
+	client     clientset.Interface
+	queue      workqueue.RateLimitingInterface
+	roleLister authzv1.RoleLister
+	roleSynced cache.InformerSynced
+	mcrbLister authzv1.MultiClusterRoleBindingLister
+	mcrbSynced cache.InformerSynced
+	stopCh     <-chan struct{}
 }
 
 // NewController creates a new Controller object.
 func NewController(
 	client clientset.Interface,
 	roleInformer authzv1informer.RoleInformer,
-	roleBindingInformer authzv1informer.RoleBindingInformer,
-	resyncPeriod time.Duration,
-) *Controller {
-	// create the controller so we can inject the enqueue function
+	mcrbInformer authzv1informer.MultiClusterRoleBindingInformer,
+	resyncPeriod time.Duration) *Controller {
 	controller := &Controller{
 		client: client,
 		queue:  workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), controllerName),
@@ -87,22 +76,36 @@ func NewController(
 		cache.FilteringResourceEventHandler{
 			Handler: cache.ResourceEventHandlerFuncs{
 				AddFunc: func(obj interface{}) {
+					role := obj.(*apiauthzv1.Role)
 					controller.enqueue(obj)
+					policyrolecache.Cache.PutByRole(role)
 				},
 				UpdateFunc: func(oldObj, newObj interface{}) {
+					oldRole := oldObj.(*apiauthzv1.Role)
+					newRole := newObj.(*apiauthzv1.Role)
 					controller.enqueue(newObj)
+					policyrolecache.Cache.UpdateByRole(oldRole, newRole)
+				},
+				DeleteFunc: func(obj interface{}) {
+					role, _ := obj.(*apiauthzv1.Role)
+					policyrolecache.Cache.DeleteRole(role)
 				},
 			},
 			FilterFunc: func(obj interface{}) bool {
-				return true
+				role, ok := obj.(*apiauthzv1.Role)
+				if ok && role.Scope == apiauthzv1.MultiClusterScope {
+					return true
+				}
+				return false
 			},
 		},
 		resyncPeriod,
 	)
+
 	controller.roleLister = roleInformer.Lister()
 	controller.roleSynced = roleInformer.Informer().HasSynced
-	controller.roleBindingLister = roleBindingInformer.Lister()
-	controller.roleBindingSynced = roleBindingInformer.Informer().HasSynced
+	controller.mcrbLister = mcrbInformer.Lister()
+	controller.mcrbSynced = mcrbInformer.Informer().HasSynced
 	return controller
 }
 
@@ -112,10 +115,7 @@ func (c *Controller) enqueue(obj interface{}) {
 		log.Error("Couldn't get key for object", log.Any("object", obj), log.Err(err))
 		return
 	}
-	role := obj.(*apiauthzv1.Role)
-	if role.DeletionTimestamp != nil {
-		c.queue.AddAfter(key, appDeletionGracePeriod)
-	}
+	c.queue.AddAfter(key, appDeletionGracePeriod)
 }
 
 // Run will set up the event handlers for types we are interested in, as well
@@ -128,7 +128,7 @@ func (c *Controller) Run(workers int, stopCh <-chan struct{}) {
 	log.Info("Starting role controller")
 	defer log.Info("Shutting down role controller")
 
-	if ok := cache.WaitForCacheSync(stopCh, c.roleSynced, c.roleSynced); !ok {
+	if ok := cache.WaitForCacheSync(stopCh, c.roleSynced, c.mcrbSynced); !ok {
 		log.Error("Failed to wait for role caches to sync")
 		return
 	}
@@ -179,6 +179,7 @@ func (c *Controller) syncItem(key string) error {
 	defer func() {
 		log.Info("Finished syncing role", log.String("role", key), log.Duration("processTime", time.Since(startTime)))
 	}()
+	var roleDeleted bool
 	ns, name, err := cache.SplitMetaNamespaceKey(key)
 	if err != nil {
 		return err
@@ -190,27 +191,48 @@ func (c *Controller) syncItem(key string) error {
 			log.Info("Role has been deleted. Attempting to cleanup resources",
 				log.String("namespace", ns),
 				log.String("name", name))
-			return nil
+			// 删除mcrb资源
+			roleDeleted = true
+			mcrbs, err := c.getMultiClusterRoleBindings(ns, name)
+			if err != nil {
+				log.Warn("Unable to retrieve MultiClusterRoleBindings from store",
+					log.String("roleNs", ns),
+					log.String("roleName", name), log.Err(err))
+				return err
+			}
+			err = c.updateOrDeleteMultiClusterRoleBindings(mcrbs, roleDeleted)
+			if err != nil {
+				log.Warn("Unable to update MultiClusterRoleBindings",
+					log.String("roleNs", ns),
+					log.String("roleName", name), log.Err(err))
+			}
+			return err
 		}
 		log.Warn("Unable to retrieve role from store",
 			log.String("namespace", ns),
 			log.String("name", name), log.Err(err))
 		return err
 	}
+	roleDeleted = role.DeletionTimestamp != nil
 	role = role.DeepCopy()
 
-	var rbs []*apiauthzv1.RoleBinding
-	selector := labels.SelectorFromSet(map[string]string{
-		constant.RoleNamespace: role.Namespace,
-		constant.RoleName:      role.Name,
-	})
-	if role.Namespace == "" {
-		rbs, err = c.roleBindingLister.List(selector)
-	} else {
-		rbs, err = c.roleBindingLister.RoleBindings(role.Namespace).List(selector)
+	mcrbs, err := c.getMultiClusterRoleBindings(ns, name)
+	if err != nil {
+		log.Warn("Unable to retrieve MultiClusterRoleBindings from store",
+			log.String("roleNs", ns),
+			log.String("roleName", name), log.Err(err))
+		return err
 	}
 
-	if len(rbs) == 0 {
+	err = c.updateOrDeleteMultiClusterRoleBindings(mcrbs, roleDeleted)
+	if err != nil {
+		log.Warn("Unable to update MultiClusterRoleBindings",
+			log.String("roleNs", ns),
+			log.String("roleName", name), log.Err(err))
+		return err
+	}
+
+	if roleDeleted {
 		roleFinalize := apiauthzv1.Role{}
 		roleFinalize.ObjectMeta = role.ObjectMeta
 		roleFinalize.Finalizers = []string{}
@@ -225,17 +247,58 @@ func (c *Controller) syncItem(key string) error {
 			return err
 		}
 		return c.client.AuthzV1().Roles(ns).Delete(context.Background(), name, metav1.DeleteOptions{})
+	}
+	return nil
+}
+
+func (c *Controller) getMultiClusterRoleBindings(roleNs, roleName string) ([]*apiauthzv1.MultiClusterRoleBinding, error) {
+	var mcrbs []*apiauthzv1.MultiClusterRoleBinding
+	var err error
+	selector := labels.SelectorFromSet(map[string]string{
+		constant.RoleNamespace: roleNs,
+		constant.RoleName:      roleName,
+	})
+	if roleNs == "" {
+		mcrbs, err = c.mcrbLister.List(selector)
 	} else {
-		for _, rb := range rbs {
-			if rb.Status.Phase == apiauthzv1.BindingTerminating {
-				continue
-			}
+		mcrbs, err = c.mcrbLister.MultiClusterRoleBindings(roleNs).List(selector)
+	}
+	return mcrbs, err
+}
+
+func (c *Controller) updateOrDeleteMultiClusterRoleBindings(mcrbs []*apiauthzv1.MultiClusterRoleBinding, roleDeleted bool) error {
+	for _, mcrb := range mcrbs {
+		if mcrb.DeletionTimestamp != nil {
+			continue
+		}
+		if roleDeleted {
 			deleteOpt := metav1.DeletePropagationBackground
-			if err = c.client.AuthzV1().RoleBindings(rb.Namespace).Delete(context.Background(), rb.Name, metav1.DeleteOptions{PropagationPolicy: &deleteOpt}); err != nil {
-				log.Warnf("Unable to delete rolebinding '%s/%s', err: '%v'", rb.Namespace, rb.Name, err)
-				return err
+			if err := c.client.AuthzV1().MultiClusterRoleBindings(mcrb.Namespace).Delete(context.Background(), mcrb.Name, metav1.DeleteOptions{PropagationPolicy: &deleteOpt}); err != nil {
+				if errors.IsNotFound(err) {
+					continue
+				} else {
+					log.Warnf("Unable to delete MultiClusterRoleBinding '%s/%s', err: '%v'", mcrb.Namespace, mcrb.Name, err)
+					return err
+				}
+			}
+		} else {
+			// 触发更新mcrb
+			deepCopy := mcrb.DeepCopy()
+			annotations := deepCopy.Annotations
+			if annotations == nil {
+				annotations = map[string]string{}
+			}
+			annotations[constant.UpdatedByRoleController] = time.Now().String()
+			deepCopy.Annotations = annotations
+			if _, err := c.client.AuthzV1().MultiClusterRoleBindings(mcrb.Namespace).Update(context.Background(), deepCopy, metav1.UpdateOptions{}); err != nil {
+				if errors.IsNotFound(err) {
+					continue
+				} else {
+					log.Warnf("Unable to delete MultiClusterRoleBinding '%s/%s', err: '%v'", mcrb.Namespace, mcrb.Name, err)
+					return err
+				}
 			}
 		}
-		return fmt.Errorf("role '%s/%s' will be retried later", ns, name)
 	}
+	return nil
 }

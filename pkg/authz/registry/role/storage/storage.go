@@ -111,7 +111,7 @@ func (r *REST) Delete(ctx context.Context, name string, deleteValidation rest.Va
 		options.Preconditions.UID = &role.UID
 	} else if *options.Preconditions.UID != role.UID {
 		err = apierrors.NewConflict(
-			authz.Resource("Roles"),
+			authz.Resource("roles"),
 			name,
 			fmt.Errorf("precondition failed: UID in precondition: %v, UID in object meta: %v", *options.Preconditions.UID, role.UID),
 		)
@@ -131,23 +131,23 @@ func (r *REST) Delete(ctx context.Context, name string, deleteValidation rest.Va
 		err = r.Store.Storage.GuaranteedUpdate(
 			ctx, key, out, false, &preconditions,
 			storage.SimpleUpdate(func(existing runtime.Object) (runtime.Object, error) {
-				existingBinding, ok := existing.(*authz.Role)
+				existingRole, ok := existing.(*authz.Role)
 				if !ok {
 					// wrong type
 					return nil, fmt.Errorf("expected *auth.Role, got %v", existing)
 				}
-				if err := deleteValidation(ctx, existingBinding); err != nil {
+				if err := deleteValidation(ctx, existingRole); err != nil {
 					return nil, err
 				}
 				// Set the deletion timestamp if needed
-				if existingBinding.DeletionTimestamp.IsZero() {
+				if existingRole.DeletionTimestamp.IsZero() {
 					now := metav1.Now()
-					existingBinding.DeletionTimestamp = &now
+					existingRole.DeletionTimestamp = &now
 				}
 
 				// the current finalizers which are on namespace
 				currentFinalizers := map[string]bool{}
-				for _, f := range existingBinding.Finalizers {
+				for _, f := range existingRole.Finalizers {
 					currentFinalizers[f] = true
 				}
 				// the finalizers we should ensure on rule
@@ -171,17 +171,17 @@ func (r *REST) Delete(ctx context.Context, name string, deleteValidation rest.Va
 					for f := range currentFinalizers {
 						newFinalizers = append(newFinalizers, f)
 					}
-					existingBinding.Finalizers = newFinalizers
+					existingRole.Finalizers = newFinalizers
 				}
-				return existingBinding, nil
+				return existingRole, nil
 			}),
 			dryrun.IsDryRun(options.DryRun),
 			nil,
 		)
 
 		if err != nil {
-			err = storageerr.InterpretGetError(err, authz.Resource("Roles"), name)
-			err = storageerr.InterpretUpdateError(err, authz.Resource("Roles"), name)
+			err = storageerr.InterpretGetError(err, authz.Resource("roles"), name)
+			err = storageerr.InterpretUpdateError(err, authz.Resource("roles"), name)
 			if _, ok := err.(*apierrors.StatusError); !ok {
 				err = apierrors.NewInternalError(err)
 			}
@@ -193,7 +193,7 @@ func (r *REST) Delete(ctx context.Context, name string, deleteValidation rest.Va
 
 	// prior to final deletion, we must ensure that finalizers is empty
 	if len(role.Finalizers) != 0 {
-		err = apierrors.NewConflict(authz.Resource("Roles"), role.Name, fmt.Errorf("the system is ensuring all content is removed from this role.  Upon completion, this role will automatically be purged by the system"))
+		err = apierrors.NewConflict(authz.Resource("roles"), role.Name, fmt.Errorf("the system is ensuring all content is removed from this role.  Upon completion, this role will automatically be purged by the system"))
 		return nil, false, err
 	}
 	return r.Store.Delete(ctx, name, deleteValidation, options)

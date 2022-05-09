@@ -33,28 +33,28 @@ import (
 	"k8s.io/apiserver/pkg/util/dryrun"
 	"tkestack.io/tke/api/authz"
 	apiserverutil "tkestack.io/tke/pkg/apiserver/util"
-	"tkestack.io/tke/pkg/authz/registry/clusterpolicybinding"
+	"tkestack.io/tke/pkg/authz/registry/multiclusterrolebinding"
 	"tkestack.io/tke/pkg/util/log"
 )
 
 // Storage includes storage for configmap and all sub resources.
 type Storage struct {
-	ClusterPolicyBinding *REST
+	MultiClusterRoleBinding *REST
 	Status               *StatusREST
 	Finalize             *FinalizeREST
 }
 
 // NewStorage returns a Storage object that will work against configmap.
 func NewStorage(optsGetter genericregistry.RESTOptionsGetter) *Storage {
-	strategy := clusterpolicybinding.NewStrategy()
+	strategy := multiclusterrolebinding.NewStrategy()
 	store := &registry.Store{
-		NewFunc:                  func() runtime.Object { return &authz.ClusterPolicyBinding{} },
-		NewListFunc:              func() runtime.Object { return &authz.ClusterPolicyBindingList{} },
-		DefaultQualifiedResource: authz.Resource("clusterpolicybindings"),
+		NewFunc:                  func() runtime.Object { return &authz.MultiClusterRoleBinding{} },
+		NewListFunc:              func() runtime.Object { return &authz.MultiClusterRoleBindingList{} },
+		DefaultQualifiedResource: authz.Resource("multiclusterrolebindings"),
 		CreateStrategy:           strategy,
 		UpdateStrategy:           strategy,
 		DeleteStrategy:           strategy,
-		ShouldDeleteDuringUpdate: clusterpolicybinding.ShouldDeleteDuringUpdate,
+		ShouldDeleteDuringUpdate: multiclusterrolebinding.ShouldDeleteDuringUpdate,
 	}
 	store.TableConvertor = rest.NewDefaultTableConvertor(store.DefaultQualifiedResource)
 	options := &genericregistry.StoreOptions{
@@ -66,13 +66,13 @@ func NewStorage(optsGetter genericregistry.RESTOptionsGetter) *Storage {
 	}
 
 	statusStore := *store
-	statusStore.UpdateStrategy = clusterpolicybinding.NewStatusStrategy(strategy)
+	statusStore.UpdateStrategy = multiclusterrolebinding.NewStatusStrategy(strategy)
 
 	finalizeStore := *store
-	finalizeStore.UpdateStrategy = clusterpolicybinding.NewFinalizerStrategy(strategy)
+	finalizeStore.UpdateStrategy = multiclusterrolebinding.NewFinalizerStrategy(strategy)
 
 	return &Storage{
-		ClusterPolicyBinding: &REST{store},
+		MultiClusterRoleBinding: &REST{store},
 		Status:               &StatusREST{&statusStore},
 		Finalize:             &FinalizeREST{&finalizeStore},
 	}
@@ -94,7 +94,7 @@ var _ rest.GracefulDeleter = &REST{}
 
 // ShortNames implements the ShortNamesProvider interface. Returns a list of short names for a resource.
 func (r *REST) ShortNames() []string {
-	return []string{"cpb"}
+	return []string{"mcrb"}
 }
 
 // List selects resources in the storage which match to the selector. 'options' can be nil.
@@ -109,7 +109,7 @@ func (r *REST) Delete(ctx context.Context, name string, deleteValidation rest.Va
 	if err != nil {
 		return nil, false, err
 	}
-	cpb := object.(*authz.ClusterPolicyBinding)
+	cpb := object.(*authz.MultiClusterRoleBinding)
 
 	// Ensure we have a UID precondition
 	if options == nil {
@@ -122,7 +122,7 @@ func (r *REST) Delete(ctx context.Context, name string, deleteValidation rest.Va
 		options.Preconditions.UID = &cpb.UID
 	} else if *options.Preconditions.UID != cpb.UID {
 		err = apierrors.NewConflict(
-			authz.Resource("ClusterPolicyBindings"),
+			authz.Resource("multiclusterrolebindings"),
 			name,
 			fmt.Errorf("precondition failed: UID in precondition: %v, UID in object meta: %v", *options.Preconditions.UID, cpb.UID),
 		)
@@ -142,27 +142,27 @@ func (r *REST) Delete(ctx context.Context, name string, deleteValidation rest.Va
 		err = r.Store.Storage.GuaranteedUpdate(
 			ctx, key, out, false, &preconditions,
 			storage.SimpleUpdate(func(existing runtime.Object) (runtime.Object, error) {
-				existingBinding, ok := existing.(*authz.ClusterPolicyBinding)
+				existingMultiClusterRoleBinding, ok := existing.(*authz.MultiClusterRoleBinding)
 				if !ok {
 					// wrong type
-					return nil, fmt.Errorf("expected *auth.ClusterPolicyBinding, got %v", existing)
+					return nil, fmt.Errorf("expected *auth.MultiClusterRoleBinding, got %v", existing)
 				}
-				if err := deleteValidation(ctx, existingBinding); err != nil {
+				if err := deleteValidation(ctx, existingMultiClusterRoleBinding); err != nil {
 					return nil, err
 				}
 				// Set the deletion timestamp if needed
-				if existingBinding.DeletionTimestamp.IsZero() {
+				if existingMultiClusterRoleBinding.DeletionTimestamp.IsZero() {
 					now := metav1.Now()
-					existingBinding.DeletionTimestamp = &now
+					existingMultiClusterRoleBinding.DeletionTimestamp = &now
 				}
 				// Set the cpb phase to terminating, if needed
-				if existingBinding.Status.Phase != authz.BindingTerminating {
-					existingBinding.Status.Phase = authz.BindingTerminating
+				if existingMultiClusterRoleBinding.Status.Phase != authz.BindingTerminating {
+					existingMultiClusterRoleBinding.Status.Phase = authz.BindingTerminating
 				}
 
 				// the current finalizers which are on namespace
 				currentFinalizers := map[string]bool{}
-				for _, f := range existingBinding.Finalizers {
+				for _, f := range existingMultiClusterRoleBinding.Finalizers {
 					currentFinalizers[f] = true
 				}
 				// the finalizers we should ensure on rule
@@ -186,17 +186,17 @@ func (r *REST) Delete(ctx context.Context, name string, deleteValidation rest.Va
 					for f := range currentFinalizers {
 						newFinalizers = append(newFinalizers, f)
 					}
-					existingBinding.Finalizers = newFinalizers
+					existingMultiClusterRoleBinding.Finalizers = newFinalizers
 				}
-				return existingBinding, nil
+				return existingMultiClusterRoleBinding, nil
 			}),
 			dryrun.IsDryRun(options.DryRun),
 			nil,
 		)
 
 		if err != nil {
-			err = storageerr.InterpretGetError(err, authz.Resource("ClusterPolicyBindings"), name)
-			err = storageerr.InterpretUpdateError(err, authz.Resource("ClusterPolicyBindings"), name)
+			err = storageerr.InterpretGetError(err, authz.Resource("multiclusterrolebindings"), name)
+			err = storageerr.InterpretUpdateError(err, authz.Resource("multiclusterrolebindings"), name)
 			if _, ok := err.(*apierrors.StatusError); !ok {
 				err = apierrors.NewInternalError(err)
 			}
@@ -208,7 +208,7 @@ func (r *REST) Delete(ctx context.Context, name string, deleteValidation rest.Va
 
 	// prior to final deletion, we must ensure that finalizers is empty
 	if len(cpb.Finalizers) != 0 {
-		err = apierrors.NewConflict(authz.Resource("ClusterPolicyBindings"), cpb.Name, fmt.Errorf("the system is ensuring all content is removed from this cpb.  Upon completion, this cpb will automatically be purged by the system"))
+		err = apierrors.NewConflict(authz.Resource("multiclusterrolebindings"), cpb.Name, fmt.Errorf("the system is ensuring all content is removed from this cpb.  Upon completion, this cpb will automatically be purged by the system"))
 		return nil, false, err
 	}
 	return r.Store.Delete(ctx, name, deleteValidation, options)

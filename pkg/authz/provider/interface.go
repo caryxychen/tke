@@ -12,9 +12,9 @@ type Provider interface {
 	Name() string
 	InitContext(param interface{}) context.Context
 	GetSubject(ctx context.Context, userName string, cluster *platformv1.Cluster) (*rbacv1.Subject, error)
-	DispatchPolicy(ctx context.Context, platformClient platformversionedclient.PlatformV1Interface, policy *authzv1.Policy, cpb *authzv1.ClusterPolicyBinding, clusterSubjects map[string]*rbacv1.Subject) error
-	RenderClusterPolicyBinding(ctx context.Context, cpb *authzv1.ClusterPolicyBinding) error
-	DeleteClusterPolicyBindingResources(ctx context.Context, cpb *authzv1.ClusterPolicyBinding, platformClient platformversionedclient.PlatformV1Interface) error
+	DispatchMultiClusterRoleBinding(ctx context.Context, platformClient platformversionedclient.PlatformV1Interface, mcrb *authzv1.MultiClusterRoleBinding, rules []rbacv1.PolicyRule, clusterSubjects map[string]*rbacv1.Subject) error
+	RenderClusterPolicyBinding(ctx context.Context, mcrb *authzv1.MultiClusterRoleBinding) error
+	DeleteMultiClusterRoleBindingResources(ctx context.Context, platformClient platformversionedclient.PlatformV1Interface, mcrb *authzv1.MultiClusterRoleBinding) error
 }
 
 var _ Provider = &DelegateProvider{}
@@ -42,14 +42,14 @@ func (p *DelegateProvider) GetSubject(ctx context.Context, platformUser string, 
 	return nil, nil
 }
 
-func (p *DelegateProvider) DispatchPolicy(ctx context.Context, platformClient platformversionedclient.PlatformV1Interface, policy *authzv1.Policy, cpb *authzv1.ClusterPolicyBinding, clusterSubjects map[string]*rbacv1.Subject) error {
+func (p *DelegateProvider) DispatchMultiClusterRoleBinding(ctx context.Context, platformClient platformversionedclient.PlatformV1Interface, mcrb *authzv1.MultiClusterRoleBinding, rules []rbacv1.PolicyRule, clusterSubjects map[string]*rbacv1.Subject) error {
 	return nil
 }
 
-func (p *DelegateProvider) RenderClusterPolicyBinding(ctx context.Context, cpb *authzv1.ClusterPolicyBinding) error {
+func (p *DelegateProvider) RenderClusterPolicyBinding(ctx context.Context, mcrb *authzv1.MultiClusterRoleBinding) error {
 	return nil
 }
 
-func (p *DelegateProvider) DeleteClusterPolicyBindingResources(ctx context.Context, cpb *authzv1.ClusterPolicyBinding, platformClient platformversionedclient.PlatformV1Interface) error {
+func (p *DelegateProvider) DeleteMultiClusterRoleBindingResources(ctx context.Context, platformClient platformversionedclient.PlatformV1Interface, mcrb *authzv1.MultiClusterRoleBinding) error {
 	return nil
 }

@@ -23,6 +23,51 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+type Scope string
+
+const (
+	PlatformScope     Scope = "Platform"
+	MultiClusterScope Scope = "MultiCluster"
+	BusinessScope     Scope = "Business"
+)
+
+// +genclient
+// +genclient:skipVerbs=deleteCollection
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+type Policy struct {
+	metav1.TypeMeta
+	// +optional
+	metav1.ObjectMeta
+
+	DisplayName string
+
+	// +optional
+	TenantID string
+
+	// Username is Creator
+	// +optional
+	Username string
+
+	// +optional
+	Description string
+
+	Scope Scope
+
+	Rules []rbacv1.PolicyRule
+}
+
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+// PolicyList is the whole list of all policies.
+type PolicyList struct {
+	metav1.TypeMeta
+	// +optional
+	metav1.ListMeta
+	// List of policies
+	Items []Policy
+}
+
 // +genclient
 // +genclient:skipVerbs=deleteCollection
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -33,10 +78,19 @@ type Role struct {
 	metav1.ObjectMeta
 
 	DisplayName string
-	TenantID    string
+
+	// +optional
+	TenantID string
+
 	// Username is Creator
-	Username    string
+	// +optional
+	Username string
+
+	// +optional
 	Description string
+
+	Scope Scope
+
 	// policyNamespace/policyName
 	Policies []string
 }
@@ -55,94 +109,32 @@ type RoleList struct {
 // +genclient:skipVerbs=deleteCollection
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-type RoleBinding struct {
+type MultiClusterRoleBinding struct {
 	metav1.TypeMeta
 	metav1.ObjectMeta
-	Spec   RoleBindingSpec
-	Status RoleBindingStatus
+	Spec   MultiClusterRoleBindingSpec
+	Status MultiClusterRoleBindingStatus
 }
 
-type RoleBindingSpec struct {
-	// +optional
-	UserName string
-	// +optional
-	GroupName string
-	RoleName  string
-	Clusters  []string
+type MultiClusterRoleBindingSpec struct {
+	Username string
+	// roleNamespace/roleName
+	RoleName string
+	Clusters []string
 }
 
-type RoleBindingStatus struct {
+type MultiClusterRoleBindingStatus struct {
 	// +optional
 	Phase BindingPhase
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-type RoleBindingList struct {
+type MultiClusterRoleBindingList struct {
 	metav1.TypeMeta
 	metav1.ListMeta
 	// List of rules.
-	Items []RoleBinding
-}
-
-// +genclient
-// +genclient:skipVerbs=deleteCollection
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-type Policy struct {
-	metav1.TypeMeta
-	// +optional
-	metav1.ObjectMeta
-
-	// +optional
-	TenantID    string
-	DisplayName string
-	// +optional
-	Description string
-	// +optional
-	Scope Scope
-	Rules []rbacv1.PolicyRule
-}
-
-type Scope string
-
-const (
-	PlatformScope Scope = "Platform"
-	ClusterScope  Scope = "Cluster"
-	BusinessScope Scope = "Business"
-)
-
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-// PolicyList is the whole list of all policies.
-type PolicyList struct {
-	metav1.TypeMeta
-	// +optional
-	metav1.ListMeta
-	// List of policies
-	Items []Policy
-}
-
-// +genclient
-// +genclient:skipVerbs=deleteCollection
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-type ClusterPolicyBinding struct {
-	metav1.TypeMeta
-	// +optional
-	metav1.ObjectMeta
-	Spec   ClusterPolicyBindingSpec
-	Status ClusterPolicyBindingStatus
-}
-
-type ClusterPolicyBindingSpec struct {
-	// +optional
-	UserName string
-	// +optional
-	GroupName string
-	// PolicyNamespace/PolicyName
-	PolicyName string
-	Clusters   []string
+	Items []MultiClusterRoleBinding
 }
 
 type BindingPhase string
@@ -152,28 +144,12 @@ const (
 	BindingTerminating BindingPhase = "Terminating"
 )
 
-type ClusterPolicyBindingStatus struct {
-	// +optional
-	Phase BindingPhase
-}
-
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-// ClusterPolicyBindingList is a resource containing a list of ClusterPolicyBinding objects.
-type ClusterPolicyBindingList struct {
-	metav1.TypeMeta
-	// +optional
-	metav1.ListMeta
-	// Items is the list of ConfigMaps.
-	Items []ClusterPolicyBinding
-}
-
 type FinalizerName string
 
 const (
-	PolicyFinalize               FinalizerName = "policy"
-	ClusterPolicyBindingFinalize FinalizerName = "clusterpolicybinding"
-	RoleBindingFinalize          FinalizerName = "rolebinding"
+	PolicyFinalize                  FinalizerName = "policy"
+	RoleFinalize                    FinalizerName = "role"
+	MultiClusterRoleBindingFinalize FinalizerName = "rolebinding"
 )
 
 // +genclient

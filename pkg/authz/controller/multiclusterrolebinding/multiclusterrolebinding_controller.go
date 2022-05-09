@@ -16,14 +16,13 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package clusterpolicybinding
+package multiclusterrolebinding
 
 import (
 	"context"
 	"fmt"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
@@ -35,8 +34,7 @@ import (
 	platformversionedclient "tkestack.io/tke/api/client/clientset/versioned/typed/platform/v1"
 	authzv1informer "tkestack.io/tke/api/client/informers/externalversions/authz/v1"
 	authzv1 "tkestack.io/tke/api/client/listers/authz/v1"
-	"tkestack.io/tke/pkg/authz/constant"
-	"tkestack.io/tke/pkg/authz/controller/clusterpolicybinding/deletion"
+	"tkestack.io/tke/pkg/authz/controller/MultiClusterRoleBinding/deletion"
 	authzprovider "tkestack.io/tke/pkg/authz/provider"
 	controllerutil "tkestack.io/tke/pkg/controller"
 	clusterprovider "tkestack.io/tke/pkg/platform/provider/cluster"
@@ -55,19 +53,21 @@ const (
 )
 
 const (
-	controllerName = "clusterpolicybinding-controller"
+	controllerName = "multiclusterrolebinding-controller"
 )
 
 type Controller struct {
-	client                      clientset.Interface
-	platformClient              platformversionedclient.PlatformV1Interface
-	queue                       workqueue.RateLimitingInterface
-	policyLister                authzv1.PolicyLister
-	clusterPolicyBindingLister  authzv1.ClusterPolicyBindingLister
-	policySynced                cache.InformerSynced
-	clusterPolicyBindingSynced  cache.InformerSynced
-	clusterPolicyBindingDeleter deletion.ClusterPolicyBindingDeleter
-	stopCh                      <-chan struct{}
+	client         clientset.Interface
+	platformClient platformversionedclient.PlatformV1Interface
+	queue          workqueue.RateLimitingInterface
+	policyLister   authzv1.PolicyLister
+	policySynced   cache.InformerSynced
+	roleLister     authzv1.RoleLister
+	roleSynced     cache.InformerSynced
+	mcrbLister     authzv1.MultiClusterRoleBindingLister
+	mcrbSynced     cache.InformerSynced
+	mcrbDeleter    deletion.MultiClusterRoleBindingDeleter
+	stopCh         <-chan struct{}
 }
 
 // NewController creates a new Controller object.
@@ -75,15 +75,15 @@ func NewController(
 	client clientset.Interface,
 	platformClient platformversionedclient.PlatformV1Interface,
 	policyInformer authzv1informer.PolicyInformer,
-	clusterPolicyBindingInformer authzv1informer.ClusterPolicyBindingInformer,
-	resyncPeriod time.Duration,
-) *Controller {
+	roleInformer authzv1informer.RoleInformer,
+	mcrbInformer authzv1informer.MultiClusterRoleBindingInformer,
+	resyncPeriod time.Duration) *Controller {
 	// create the controller so we can inject the enqueue function
 	controller := &Controller{
-		client:                      client,
-		platformClient:              platformClient,
-		queue:                       workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), controllerName),
-		clusterPolicyBindingDeleter: deletion.New(client, platformClient),
+		client:         client,
+		platformClient: platformClient,
+		queue:          workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), controllerName),
+		mcrbDeleter:    deletion.New(client, platformClient),
 	}
 	if client != nil &&
 		client.AuthzV1().RESTClient() != nil &&
@@ -92,84 +92,33 @@ func NewController(
 		_ = metrics.RegisterMetricAndTrackRateLimiterUsage(controllerName, client.AuthzV1().RESTClient().GetRateLimiter())
 	}
 
-	policyInformer.Informer().AddEventHandlerWithResyncPeriod(
-		cache.FilteringResourceEventHandler{
-			Handler: cache.ResourceEventHandlerFuncs{
-				AddFunc: controller.addPolicy,
-				UpdateFunc: func(oldObj, newObj interface{}) {
-					old, ok1 := oldObj.(*apiauthzv1.Policy)
-					cur, ok2 := newObj.(*apiauthzv1.Policy)
-					if ok1 && ok2 && controller.needsAddPolicy(old, cur) {
-						controller.addPolicy(newObj)
-					}
-				},
-			},
-			FilterFunc: func(obj interface{}) bool {
-				return true
-			},
-		}, resyncPeriod,
-	)
-
-	clusterPolicyBindingInformer.Informer().AddEventHandlerWithResyncPeriod(
+	mcrbInformer.Informer().AddEventHandlerWithResyncPeriod(
 		cache.FilteringResourceEventHandler{
 			Handler: cache.ResourceEventHandlerFuncs{
 				AddFunc: controller.enqueue,
 				UpdateFunc: func(oldObj, newObj interface{}) {
-					old, ok1 := oldObj.(*apiauthzv1.ClusterPolicyBinding)
-					cur, ok2 := newObj.(*apiauthzv1.ClusterPolicyBinding)
+					old, ok1 := oldObj.(*apiauthzv1.MultiClusterRoleBinding)
+					cur, ok2 := newObj.(*apiauthzv1.MultiClusterRoleBinding)
 					if ok1 && ok2 && controller.needsUpdate(old, cur) {
 						controller.enqueue(newObj)
 					}
 				},
 				DeleteFunc: controller.enqueue,
 			},
-			// TODO
 			FilterFunc: func(obj interface{}) bool {
+				// TODO 优化此处逻辑
 				return true
 			},
 		},
 		resyncPeriod,
 	)
-	controller.clusterPolicyBindingLister = clusterPolicyBindingInformer.Lister()
-	controller.clusterPolicyBindingSynced = clusterPolicyBindingInformer.Informer().HasSynced
 	controller.policyLister = policyInformer.Lister()
 	controller.policySynced = policyInformer.Informer().HasSynced
+	controller.roleLister = roleInformer.Lister()
+	controller.roleSynced = roleInformer.Informer().HasSynced
+	controller.mcrbLister = mcrbInformer.Lister()
+	controller.mcrbSynced = mcrbInformer.Informer().HasSynced
 	return controller
-}
-
-func (c *Controller) needsAddPolicy(old *apiauthzv1.Policy, new *apiauthzv1.Policy) bool {
-	if old.UID != new.UID {
-		return true
-	}
-	if !reflect.DeepEqual(old.Rules, new.Rules) {
-		return true
-	}
-	return false
-}
-
-func (c *Controller) addPolicy(obj interface{}) {
-	policy := obj.(*apiauthzv1.Policy)
-	var (
-		cpbs []*apiauthzv1.ClusterPolicyBinding
-		err  error
-	)
-	selector := labels.SelectorFromSet(map[string]string{
-		constant.PolicyNamespace: policy.Namespace,
-		constant.PolicyName:      policy.Name,
-	})
-	if policy.Namespace == "" {
-		// 如果是默认策略，允许绑定到任何ns
-		cpbs, err = c.clusterPolicyBindingLister.List(selector)
-	} else {
-		cpbs, err = c.clusterPolicyBindingLister.ClusterPolicyBindings(policy.Namespace).List(selector)
-	}
-	if err != nil {
-		log.Warnf("Failed to list clusterpolicybindings by policy %s/%s", policy.Namespace, policy.Name)
-		return
-	}
-	for _, cpb := range cpbs {
-		c.enqueue(cpb)
-	}
 }
 
 func (c *Controller) enqueue(obj interface{}) {
@@ -181,8 +130,17 @@ func (c *Controller) enqueue(obj interface{}) {
 	c.queue.AddAfter(key, appDeletionGracePeriod)
 }
 
-func (c *Controller) needsUpdate(old *apiauthzv1.ClusterPolicyBinding, new *apiauthzv1.ClusterPolicyBinding) bool {
-	return true
+func (c *Controller) needsUpdate(old *apiauthzv1.MultiClusterRoleBinding, new *apiauthzv1.MultiClusterRoleBinding) bool {
+	if old.UID != new.UID {
+		return true
+	}
+	if !reflect.DeepEqual(old.Annotations, old.Annotations) {
+		return true
+	}
+	if !reflect.DeepEqual(old.Spec, old.Spec) {
+		return true
+	}
+	return false
 }
 
 // Run will set up the event handlers for types we are interested in, as well
@@ -195,7 +153,7 @@ func (c *Controller) Run(workers int, stopCh <-chan struct{}) {
 	log.Info("Starting app controller")
 	defer log.Info("Shutting down app controller")
 
-	if ok := cache.WaitForCacheSync(stopCh, c.clusterPolicyBindingSynced, c.policySynced); !ok {
+	if ok := cache.WaitForCacheSync(stopCh, c.mcrbSynced, c.policySynced); !ok {
 		log.Error("Failed to wait for app caches to sync")
 		return
 	}
@@ -244,79 +202,109 @@ func (c *Controller) worker() {
 func (c *Controller) syncItem(key string) error {
 	startTime := time.Now()
 	defer func() {
-		log.Info("Finished syncing clusterpolicybinding", log.String("clusterpolicybinding", key), log.Duration("processTime", time.Since(startTime)))
+		log.Info("Finished syncing MultiClusterRoleBinding", log.String("MultiClusterRoleBinding", key), log.Duration("processTime", time.Since(startTime)))
 	}()
 	ns, name, err := cache.SplitMetaNamespaceKey(key)
 	if err != nil {
 		return err
 	}
 
-	cpb, err := c.clusterPolicyBindingLister.ClusterPolicyBindings(ns).Get(name)
+	mcrb, err := c.mcrbLister.MultiClusterRoleBindings(ns).Get(name)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			log.Info("ClusterPolicyBinding has been deleted. Attempting to cleanup resources",
+			log.Info("MultiClusterRoleBinding has been deleted. Attempting to cleanup resources",
 				log.String("namespace", ns),
 				log.String("name", name))
 			return nil
 		}
-		log.Warn("Unable to retrieve clusterpolicybinding from store",
+		log.Warn("Unable to retrieve MultiClusterRoleBinding from store",
 			log.String("namespace", ns),
 			log.String("name", name), log.Err(err))
 		return err
 	}
-	cpb = cpb.DeepCopy()
-	provider, err := authzprovider.GetProvider(cpb.Annotations)
+	mcrb = mcrb.DeepCopy()
+	provider, err := authzprovider.GetProvider(mcrb.Annotations)
 	if err != nil {
 		log.Warn("Unable to retrieve provider",
 			log.String("namespace", ns),
 			log.String("name", name), log.Err(err))
 		return err
 	}
-	ctx := provider.InitContext(cpb)
+	ctx := provider.InitContext(mcrb)
 
-	switch cpb.Status.Phase {
+	switch mcrb.Status.Phase {
 	case apiauthzv1.BindingActive:
-		return c.handleActive(ctx, cpb, provider)
+		return c.handleActive(ctx, mcrb, provider)
 	case apiauthzv1.BindingTerminating:
-		return c.clusterPolicyBindingDeleter.Delete(ctx, cpb, provider)
+		return c.mcrbDeleter.Delete(ctx, mcrb, provider)
 	default:
-		return fmt.Errorf("unknown clusterpolicybinding phase '%s'", cpb.Status.Phase)
+		return fmt.Errorf("unknown MultiClusterRoleBinding phase '%s'", mcrb.Status.Phase)
 	}
 }
 
-func (c *Controller) handleActive(ctx context.Context, cpb *apiauthzv1.ClusterPolicyBinding, provider authzprovider.Provider) error {
-	policyNs, policyName, err := cache.SplitMetaNamespaceKey(cpb.Spec.PolicyName)
+func (c *Controller) handleActive(ctx context.Context, mcrb *apiauthzv1.MultiClusterRoleBinding, provider authzprovider.Provider) error {
+	roleNs, roleName, err := cache.SplitMetaNamespaceKey(mcrb.Spec.RoleName)
 	if err != nil {
-		log.Warnf("failed to parse clusterpolicybinding namespace/name '%s'", cpb.Spec.PolicyName)
+		log.Warnf("failed to parse Role namespace/name '%s'", mcrb.Spec.RoleName)
 		return err
 	}
-	policy, err := c.policyLister.Policies(policyNs).Get(policyName)
+
+	role, err := c.roleLister.Roles(roleNs).Get(roleName)
 	if err != nil {
-		log.Warn("Unable to retrieve clusterpolicybinding from store",
-			log.String("namespace", policyNs),
-			log.String("name", policyName), log.Err(err))
+		log.Warn("Unable to retrieve Role from store",
+			log.String("namespace", roleNs),
+			log.String("name", roleName), log.Err(err))
 		return err
 	}
+
+	// 将Role关联的多个Policy合并
+	policies, err := c.combineRolePolicies(role)
+	if err != nil {
+		log.Warn("Unable to combine role policies",
+			log.String("namespace", roleNs),
+			log.String("name", roleName), log.Err(err))
+		return err
+	}
+
 	// 获取user在各个cluster内的subject
 	clusterSubjects := map[string]*rbacv1.Subject{}
-	for _, cls := range cpb.Spec.Clusters {
-		cluster, err := clusterprovider.GetV1ClusterByName(ctx, c.platformClient, cls, cpb.Spec.UserName)
+	for _, cls := range mcrb.Spec.Clusters {
+		cluster, err := clusterprovider.GetV1ClusterByName(ctx, c.platformClient, cls, mcrb.Spec.Username)
 		if err != nil {
-			log.Warnf("GetV1ClusterByName failed, cluster: '%s', user: '%s', err: '%#v'", cls, cpb.Spec.UserName, err)
+			log.Warnf("GetV1ClusterByName failed, cluster: '%s', user: '%s', err: '%#v'", cls, mcrb.Spec.Username, err)
 			return err
 		}
-		subject, err := provider.GetSubject(ctx, cpb.Spec.UserName, cluster)
+		subject, err := provider.GetSubject(ctx, mcrb.Spec.Username, cluster)
 		if err != nil {
-			log.Warnf("GetSubject failed, cluster: '%s',  user: '%s', err: '%#v'", cls, cpb.Spec.UserName, err)
+			log.Warnf("GetSubject failed, cluster: '%s',  user: '%s', err: '%#v'", cls, mcrb.Spec.Username, err)
 			return err
 		}
 		clusterSubjects[cls] = subject
 	}
+
 	// 执行权限分发
-	err = provider.DispatchPolicy(ctx, c.platformClient, policy, cpb, clusterSubjects)
+	err = provider.DispatchMultiClusterRoleBinding(ctx, c.platformClient, mcrb, policies, clusterSubjects)
 	if err != nil {
-		log.Warnf("DispatchPolicy failed, clusterpolicybinding: '%s', err: '%#v'", cpb.Name, err)
+		log.Warnf("DispatchMultiClusterRoleBinding failed, MultiClusterRoleBinding: '%s', err: '%#v'", mcrb.Name, err)
 		return err
 	}
 	return nil
+}
+
+func (c *Controller) combineRolePolicies(role *apiauthzv1.Role) ([]rbacv1.PolicyRule, error) {
+	var policyRules []rbacv1.PolicyRule
+	for _, policy := range role.Policies {
+		policyNamespace, policyName, _ := cache.SplitMetaNamespaceKey(policy)
+		pol, err := c.policyLister.Policies(policyNamespace).Get(policyName)
+		if err != nil {
+			if errors.IsNotFound(err) {
+				log.Warnf("Policy '%s/%s' is not exist", policyNamespace, policyName)
+				continue
+			}
+			log.Warnf("Unable get policy '%s/%s', err: '%v'", policyNamespace, policyName, err)
+			return nil, err
+		}
+		policyRules = append(policyRules, pol.Rules...)
+	}
+	return policyRules, nil
 }

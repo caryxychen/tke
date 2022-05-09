@@ -23,66 +23,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// +genclient
-// +genclient:skipVerbs=deleteCollection
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+type Scope string
 
-// Role is a collection with multiple policies.
-type Role struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
-
-	DisplayName string `json:"displayName" protobuf:"bytes,2,opt,name=displayName"`
-	TenantID    string `json:"tenantID" protobuf:"bytes,3,opt,name=tenantID"`
-	// Username is Creator
-	Username    string   `json:"username" protobuf:"bytes,4,opt,name=username"`
-	Description string   `json:"description" protobuf:"bytes,5,opt,name=description"`
-	Policies    []string `json:"policies" protobuf:"bytes,6,rep,name=policies"`
-}
-
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-// RoleList is the whole list of policy.
-type RoleList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
-	// List of rules.
-	Items []Role `json:"items" protobuf:"bytes,2,rep,name=items"`
-}
-
-// +genclient
-// +genclient:skipVerbs=deleteCollection
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-type RoleBinding struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
-	Spec              RoleBindingSpec   `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
-	Status            RoleBindingStatus `json:"status,omitempty" protobuf:"bytes,3,opt,name=status"`
-}
-
-type RoleBindingSpec struct {
-	// +optional
-	UserName string `json:"userName" protobuf:"bytes,1,opt,name=userName"`
-	// +optional
-	GroupName string   `json:"groupName" protobuf:"bytes,2,opt,name=groupName"`
-	RoleName  string   `json:"roleName" protobuf:"bytes,3,opt,name=roleName"`
-	Clusters  []string `json:"clusters" protobuf:"bytes,4,rep,name=clusters"`
-}
-
-type RoleBindingStatus struct {
-	// +optional
-	Phase BindingPhase `json:"phase" protobuf:"bytes,1,opt,name=phase"`
-}
-
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-type RoleBindingList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
-	// List of rules.
-	Items []RoleBinding `json:"items" protobuf:"bytes,2,rep,name=items"`
-}
+const (
+	PlatformScope     Scope = "Platform"
+	MultiClusterScope Scope = "MultiCluster"
+	BusinessScope     Scope = "Business"
+)
 
 // +genclient
 // +genclient:skipVerbs=deleteCollection
@@ -94,22 +41,16 @@ type Policy struct {
 	// +optional
 	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 
-	TenantID    string `json:"tenantID" protobuf:"bytes,2,opt,name=tenantID"`
-	DisplayName string `json:"displayName" protobuf:"bytes,3,opt,name=displayName"`
+	DisplayName string `json:"displayName" protobuf:"bytes,2,opt,name=displayName"`
 	// +optional
-	Description string `json:"description" protobuf:"bytes,4,opt,name=description"`
+	TenantID string `json:"tenantID" protobuf:"bytes,3,opt,name=tenantID"`
 	// +optional
-	Scope Scope               `json:"scope" protobuf:"bytes,5,opt,name=scope"`
-	Rules []rbacv1.PolicyRule `json:"rules" protobuf:"bytes,6,rep,name=rules"`
+	Username string `json:"username" protobuf:"bytes,4,opt,name=username"`
+	// +optional
+	Description string              `json:"description" protobuf:"bytes,5,opt,name=description"`
+	Scope       Scope               `json:"scope" protobuf:"bytes,6,opt,name=scope"`
+	Rules       []rbacv1.PolicyRule `json:"rules" protobuf:"bytes,7,rep,name=rules"`
 }
-
-type Scope string
-
-const (
-	PlatformScope Scope = "Platform"
-	ClusterScope  Scope = "Cluster"
-	BusinessScope Scope = "Business"
-)
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -127,21 +68,61 @@ type PolicyList struct {
 // +genclient:skipVerbs=deleteCollection
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-type ClusterPolicyBinding struct {
-	metav1.TypeMeta `json:",inline"`
-	// +optional
+// Role is a collection with multiple policies.
+type Role struct {
+	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
-	Spec              ClusterPolicyBindingSpec   `json:"spec" protobuf:"bytes,2,opt,name=spec"`
-	Status            ClusterPolicyBindingStatus `json:"status,omitempty" protobuf:"bytes,3,opt,name=status"`
+
+	DisplayName string `json:"displayName" protobuf:"bytes,2,opt,name=displayName"`
+	// +optional
+	TenantID string `json:"tenantID" protobuf:"bytes,3,opt,name=tenantID"`
+	// +optional
+	Username string `json:"username" protobuf:"bytes,4,opt,name=username"`
+	// +optional
+	Description string   `json:"description" protobuf:"bytes,5,opt,name=description"`
+	Scope       Scope    `json:"scope" protobuf:"bytes,6,opt,name=scope"`
+	Policies    []string `json:"policies" protobuf:"bytes,7,rep,name=policies"`
 }
 
-type ClusterPolicyBindingSpec struct {
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+// RoleList is the whole list of policy.
+type RoleList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+	// List of rules.
+	Items []Role `json:"items" protobuf:"bytes,2,rep,name=items"`
+}
+
+// +genclient
+// +genclient:skipVerbs=deleteCollection
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+type MultiClusterRoleBinding struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+	Spec              MultiClusterRoleBindingSpec   `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
+	Status            MultiClusterRoleBindingStatus `json:"status,omitempty" protobuf:"bytes,3,opt,name=status"`
+}
+
+type MultiClusterRoleBindingSpec struct {
+	Username string   `json:"username" protobuf:"bytes,1,name=username"`
+	RoleName string   `json:"roleName" protobuf:"bytes,3,name=roleName"`
+	Clusters []string `json:"clusters" protobuf:"bytes,4,rep,name=clusters"`
+}
+
+type MultiClusterRoleBindingStatus struct {
 	// +optional
-	UserName string `json:"userName" protobuf:"bytes,1,opt,name=userName"`
-	// +optional
-	GroupName  string   `json:"groupName" protobuf:"bytes,2,opt,name=groupName"`
-	PolicyName string   `json:"policyName" protobuf:"bytes,3,opt,name=policyName"`
-	Clusters   []string `json:"clusters" protobuf:"bytes,4,rep,name=clusters"`
+	Phase BindingPhase `json:"phase" protobuf:"bytes,1,opt,name=phase"`
+}
+
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+type MultiClusterRoleBindingList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+	// List of rules.
+	Items []MultiClusterRoleBinding `json:"items" protobuf:"bytes,2,rep,name=items"`
 }
 
 type BindingPhase string
@@ -151,27 +132,12 @@ const (
 	BindingTerminating BindingPhase = "Terminating"
 )
 
-type ClusterPolicyBindingStatus struct {
-	// +optional
-	Phase BindingPhase `json:"phase" protobuf:"bytes,1,opt,name=phase"`
-}
-
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-// ClusterPolicyBindingList is a resource containing a list of ClusterPolicyBinding objects.
-type ClusterPolicyBindingList struct {
-	metav1.TypeMeta `json:",inline"`
-	// +optional
-	metav1.ListMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
-	// Items is the list of ConfigMaps.
-	Items []ClusterPolicyBinding `json:"items" protobuf:"bytes,2,rep,name=items"`
-}
-
 type FinalizerName string
 
 const (
-	PolicyFinalize               FinalizerName = "policy"
-	ClusterPolicyBindingFinalize FinalizerName = "clusterpolicybinding"
+	PolicyFinalize                  FinalizerName = "policy"
+	RoleFinalize                    FinalizerName = "role"
+	MultiClusterRoleBindingFinalize FinalizerName = "rolebinding"
 )
 
 // +genclient

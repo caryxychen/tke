@@ -23,37 +23,21 @@ import (
 	"net/http"
 	"time"
 	authzv1 "tkestack.io/tke/api/authz/v1"
-	"tkestack.io/tke/pkg/authz/controller/clusterpolicybinding"
+	"tkestack.io/tke/pkg/authz/controller/multiclusterrolebinding"
 	"tkestack.io/tke/pkg/authz/controller/policy"
 	"tkestack.io/tke/pkg/authz/controller/role"
-	"tkestack.io/tke/pkg/authz/controller/rolebinding"
 )
 
-func startClusterPolicyBindingController(ctx ControllerContext) (http.Handler, bool, error) {
-	if !ctx.AvailableResources[schema.GroupVersionResource{Group: authzv1.GroupName, Version: "v1", Resource: "clusterpolicybindings"}] {
+func startMultiClusterRoleBindingController(ctx ControllerContext) (http.Handler, bool, error) {
+	if !ctx.AvailableResources[schema.GroupVersionResource{Group: authzv1.GroupName, Version: "v1", Resource: "multiclusterrolebindings"}] {
 		return nil, false, nil
 	}
-	ctrl := clusterpolicybinding.NewController(
-		ctx.ClientBuilder.ClientOrDie("clusterpolicybinding-controller"),
+	ctrl := multiclusterrolebinding.NewController(
+		ctx.ClientBuilder.ClientOrDie("multiclusterrolebinding-controller"),
 		ctx.PlatformClient,
 		ctx.InformerFactory.Authz().V1().Policies(),
-		ctx.InformerFactory.Authz().V1().ClusterPolicyBindings(),
-		5*time.Minute,
-	)
-	go ctrl.Run(4, ctx.Stop)
-	return nil, true, nil
-}
-
-func startRoleBindingController(ctx ControllerContext) (http.Handler, bool, error) {
-	if !ctx.AvailableResources[schema.GroupVersionResource{Group: authzv1.GroupName, Version: "v1", Resource: "rolebindings"}] {
-		return nil, false, nil
-	}
-	ctrl := rolebinding.NewController(
-		ctx.ClientBuilder.ClientOrDie("rolebinding-controller"),
-		ctx.PlatformClient,
 		ctx.InformerFactory.Authz().V1().Roles(),
-		ctx.InformerFactory.Authz().V1().RoleBindings(),
-		ctx.InformerFactory.Authz().V1().Policies(),
+		ctx.InformerFactory.Authz().V1().MultiClusterRoleBindings(),
 		5*time.Minute,
 	)
 	go ctrl.Run(4, ctx.Stop)
@@ -67,7 +51,6 @@ func startPolicyController(ctx ControllerContext) (http.Handler, bool, error) {
 	ctrl := policy.NewController(
 		ctx.ClientBuilder.ClientOrDie("policy-controller"),
 		ctx.InformerFactory.Authz().V1().Policies(),
-		ctx.InformerFactory.Authz().V1().ClusterPolicyBindings(),
 		5*time.Minute,
 	)
 	go ctrl.Run(4, ctx.Stop)
@@ -81,7 +64,7 @@ func startRoleController(ctx ControllerContext) (http.Handler, bool, error) {
 	ctrl := role.NewController(
 		ctx.ClientBuilder.ClientOrDie("role-controller"),
 		ctx.InformerFactory.Authz().V1().Roles(),
-		ctx.InformerFactory.Authz().V1().RoleBindings(),
+		ctx.InformerFactory.Authz().V1().MultiClusterRoleBindings(),
 		5*time.Minute,
 	)
 	go ctrl.Run(4, ctx.Stop)

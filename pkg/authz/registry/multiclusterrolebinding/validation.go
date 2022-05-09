@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package clusterpolicybinding
+package multiclusterrolebinding
 
 import (
 	apimachineryvalidation "k8s.io/apimachinery/pkg/api/validation"
@@ -24,19 +24,19 @@ import (
 	"tkestack.io/tke/api/authz"
 )
 
-var ValidateClusterPolicyBindingName = apimachineryvalidation.NameIsDNSLabel
+var ValidateMultiClusterRoleBindingName = apimachineryvalidation.NameIsDNSLabel
 
-// ValidateClusterPolicyBinding tests if required fields in the cluster are set.
-func ValidateClusterPolicyBinding(clusterPolicyBinding *authz.ClusterPolicyBinding) field.ErrorList {
-	allErrs := apimachineryvalidation.ValidateObjectMeta(&clusterPolicyBinding.ObjectMeta, true, ValidateClusterPolicyBindingName, field.NewPath("metadata"))
+// ValidateMultiClusterRoleBinding tests if required fields in the cluster are set.
+func ValidateMultiClusterRoleBinding(MultiClusterRoleBinding *authz.MultiClusterRoleBinding) field.ErrorList {
+	allErrs := apimachineryvalidation.ValidateObjectMeta(&MultiClusterRoleBinding.ObjectMeta, true, ValidateMultiClusterRoleBindingName, field.NewPath("metadata"))
 
 	return allErrs
 }
 
-// ValidateClusterPolicyBindingUpdate tests if required fields in the namespace set are
+// ValidateMultiClusterRoleBindingUpdate tests if required fields in the namespace set are
 // set during an update.
-func ValidateClusterPolicyBindingUpdate(clusterroletemplatebinding *authz.ClusterPolicyBinding, old *authz.ClusterPolicyBinding) field.ErrorList {
+func ValidateMultiClusterRoleBindingUpdate(clusterroletemplatebinding *authz.MultiClusterRoleBinding, old *authz.MultiClusterRoleBinding) field.ErrorList {
 	allErrs := apimachineryvalidation.ValidateObjectMetaUpdate(&clusterroletemplatebinding.ObjectMeta, &old.ObjectMeta, field.NewPath("metadata"))
-	allErrs = append(allErrs, ValidateClusterPolicyBinding(clusterroletemplatebinding)...)
+	allErrs = append(allErrs, ValidateMultiClusterRoleBinding(clusterroletemplatebinding)...)
 	return allErrs
 }

@@ -30,41 +30,6 @@ import "k8s.io/apimachinery/pkg/runtime/schema/generated.proto";
 // Package-wide variables from generator "generated".
 option go_package = "v1";
 
-message ClusterPolicyBinding {
-  // +optional
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
-
-  optional ClusterPolicyBindingSpec spec = 2;
-
-  optional ClusterPolicyBindingStatus status = 3;
-}
-
-// ClusterPolicyBindingList is a resource containing a list of ClusterPolicyBinding objects.
-message ClusterPolicyBindingList {
-  // +optional
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
-
-  // Items is the list of ConfigMaps.
-  repeated ClusterPolicyBinding items = 2;
-}
-
-message ClusterPolicyBindingSpec {
-  // +optional
-  optional string userName = 1;
-
-  // +optional
-  optional string groupName = 2;
-
-  optional string policyName = 3;
-
-  repeated string clusters = 4;
-}
-
-message ClusterPolicyBindingStatus {
-  // +optional
-  optional string phase = 1;
-}
-
 // ConfigMap holds configuration data for tke to consume.
 message ConfigMap {
   // +optional
@@ -96,22 +61,53 @@ message ConfigMapList {
   repeated ConfigMap items = 2;
 }
 
+message MultiClusterRoleBinding {
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
+
+  optional MultiClusterRoleBindingSpec spec = 2;
+
+  optional MultiClusterRoleBindingStatus status = 3;
+}
+
+message MultiClusterRoleBindingList {
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
+
+  // List of rules.
+  repeated MultiClusterRoleBinding items = 2;
+}
+
+message MultiClusterRoleBindingSpec {
+  optional string username = 1;
+
+  optional string roleName = 3;
+
+  repeated string clusters = 4;
+}
+
+message MultiClusterRoleBindingStatus {
+  // +optional
+  optional string phase = 1;
+}
+
 // Policy is a rbac template in TKE.
 message Policy {
   // +optional
   optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
 
-  optional string tenantID = 2;
-
-  optional string displayName = 3;
+  optional string displayName = 2;
 
   // +optional
-  optional string description = 4;
+  optional string tenantID = 3;
 
   // +optional
-  optional string scope = 5;
+  optional string username = 4;
 
-  repeated k8s.io.api.rbac.v1.PolicyRule rules = 6;
+  // +optional
+  optional string description = 5;
+
+  optional string scope = 6;
+
+  repeated k8s.io.api.rbac.v1.PolicyRule rules = 7;
 }
 
 // PolicyList is the whole list of all rbac templates.
@@ -129,46 +125,18 @@ message Role {
 
   optional string displayName = 2;
 
+  // +optional
   optional string tenantID = 3;
 
-  // Username is Creator
+  // +optional
   optional string username = 4;
 
+  // +optional
   optional string description = 5;
 
-  repeated string policies = 6;
-}
+  optional string scope = 6;
 
-message RoleBinding {
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
-
-  optional RoleBindingSpec spec = 2;
-
-  optional RoleBindingStatus status = 3;
-}
-
-message RoleBindingList {
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
-
-  // List of rules.
-  repeated RoleBinding items = 2;
-}
-
-message RoleBindingSpec {
-  // +optional
-  optional string userName = 1;
-
-  // +optional
-  optional string groupName = 2;
-
-  optional string roleName = 3;
-
-  repeated string clusters = 4;
-}
-
-message RoleBindingStatus {
-  // +optional
-  optional string phase = 1;
+  repeated string policies = 7;
 }
 
 // RoleList is the whole list of policy.

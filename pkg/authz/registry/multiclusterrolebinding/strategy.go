@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package clusterpolicybinding
+package multiclusterrolebinding
 
 import (
 	"context"
@@ -66,22 +66,21 @@ func (Strategy) Export(ctx context.Context, obj runtime.Object, exact bool) erro
 // PrepareForCreate is invoked on create before validation to normalize
 // the object.
 func (Strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
-	cbp, _ := obj.(*authz.ClusterPolicyBinding)
-	policyNs, policyName, err := cache.SplitMetaNamespaceKey(cbp.Spec.PolicyName)
+	mcrb, _ := obj.(*authz.MultiClusterRoleBinding)
+	roleNs, roleName, err := cache.SplitMetaNamespaceKey(mcrb.Spec.RoleName)
 	if err != nil {
 		return
 	}
-	labels := cbp.Labels
+	labels := mcrb.Labels
 	if labels == nil {
 		labels = map[string]string{}
 	}
-	labels[constant.PolicyNamespace] = policyNs
-	labels[constant.PolicyName] = policyName
-	labels[constant.UserName] = cbp.Spec.UserName
-	labels[constant.GroupName] = cbp.Spec.GroupName
-	cbp.Labels = labels
-	cbp.Status.Phase = authz.BindingActive
-	cbp.ObjectMeta.Finalizers = []string{string(authz.ClusterPolicyBindingFinalize)}
+	labels[constant.RoleNamespace] = roleNs
+	labels[constant.RoleName] = roleName
+	labels[constant.Username] = mcrb.Spec.Username
+	mcrb.Labels = labels
+	mcrb.Status.Phase = authz.BindingActive
+	mcrb.ObjectMeta.Finalizers = []string{string(authz.MultiClusterRoleBindingFinalize)}
 }
 
 // PrepareForUpdate is invoked on update before validation to normalize the
@@ -93,7 +92,7 @@ func (Strategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
 // Validate validates a new configmap.
 // TODO
 func (Strategy) Validate(ctx context.Context, obj runtime.Object) field.ErrorList {
-	return ValidateClusterPolicyBinding(obj.(*authz.ClusterPolicyBinding))
+	return ValidateMultiClusterRoleBinding(obj.(*authz.MultiClusterRoleBinding))
 }
 
 // AllowCreateOnUpdate is false for persistent events
@@ -119,7 +118,7 @@ func (Strategy) Canonicalize(obj runtime.Object) {
 
 // ValidateUpdate is the default update validation for an end namespace set.
 func (Strategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
-	return ValidateClusterPolicyBindingUpdate(obj.(*authz.ClusterPolicyBinding), old.(*authz.ClusterPolicyBinding))
+	return ValidateMultiClusterRoleBindingUpdate(obj.(*authz.MultiClusterRoleBinding), old.(*authz.MultiClusterRoleBinding))
 }
 
 // WarningsOnUpdate returns warnings for the given update.
@@ -128,7 +127,7 @@ func (Strategy) WarningsOnUpdate(ctx context.Context, obj, old runtime.Object) [
 }
 
 func ShouldDeleteDuringUpdate(ctx context.Context, key string, obj, existing runtime.Object) bool {
-	pol, ok := obj.(*authz.ClusterPolicyBinding)
+	pol, ok := obj.(*authz.MultiClusterRoleBinding)
 	if !ok {
 		log.Errorf("unexpected object, key:%s", key)
 		return false
@@ -153,18 +152,18 @@ func NewStatusStrategy(strategy *Strategy) *StatusStrategy {
 // sort order-insensitive list fields, etc.  This should not remove fields
 // whose presence would be considered a validation error.
 func (StatusStrategy) PrepareForUpdate(_ context.Context, obj, old runtime.Object) {
-	newClusterPolicyBinding := obj.(*authz.ClusterPolicyBinding)
-	oldClusterPolicyBinding := old.(*authz.ClusterPolicyBinding)
-	status := newClusterPolicyBinding.Status
-	newClusterPolicyBinding = oldClusterPolicyBinding
-	newClusterPolicyBinding.Status = status
+	newMultiClusterRoleBinding := obj.(*authz.MultiClusterRoleBinding)
+	oldMultiClusterRoleBinding := old.(*authz.MultiClusterRoleBinding)
+	status := newMultiClusterRoleBinding.Status
+	newMultiClusterRoleBinding = oldMultiClusterRoleBinding
+	newMultiClusterRoleBinding.Status = status
 }
 
 // ValidateUpdate is invoked after default fields in the object have been
 // filled in before the object is persisted.  This method should not mutate
 // the object.
 func (s *StatusStrategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
-	return ValidateClusterPolicyBindingUpdate(obj.(*authz.ClusterPolicyBinding), old.(*authz.ClusterPolicyBinding))
+	return ValidateMultiClusterRoleBindingUpdate(obj.(*authz.MultiClusterRoleBinding), old.(*authz.MultiClusterRoleBinding))
 }
 
 // FinalizeStrategy implements finalizer logic for Machine.
@@ -184,8 +183,8 @@ func NewFinalizerStrategy(strategy *Strategy) *FinalizeStrategy {
 // sort order-insensitive list fields, etc.  This should not remove fields
 // whose presence would be considered a validation error.
 func (FinalizeStrategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
-	newBinding := obj.(*authz.ClusterPolicyBinding)
-	oldBinding := old.(*authz.ClusterPolicyBinding)
+	newBinding := obj.(*authz.MultiClusterRoleBinding)
+	oldBinding := old.(*authz.MultiClusterRoleBinding)
 	finalizers := newBinding.Finalizers
 	newBinding = oldBinding
 	newBinding.Finalizers = finalizers
