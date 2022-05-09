@@ -34,7 +34,7 @@ import (
 	platformversionedclient "tkestack.io/tke/api/client/clientset/versioned/typed/platform/v1"
 	authzv1informer "tkestack.io/tke/api/client/informers/externalversions/authz/v1"
 	authzv1 "tkestack.io/tke/api/client/listers/authz/v1"
-	"tkestack.io/tke/pkg/authz/controller/MultiClusterRoleBinding/deletion"
+	"tkestack.io/tke/pkg/authz/controller/multiclusterrolebinding/deletion"
 	authzprovider "tkestack.io/tke/pkg/authz/provider"
 	controllerutil "tkestack.io/tke/pkg/controller"
 	clusterprovider "tkestack.io/tke/pkg/platform/provider/cluster"
