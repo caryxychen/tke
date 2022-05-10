@@ -158,7 +158,7 @@ func (c *Controller) worker() {
 		}
 		defer c.queue.Done(key)
 
-		err := c.syncItem(key.(string))
+		_, err := c.syncItem(key.(string))
 		if err == nil {
 			// no error, forget this entry and return
 			c.queue.Forget(key)
@@ -179,17 +179,16 @@ func (c *Controller) worker() {
 	}
 }
 
-func (c *Controller) syncItem(key string) (retErr error) {
+func (c *Controller) syncItem(key string) (policyDeleted bool, retErr error) {
 	startTime := time.Now()
 	defer func() {
 		log.Info("Finished syncing policy", log.String("policy", key), log.Duration("processTime", time.Since(startTime)))
 	}()
 	ns, name, err := cache.SplitMetaNamespaceKey(key)
 	if err != nil {
-		return err
+		return policyDeleted, err
 	}
 
-	policyDeleted := false
 	defer func() {
 		if policyDeleted && retErr == nil {
 			log.Infof("Delete key '%s' from policy role cache", key)
@@ -204,16 +203,16 @@ func (c *Controller) syncItem(key string) (retErr error) {
 				log.String("namespace", ns),
 				log.String("name", name))
 			policyDeleted = true
-			return c.updateRelatedRoles(key, policyDeleted)
+			return policyDeleted, c.updateRelatedRoles(key, policyDeleted)
 		}
 		log.Warn("Unable to retrieve policy from store",
 			log.String("namespace", ns),
 			log.String("name", name), log.Err(err))
-		return err
+		return policyDeleted, err
 	}
 	policy = policy.DeepCopy()
 	policyDeleted = policy.DeletionTimestamp != nil
-	return c.updateRelatedRoles(key, policyDeleted)
+	return policyDeleted, c.updateRelatedRoles(key, policyDeleted)
 }
 
 func (c *Controller) updateRelatedRoles(policyName string, policyDeleted bool) error {

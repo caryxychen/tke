@@ -88,6 +88,7 @@ func NewController(
 				},
 				DeleteFunc: func(obj interface{}) {
 					role, _ := obj.(*apiauthzv1.Role)
+					controller.enqueue(obj)
 					policyrolecache.Cache.DeleteRole(role)
 				},
 			},
@@ -246,7 +247,12 @@ func (c *Controller) syncItem(key string) error {
 			log.Warnf("Unable to finalize role '%s/%s', err: %v", ns, name, err)
 			return err
 		}
-		return c.client.AuthzV1().Roles(ns).Delete(context.Background(), name, metav1.DeleteOptions{})
+		if err = c.client.AuthzV1().Roles(ns).Delete(context.Background(), name, metav1.DeleteOptions{}); err != nil {
+			if !errors.IsNotFound(err) {
+				log.Warnf("Unable to delete role '%s/%s', err: %v", ns, name, err)
+				return err
+			}
+		}
 	}
 	return nil
 }

@@ -134,10 +134,16 @@ func (c *Controller) needsUpdate(old *apiauthzv1.MultiClusterRoleBinding, new *a
 	if old.UID != new.UID {
 		return true
 	}
-	if !reflect.DeepEqual(old.Annotations, old.Annotations) {
+	if !reflect.DeepEqual(old.Annotations, new.Annotations) {
 		return true
 	}
-	if !reflect.DeepEqual(old.Spec, old.Spec) {
+	if !reflect.DeepEqual(old.Spec, new.Spec) {
+		return true
+	}
+	if !reflect.DeepEqual(old.Status, new.Status) {
+		return true
+	}
+	if !reflect.DeepEqual(old.DeletionTimestamp, new.DeletionTimestamp) {
 		return true
 	}
 	return false

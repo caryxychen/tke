@@ -2,6 +2,7 @@ package deletion
 
 import (
 	"golang.org/x/net/context"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apiauthzv1 "tkestack.io/tke/api/authz/v1"
 	clientset "tkestack.io/tke/api/client/clientset/versioned"
@@ -45,5 +46,11 @@ func (c *MultiClusterRoleBindingResourcesDeleter) Delete(ctx context.Context, mc
 		log.Warnf("Unable to finalize multiclusterrolebinding '%s/%s', err: %v", mcrb.Namespace, mcrb.Name, err)
 		return err
 	}
-	return c.client.AuthzV1().MultiClusterRoleBindings(mcrb.Namespace).Delete(ctx, mcrb.Name, metav1.DeleteOptions{})
+	if err := c.client.AuthzV1().MultiClusterRoleBindings(mcrb.Namespace).Delete(ctx, mcrb.Name, metav1.DeleteOptions{}); err != nil {
+		if !errors.IsNotFound(err) {
+			log.Warnf("Unable to delete multiclusterrolebinding '%s/%s', err: %v", mcrb.Namespace, mcrb.Name, err)
+			return err
+		}
+	}
+	return nil
 }
