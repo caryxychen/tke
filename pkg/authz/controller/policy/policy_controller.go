@@ -237,7 +237,7 @@ func (c *Controller) updateRelatedRoles(policyName string, policyDeleted bool) e
 		if annotations == nil {
 			annotations = map[string]string{}
 		}
-		annotations[constant.UpdatedByPolicyController] = time.Now().String()
+		annotations[constant.UpdatedByPolicyController] = time.Now().Format("2006-01-02T15:04:05")
 		role.Annotations = annotations
 		if policyDeleted {
 			role.Policies = removeItem(role.Policies, policyName)

@@ -294,7 +294,7 @@ func (c *Controller) updateOrDeleteMultiClusterRoleBindings(mcrbs []*apiauthzv1.
 			if annotations == nil {
 				annotations = map[string]string{}
 			}
-			annotations[constant.UpdatedByRoleController] = time.Now().String()
+			annotations[constant.UpdatedByRoleController] = time.Now().Format("2006-01-02T15:04:05")
 			deepCopy.Annotations = annotations
 			if _, err := c.client.AuthzV1().MultiClusterRoleBindings(mcrb.Namespace).Update(context.Background(), deepCopy, metav1.UpdateOptions{}); err != nil {
 				if errors.IsNotFound(err) {
