@@ -152,6 +152,8 @@ func NewController(
 	controller.policySynced = policyInformer.Informer().HasSynced
 	controller.roleLister = roleInformer.Lister()
 	controller.roleSynced = roleInformer.Informer().HasSynced
+	controller.clusterLister = clusterInformer.Lister()
+	controller.clusterSynced = clusterInformer.Informer().HasSynced
 	controller.mcrbLister = mcrbInformer.Lister()
 	controller.mcrbSynced = mcrbInformer.Informer().HasSynced
 	return controller
@@ -208,7 +210,7 @@ func (c *Controller) Run(workers int, stopCh <-chan struct{}) {
 	log.Info("Starting app controller")
 	defer log.Info("Shutting down app controller")
 
-	if ok := cache.WaitForCacheSync(stopCh, c.mcrbSynced, c.policySynced); !ok {
+	if ok := cache.WaitForCacheSync(stopCh, c.mcrbSynced, c.policySynced, c.clusterSynced); !ok {
 		log.Error("Failed to wait for app caches to sync")
 		return
 	}
