@@ -37,9 +37,7 @@ import (
 	clientset "tkestack.io/tke/api/client/clientset/versioned"
 	platformversionedclient "tkestack.io/tke/api/client/clientset/versioned/typed/platform/v1"
 	authzv1informer "tkestack.io/tke/api/client/informers/externalversions/authz/v1"
-	platformv1informer "tkestack.io/tke/api/client/informers/externalversions/platform/v1"
 	authzv1 "tkestack.io/tke/api/client/listers/authz/v1"
-	platformv1 "tkestack.io/tke/api/client/listers/platform/v1"
 	apiplatformv1 "tkestack.io/tke/api/platform/v1"
 	"tkestack.io/tke/pkg/authz/constant"
 	"tkestack.io/tke/pkg/authz/controller/multiclusterrolebinding/deletion"
@@ -74,8 +72,6 @@ type Controller struct {
 	roleSynced     cache.InformerSynced
 	mcrbLister     authzv1.MultiClusterRoleBindingLister
 	mcrbSynced     cache.InformerSynced
-	clusterLister  platformv1.ClusterLister
-	clusterSynced  cache.InformerSynced
 	mcrbDeleter    deletion.MultiClusterRoleBindingDeleter
 	stopCh         <-chan struct{}
 }
@@ -87,7 +83,6 @@ func NewController(
 	policyInformer authzv1informer.PolicyInformer,
 	roleInformer authzv1informer.RoleInformer,
 	mcrbInformer authzv1informer.MultiClusterRoleBindingInformer,
-	clusterInformer platformv1informer.ClusterInformer,
 	resyncPeriod time.Duration) *Controller {
 	// create the controller so we can inject the enqueue function
 	controller := &Controller{
@@ -110,8 +105,12 @@ func NewController(
 				UpdateFunc: func(oldObj, newObj interface{}) {
 					old, ok1 := oldObj.(*apiauthzv1.MultiClusterRoleBinding)
 					cur, ok2 := newObj.(*apiauthzv1.MultiClusterRoleBinding)
-					if ok1 && ok2 && controller.needsUpdate(old, cur) {
-						controller.enqueue(newObj)
+					if ok1 && ok2 {
+						if cur.Labels[constant.DispatchAllClusters] == "true" {
+							controller.enqueue(newObj)
+						} else if controller.needsUpdate(old, cur) {
+							controller.enqueue(newObj)
+						}
 					}
 				},
 				DeleteFunc: controller.enqueue,
@@ -124,36 +123,10 @@ func NewController(
 		resyncPeriod,
 	)
 
-	clusterInformer.Informer().AddEventHandlerWithResyncPeriod(
-		cache.FilteringResourceEventHandler{
-			Handler: cache.ResourceEventHandlerFuncs{
-				AddFunc: controller.enqueueCluster,
-				UpdateFunc: func(oldObj, newObj interface{}) {
-					old, ok1 := oldObj.(*apiauthzv1.MultiClusterRoleBinding)
-					cur, ok2 := newObj.(*apiauthzv1.MultiClusterRoleBinding)
-					if ok1 && ok2 && old.Status.Phase != cur.Status.Phase {
-						controller.enqueue(newObj)
-					}
-				},
-				DeleteFunc: controller.enqueueCluster,
-			},
-			FilterFunc: func(obj interface{}) bool {
-				cluster, ok := obj.(*apiplatformv1.Cluster)
-				if ok && cluster.Status.Phase != apiplatformv1.ClusterInitializing {
-					return true
-				}
-				return false
-			},
-		},
-		resyncPeriod,
-	)
-
 	controller.policyLister = policyInformer.Lister()
 	controller.policySynced = policyInformer.Informer().HasSynced
 	controller.roleLister = roleInformer.Lister()
 	controller.roleSynced = roleInformer.Informer().HasSynced
-	controller.clusterLister = clusterInformer.Lister()
-	controller.clusterSynced = clusterInformer.Informer().HasSynced
 	controller.mcrbLister = mcrbInformer.Lister()
 	controller.mcrbSynced = mcrbInformer.Informer().HasSynced
 	return controller
@@ -210,7 +183,7 @@ func (c *Controller) Run(workers int, stopCh <-chan struct{}) {
 	log.Info("Starting app controller")
 	defer log.Info("Shutting down app controller")
 
-	if ok := cache.WaitForCacheSync(stopCh, c.mcrbSynced, c.policySynced, c.clusterSynced); !ok {
+	if ok := cache.WaitForCacheSync(stopCh, c.mcrbSynced, c.policySynced); !ok {
 		log.Error("Failed to wait for app caches to sync")
 		return
 	}
@@ -289,7 +262,7 @@ func (c *Controller) syncItem(key string) error {
 	}
 	ctx := provider.InitContext(mcrb)
 	if mcrb.Labels[constant.DispatchAllClusters] == "true" {
-		mcrb.Spec.Clusters, err = provider.GetTenantClusters(ctx, c.clusterLister, mcrb.Namespace)
+		mcrb.Spec.Clusters, err = provider.GetTenantClusters(ctx, c.platformClient, mcrb.Namespace)
 		if err != nil {
 			log.Warnf("failed to get tenant clusters, err '%v'", err)
 			return err

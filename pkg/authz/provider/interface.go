@@ -2,11 +2,11 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	rbacv1 "k8s.io/api/rbac/v1"
-	"k8s.io/apimachinery/pkg/labels"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	authzv1 "tkestack.io/tke/api/authz/v1"
 	platformversionedclient "tkestack.io/tke/api/client/clientset/versioned/typed/platform/v1"
-	v1 "tkestack.io/tke/api/client/listers/platform/v1"
 	apiplatformv1 "tkestack.io/tke/api/platform/v1"
 	platformv1 "tkestack.io/tke/pkg/platform/types/v1"
 )
@@ -14,7 +14,7 @@ import (
 type Provider interface {
 	Name() string
 	InitContext(param interface{}) context.Context
-	GetTenantClusters(ctx context.Context, lister v1.ClusterLister, tenantID string) ([]string, error)
+	GetTenantClusters(ctx context.Context, platformClient platformversionedclient.PlatformV1Interface, tenantID string) ([]string, error)
 	GetSubject(ctx context.Context, userName string, cluster *platformv1.Cluster) (*rbacv1.Subject, error)
 	DispatchMultiClusterRoleBinding(ctx context.Context, platformClient platformversionedclient.PlatformV1Interface, mcrb *authzv1.MultiClusterRoleBinding, rules []rbacv1.PolicyRule, clusterSubjects map[string]*rbacv1.Subject) error
 	DeleteUnbindingResources(ctx context.Context, client platformversionedclient.PlatformV1Interface, mcrb *authzv1.MultiClusterRoleBinding, clusterIDs []string) error
@@ -38,14 +38,18 @@ func (p *DelegateProvider) InitContext(param interface{}) context.Context {
 	return context.Background()
 }
 
-func (p *DelegateProvider) GetTenantClusters(ctx context.Context, lister v1.ClusterLister, tenantID string) ([]string, error) {
+func (p *DelegateProvider) GetTenantClusters(ctx context.Context, platformClient platformversionedclient.PlatformV1Interface, tenantID string) ([]string, error) {
 	var clusterIDs []string
-	selector := labels.NewSelector()
-	clusters, err := lister.List(selector)
+
+	listOptions := metav1.ListOptions{
+		ResourceVersion: "0",
+		FieldSelector:   fmt.Sprintf("spec.tenantID=%s", tenantID),
+	}
+	clusters, err := platformClient.Clusters().List(context.TODO(), listOptions)
 	if err != nil {
 		return nil, err
 	}
-	for _, cls := range clusters {
+	for _, cls := range clusters.Items {
 		if cls.Spec.TenantID == tenantID && cls.Name != "global" {
 			if cls.Status.Phase != apiplatformv1.ClusterInitializing && cls.Status.Phase != apiplatformv1.ClusterTerminating {
 				clusterIDs = append(clusterIDs, cls.Name)

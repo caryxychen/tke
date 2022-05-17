@@ -38,8 +38,7 @@ func startMultiClusterRoleBindingController(ctx ControllerContext) (http.Handler
 		ctx.InformerFactory.Authz().V1().Policies(),
 		ctx.InformerFactory.Authz().V1().Roles(),
 		ctx.InformerFactory.Authz().V1().MultiClusterRoleBindings(),
-		ctx.InformerFactory.Platform().V1().Clusters(),
-		5*time.Minute,
+		30*time.Second,
 	)
 	go ctrl.Run(4, ctx.Stop)
 	return nil, true, nil
