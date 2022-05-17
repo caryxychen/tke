@@ -20,11 +20,14 @@ package multiclusterrolebinding
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/runtime"
+	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
@@ -283,6 +286,13 @@ func (c *Controller) syncItem(key string) error {
 		return err
 	}
 	ctx := provider.InitContext(mcrb)
+	if mcrb.Labels[constant.DispatchAllClusters] == "true" {
+		mcrb.Spec.Clusters, err = provider.GetTenantClusters(ctx, c.clusterLister, mcrb.Namespace)
+		if err != nil {
+			log.Warnf("failed to get tenant clusters, err '%v'", err)
+			return err
+		}
+	}
 
 	switch mcrb.Status.Phase {
 	case apiauthzv1.BindingActive:
@@ -318,14 +328,9 @@ func (c *Controller) handleActive(ctx context.Context, mcrb *apiauthzv1.MultiClu
 		return err
 	}
 
-	dispatchClusters := mcrb.Spec.Clusters
-	if mcrb.Labels[constant.DispatchAllClusters] == "true" {
-		dispatchClusters = provider.GetTenantClusters(ctx, c.clusterLister, mcrb.Namespace)
-	}
-
 	// 获取user在各个cluster内的subject
 	clusterSubjects := map[string]*rbacv1.Subject{}
-	for _, cls := range dispatchClusters {
+	for _, cls := range mcrb.Spec.Clusters {
 		cluster, err := clusterprovider.GetV1ClusterByName(ctx, c.platformClient, cls, mcrb.Spec.Username)
 		if err != nil {
 			log.Warnf("GetV1ClusterByName failed, cluster: '%s', user: '%s', err: '%#v'", cls, mcrb.Spec.Username, err)
@@ -340,10 +345,37 @@ func (c *Controller) handleActive(ctx context.Context, mcrb *apiauthzv1.MultiClu
 	}
 
 	// 执行权限分发
-	err = provider.DispatchMultiClusterRoleBinding(ctx, c.platformClient, mcrb, policies, clusterSubjects)
-	if err != nil {
+	if err = provider.DispatchMultiClusterRoleBinding(ctx, c.platformClient, mcrb, policies, clusterSubjects); err != nil {
 		log.Warnf("DispatchMultiClusterRoleBinding failed, MultiClusterRoleBinding: '%s', err: '%#v'", mcrb.Name, err)
 		return err
+	}
+
+	// 删除已经解绑的资源
+	lastDispatchedClusters := []string{}
+	if lastStr, ok := mcrb.Annotations[constant.LastDispatchedClusters]; ok {
+		err = json.Unmarshal([]byte(lastStr), &lastDispatchedClusters)
+		if err != nil {
+			log.Warnf("Unmarshal lastDispatchedClusters failed', err: '%#v'", err)
+			return err
+		}
+	}
+	oldSet := sets.NewString(lastDispatchedClusters...)
+	newSet := sets.NewString(mcrb.Spec.Clusters...)
+	difference := oldSet.Difference(newSet)
+	if len(difference) != 0 {
+		if err = provider.DeleteUnbindingResources(ctx, c.platformClient, mcrb, difference.List()); err != nil {
+			log.Warnf("DeleteUnbindingResources '%s/%s' failed', err: '%#v'", mcrb.Namespace, mcrb.Name, err)
+			return err
+		}
+		clsBytes, _ := json.Marshal(mcrb.Spec.Clusters)
+		mcrb.Annotations[constant.LastDispatchedClusters] = string(clsBytes)
+		if mcrb.Labels[constant.DispatchAllClusters] == "true" {
+			mcrb.Spec.Clusters = []string{"*"}
+		}
+		if _, err = c.client.AuthzV1().MultiClusterRoleBindings(mcrb.Namespace).Update(context.Background(), mcrb, metav1.UpdateOptions{}); err != nil {
+			log.Warnf("Update MultiClusterRoleBindings '%s/%s' failed', err: '%#v'", mcrb.Namespace, mcrb.Name, err)
+			return err
+		}
 	}
 	return nil
 }

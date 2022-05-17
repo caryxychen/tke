@@ -14,9 +14,10 @@ import (
 type Provider interface {
 	Name() string
 	InitContext(param interface{}) context.Context
-	GetTenantClusters(ctx context.Context, lister v1.ClusterLister, tenantID string) []string
+	GetTenantClusters(ctx context.Context, lister v1.ClusterLister, tenantID string) ([]string, error)
 	GetSubject(ctx context.Context, userName string, cluster *platformv1.Cluster) (*rbacv1.Subject, error)
 	DispatchMultiClusterRoleBinding(ctx context.Context, platformClient platformversionedclient.PlatformV1Interface, mcrb *authzv1.MultiClusterRoleBinding, rules []rbacv1.PolicyRule, clusterSubjects map[string]*rbacv1.Subject) error
+	DeleteUnbindingResources(ctx context.Context, client platformversionedclient.PlatformV1Interface, mcrb *authzv1.MultiClusterRoleBinding, clusterIDs []string) error
 	DeleteMultiClusterRoleBindingResources(ctx context.Context, platformClient platformversionedclient.PlatformV1Interface, mcrb *authzv1.MultiClusterRoleBinding) error
 }
 
@@ -37,11 +38,12 @@ func (p *DelegateProvider) InitContext(param interface{}) context.Context {
 	return context.Background()
 }
 
-func (p *DelegateProvider) GetTenantClusters(ctx context.Context, lister v1.ClusterLister, tenantID string) []string {
+func (p *DelegateProvider) GetTenantClusters(ctx context.Context, lister v1.ClusterLister, tenantID string) ([]string, error) {
 	var clusterIDs []string
 	selector := labels.NewSelector()
 	clusters, err := lister.List(selector)
 	if err != nil {
+		return nil, err
 	}
 	for _, cls := range clusters {
 		if cls.Spec.TenantID == tenantID && cls.Name != "global" {
@@ -50,7 +52,7 @@ func (p *DelegateProvider) GetTenantClusters(ctx context.Context, lister v1.Clus
 			}
 		}
 	}
-	return clusterIDs
+	return clusterIDs, nil
 }
 
 func (p *DelegateProvider) GetSubject(ctx context.Context, platformUser string, cluster *platformv1.Cluster) (*rbacv1.Subject, error) {
@@ -62,6 +64,10 @@ func (p *DelegateProvider) GetSubject(ctx context.Context, platformUser string, 
 }
 
 func (p *DelegateProvider) DispatchMultiClusterRoleBinding(ctx context.Context, platformClient platformversionedclient.PlatformV1Interface, mcrb *authzv1.MultiClusterRoleBinding, rules []rbacv1.PolicyRule, clusterSubjects map[string]*rbacv1.Subject) error {
+	return nil
+}
+
+func (p *DelegateProvider) DeleteUnbindingResources(ctx context.Context, client platformversionedclient.PlatformV1Interface, mcrb *authzv1.MultiClusterRoleBinding, clusterIDs []string) error {
 	return nil
 }
 
