@@ -78,15 +78,30 @@ func (Strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
 	labels[constant.RoleNamespace] = roleNs
 	labels[constant.RoleName] = roleName
 	labels[constant.Username] = mcrb.Spec.Username
+	if dispatchAllClusters(mcrb.Spec.Clusters) {
+		labels[constant.DispatchAllClusters] = "true"
+	}
 	mcrb.Labels = labels
 	mcrb.Status.Phase = authz.BindingActive
 	mcrb.ObjectMeta.Finalizers = []string{string(authz.MultiClusterRoleBindingFinalize)}
 }
 
+func dispatchAllClusters(clusterIDs []string) bool {
+	if len(clusterIDs) == 1 && clusterIDs[0] == "*" {
+		return true
+	}
+	return false
+}
+
 // PrepareForUpdate is invoked on update before validation to normalize the
 // object.
 func (Strategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
-
+	mcrb := obj.(*authz.MultiClusterRoleBinding)
+	if dispatchAllClusters(mcrb.Spec.Clusters) {
+		mcrb.Labels[constant.DispatchAllClusters] = "true"
+	} else {
+		delete(mcrb.Labels, constant.DispatchAllClusters)
+	}
 }
 
 // Validate validates a new configmap.

@@ -23,6 +23,7 @@ import (
 	"fmt"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
@@ -33,7 +34,11 @@ import (
 	clientset "tkestack.io/tke/api/client/clientset/versioned"
 	platformversionedclient "tkestack.io/tke/api/client/clientset/versioned/typed/platform/v1"
 	authzv1informer "tkestack.io/tke/api/client/informers/externalversions/authz/v1"
+	platformv1informer "tkestack.io/tke/api/client/informers/externalversions/platform/v1"
 	authzv1 "tkestack.io/tke/api/client/listers/authz/v1"
+	platformv1 "tkestack.io/tke/api/client/listers/platform/v1"
+	apiplatformv1 "tkestack.io/tke/api/platform/v1"
+	"tkestack.io/tke/pkg/authz/constant"
 	"tkestack.io/tke/pkg/authz/controller/multiclusterrolebinding/deletion"
 	authzprovider "tkestack.io/tke/pkg/authz/provider"
 	controllerutil "tkestack.io/tke/pkg/controller"
@@ -66,6 +71,8 @@ type Controller struct {
 	roleSynced     cache.InformerSynced
 	mcrbLister     authzv1.MultiClusterRoleBindingLister
 	mcrbSynced     cache.InformerSynced
+	clusterLister  platformv1.ClusterLister
+	clusterSynced  cache.InformerSynced
 	mcrbDeleter    deletion.MultiClusterRoleBindingDeleter
 	stopCh         <-chan struct{}
 }
@@ -77,6 +84,7 @@ func NewController(
 	policyInformer authzv1informer.PolicyInformer,
 	roleInformer authzv1informer.RoleInformer,
 	mcrbInformer authzv1informer.MultiClusterRoleBindingInformer,
+	clusterInformer platformv1informer.ClusterInformer,
 	resyncPeriod time.Duration) *Controller {
 	// create the controller so we can inject the enqueue function
 	controller := &Controller{
@@ -112,6 +120,31 @@ func NewController(
 		},
 		resyncPeriod,
 	)
+
+	clusterInformer.Informer().AddEventHandlerWithResyncPeriod(
+		cache.FilteringResourceEventHandler{
+			Handler: cache.ResourceEventHandlerFuncs{
+				AddFunc: controller.enqueueCluster,
+				UpdateFunc: func(oldObj, newObj interface{}) {
+					old, ok1 := oldObj.(*apiauthzv1.MultiClusterRoleBinding)
+					cur, ok2 := newObj.(*apiauthzv1.MultiClusterRoleBinding)
+					if ok1 && ok2 && old.Status.Phase != cur.Status.Phase {
+						controller.enqueue(newObj)
+					}
+				},
+				DeleteFunc: controller.enqueueCluster,
+			},
+			FilterFunc: func(obj interface{}) bool {
+				cluster, ok := obj.(*apiplatformv1.Cluster)
+				if ok && cluster.Status.Phase != apiplatformv1.ClusterInitializing {
+					return true
+				}
+				return false
+			},
+		},
+		resyncPeriod,
+	)
+
 	controller.policyLister = policyInformer.Lister()
 	controller.policySynced = policyInformer.Informer().HasSynced
 	controller.roleLister = roleInformer.Lister()
@@ -119,6 +152,19 @@ func NewController(
 	controller.mcrbLister = mcrbInformer.Lister()
 	controller.mcrbSynced = mcrbInformer.Informer().HasSynced
 	return controller
+}
+
+func (c *Controller) enqueueCluster(obj interface{}) {
+	cluster := obj.(*apiplatformv1.Cluster)
+	selector, _ := labels.Parse(fmt.Sprintf("%s=%s", constant.DispatchAllClusters, "true"))
+	list, err := c.mcrbLister.MultiClusterRoleBindings(cluster.Spec.TenantID).List(selector)
+	if err != nil {
+		log.Warnf("failed to list mcrbs for tenant '%s'", cluster.Spec.TenantID)
+		return
+	}
+	for _, item := range list {
+		c.enqueue(item)
+	}
 }
 
 func (c *Controller) enqueue(obj interface{}) {
@@ -272,9 +318,14 @@ func (c *Controller) handleActive(ctx context.Context, mcrb *apiauthzv1.MultiClu
 		return err
 	}
 
+	dispatchClusters := mcrb.Spec.Clusters
+	if mcrb.Labels[constant.DispatchAllClusters] == "true" {
+		dispatchClusters = provider.GetTenantClusters(ctx, c.clusterLister, mcrb.Namespace)
+	}
+
 	// 获取user在各个cluster内的subject
 	clusterSubjects := map[string]*rbacv1.Subject{}
-	for _, cls := range mcrb.Spec.Clusters {
+	for _, cls := range dispatchClusters {
 		cluster, err := clusterprovider.GetV1ClusterByName(ctx, c.platformClient, cls, mcrb.Spec.Username)
 		if err != nil {
 			log.Warnf("GetV1ClusterByName failed, cluster: '%s', user: '%s', err: '%#v'", cls, mcrb.Spec.Username, err)

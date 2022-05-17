@@ -27,9 +27,20 @@ import (
 var ValidateMultiClusterRoleBindingName = apimachineryvalidation.NameIsDNSLabel
 
 // ValidateMultiClusterRoleBinding tests if required fields in the cluster are set.
-func ValidateMultiClusterRoleBinding(MultiClusterRoleBinding *authz.MultiClusterRoleBinding) field.ErrorList {
-	allErrs := apimachineryvalidation.ValidateObjectMeta(&MultiClusterRoleBinding.ObjectMeta, true, ValidateMultiClusterRoleBindingName, field.NewPath("metadata"))
-
+func ValidateMultiClusterRoleBinding(mcrb *authz.MultiClusterRoleBinding) field.ErrorList {
+	allErrs := apimachineryvalidation.ValidateObjectMeta(&mcrb.ObjectMeta, true, ValidateMultiClusterRoleBindingName, field.NewPath("metadata"))
+	clusters := mcrb.Spec.Clusters
+	if len(clusters) == 0 {
+		allErrs = append(allErrs, field.Required(field.NewPath("spec", "clusters"), "empty clusters"))
+	}
+	if len(clusters) > 1 {
+		for _, cls := range clusters {
+			if cls == "*" {
+				allErrs = append(allErrs, field.Required(field.NewPath("spec", "clusters"), "cluster '*' is invalidate"))
+				break
+			}
+		}
+	}
 	return allErrs
 }
 
