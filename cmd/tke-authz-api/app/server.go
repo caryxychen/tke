@@ -19,7 +19,11 @@
 package app
 
 import (
+	"context"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	genericapiserver "k8s.io/apiserver/pkg/server"
+	versionedclientset "tkestack.io/tke/api/client/clientset/versioned"
 	"tkestack.io/tke/cmd/tke-authz-api/app/config"
 	"tkestack.io/tke/pkg/authz/apiserver"
 	"tkestack.io/tke/pkg/platform/apiserver/filter"
@@ -38,8 +42,36 @@ func CreateServerChain(cfg *config.Config) (*genericapiserver.GenericAPIServer, 
 		return nil, err
 	}
 
-	apiServer.GenericAPIServer.AddPostStartHookOrDie("start-authz-api-server-informers", func(context genericapiserver.PostStartHookContext) error {
-		cfg.VersionedSharedInformerFactory.Start(context.StopCh)
+	apiServer.GenericAPIServer.AddPostStartHookOrDie("start-authz-api-server-informers", func(ctx genericapiserver.PostStartHookContext) error {
+		cfg.VersionedSharedInformerFactory.Start(ctx.StopCh)
+		return nil
+	})
+	apiServer.GenericAPIServer.AddPostStartHookOrDie("init-default-policies", func(ctx genericapiserver.PostStartHookContext) error {
+		client, err := versionedclientset.NewForConfig(ctx.LoopbackClientConfig)
+		if err != nil {
+			log.Warnf("failed to generate authz client, err '%#v'", err)
+			return err
+		}
+		for _, pol := range cfg.DefaultPolicies {
+			if _, err := client.AuthzV1().Policies(pol.Namespace).Create(context.TODO(), pol, metav1.CreateOptions{}); err != nil && !errors.IsAlreadyExists(err) {
+				log.Warnf("failed to init policy '%s/%s', err '%#v'", pol.Namespace, pol.Name, err)
+				return err
+			}
+		}
+		return nil
+	})
+	apiServer.GenericAPIServer.AddPostStartHookOrDie("init-default-roles", func(ctx genericapiserver.PostStartHookContext) error {
+		client, err := versionedclientset.NewForConfig(ctx.LoopbackClientConfig)
+		if err != nil {
+			log.Warnf("failed to generate authz client, err '%#v'", err)
+			return err
+		}
+		for _, rol := range cfg.DefaultRoles {
+			if _, err := client.AuthzV1().Roles(rol.Namespace).Create(context.TODO(), rol, metav1.CreateOptions{}); err != nil && !errors.IsAlreadyExists(err) {
+				log.Warnf("failed to init role '%s/%s', err '%#v'", rol.Namespace, rol.Name, err)
+				return err
+			}
+		}
 		return nil
 	})
 

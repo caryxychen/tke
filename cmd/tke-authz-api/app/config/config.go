@@ -19,9 +19,12 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"time"
 	"tkestack.io/tke/api/authz"
+	authzv1 "tkestack.io/tke/api/authz/v1"
 
 	"tkestack.io/tke/pkg/apiserver/util"
 
@@ -55,6 +58,8 @@ type Config struct {
 	VersionedSharedInformerFactory versionedinformers.SharedInformerFactory
 	StorageFactory                 *serverstorage.DefaultStorageFactory
 	PlatformClient                 platformversionedclient.PlatformV1Interface
+	DefaultPolicies                []*authzv1.Policy
+	DefaultRoles                   []*authzv1.Role
 }
 
 // CreateConfigFromOptions creates a running configuration instance based
@@ -126,12 +131,37 @@ func CreateConfigFromOptions(serverName string, opts *options.Options) (*Config,
 		return nil, err
 	}
 
+	var policies []*authzv1.Policy
+	if opts.Authz.DefaultPoliciesConfig != "" {
+		content, err := ioutil.ReadFile(opts.Authz.DefaultPoliciesConfig)
+		if err != nil {
+			return nil, err
+		}
+		err = json.Unmarshal(content, &policies)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var roles []*authzv1.Role
+	if opts.Authz.DefaultRolesConfig != "" {
+		content, err := ioutil.ReadFile(opts.Authz.DefaultRolesConfig)
+		if err != nil {
+			return nil, err
+		}
+		err = json.Unmarshal(content, &roles)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	cfg := &Config{
 		ServerName:                     serverName,
 		GenericAPIServerConfig:         genericAPIServerConfig,
 		VersionedSharedInformerFactory: versionedInformers,
 		StorageFactory:                 storageFactory,
 		PlatformClient:                 platformClient.PlatformV1(),
+		DefaultPolicies:                policies,
+		DefaultRoles:                   roles,
 	}
 	return cfg, nil
 }

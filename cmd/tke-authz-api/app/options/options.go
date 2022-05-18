@@ -41,6 +41,7 @@ type Options struct {
 	Authorization     *apiserveroptions.AuthorizationOptions
 	PlatformAPIClient *controlleroptions.APIServerClientOptions
 	Audit             *genericapiserveroptions.AuditOptions
+	Authz             *AuthzOptions
 }
 
 // NewOptions creates a new Options with a default config.
@@ -55,6 +56,7 @@ func NewOptions(serverName string) *Options {
 		Authorization:     apiserveroptions.NewAuthorizationOptions(),
 		PlatformAPIClient: controlleroptions.NewAPIServerClientOptions("platform", true),
 		Audit:             genericapiserveroptions.NewAuditOptions(),
+		Authz:             NewAuthzOptions(),
 	}
 }
 
@@ -69,6 +71,7 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	o.Authorization.AddFlags(fs)
 	o.PlatformAPIClient.AddFlags(fs)
 	o.Audit.AddFlags(fs)
+	o.Authz.AddFlags(fs)
 }
 
 // ApplyFlags parsing parameters from the command line or configuration file
@@ -84,6 +87,7 @@ func (o *Options) ApplyFlags() []error {
 	errs = append(errs, o.Authentication.ApplyFlags()...)
 	errs = append(errs, o.Authorization.ApplyFlags()...)
 	errs = append(errs, o.PlatformAPIClient.ApplyFlags()...)
+	errs = append(errs, o.Authz.ApplyFlags()...)
 
 	return errs
 }
