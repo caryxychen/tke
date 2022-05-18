@@ -116,8 +116,15 @@ func NewController(
 				DeleteFunc: controller.enqueue,
 			},
 			FilterFunc: func(obj interface{}) bool {
-				// TODO 优化此处逻辑
-				return true
+				mcrb, ok := obj.(*apiauthzv1.MultiClusterRoleBinding)
+				if !ok {
+					return false
+				}
+				provider, err := authzprovider.GetProvider(mcrb.Annotations)
+				if err != nil {
+					return true
+				}
+				return provider.OnFilter(context.TODO(), mcrb.Annotations)
 			},
 		},
 		resyncPeriod,

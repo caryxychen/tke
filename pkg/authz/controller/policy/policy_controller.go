@@ -34,6 +34,7 @@ import (
 	authzv1 "tkestack.io/tke/api/client/listers/authz/v1"
 	"tkestack.io/tke/pkg/authz/constant"
 	"tkestack.io/tke/pkg/authz/controller/policyrolecache"
+	authzprovider "tkestack.io/tke/pkg/authz/provider"
 	controllerutil "tkestack.io/tke/pkg/controller"
 	"tkestack.io/tke/pkg/util/log"
 	"tkestack.io/tke/pkg/util/metrics"
@@ -90,11 +91,15 @@ func NewController(
 				},
 			},
 			FilterFunc: func(obj interface{}) bool {
-				role, ok := obj.(*apiauthzv1.Policy)
-				if ok && role.Scope == apiauthzv1.MultiClusterScope {
+				policy, ok := obj.(*apiauthzv1.Policy)
+				if !ok || policy.Scope != apiauthzv1.MultiClusterScope {
+					return false
+				}
+				provider, err := authzprovider.GetProvider(policy.Annotations)
+				if err != nil {
 					return true
 				}
-				return false
+				return provider.OnFilter(context.TODO(), policy.Annotations)
 			},
 		},
 		resyncPeriod,
