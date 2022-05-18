@@ -47,6 +47,7 @@ func CreateServerChain(cfg *config.Config) (*genericapiserver.GenericAPIServer, 
 		return nil
 	})
 	apiServer.GenericAPIServer.AddPostStartHookOrDie("init-default-policies", func(ctx genericapiserver.PostStartHookContext) error {
+		log.Infof("init default policies ...")
 		client, err := versionedclientset.NewForConfig(ctx.LoopbackClientConfig)
 		if err != nil {
 			log.Warnf("failed to generate authz client, err '%#v'", err)
@@ -61,6 +62,7 @@ func CreateServerChain(cfg *config.Config) (*genericapiserver.GenericAPIServer, 
 		return nil
 	})
 	apiServer.GenericAPIServer.AddPostStartHookOrDie("init-default-roles", func(ctx genericapiserver.PostStartHookContext) error {
+		log.Infof("init default roles ...")
 		client, err := versionedclientset.NewForConfig(ctx.LoopbackClientConfig)
 		if err != nil {
 			log.Warnf("failed to generate authz client, err '%#v'", err)
