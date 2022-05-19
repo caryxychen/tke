@@ -13,7 +13,7 @@ import (
 
 type Provider interface {
 	Name() string
-	OnFilter(todo context.Context, annotations map[string]string) bool
+	OnFilter(ctx context.Context, annotations map[string]string) bool
 	InitContext(param interface{}) context.Context
 	GetTenantClusters(ctx context.Context, platformClient platformversionedclient.PlatformV1Interface, tenantID string) ([]string, error)
 	GetSubject(ctx context.Context, userName string, cluster *platformv1.Cluster) (*rbacv1.Subject, error)

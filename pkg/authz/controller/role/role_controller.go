@@ -95,7 +95,7 @@ func NewController(
 			},
 			FilterFunc: func(obj interface{}) bool {
 				role, ok := obj.(*apiauthzv1.Role)
-				if !ok || role.Scope == apiauthzv1.MultiClusterScope {
+				if !ok || role.Scope != apiauthzv1.MultiClusterScope {
 					return false
 				}
 				provider, err := authzprovider.GetProvider(role.Annotations)
