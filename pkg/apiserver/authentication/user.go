@@ -20,6 +20,8 @@ package authentication
 
 import (
 	"context"
+	"encoding/json"
+	"tkestack.io/tke/pkg/util/log"
 
 	"k8s.io/apiserver/pkg/endpoints/request"
 	"tkestack.io/tke/pkg/apiserver/authentication/authenticator/oidc"
@@ -69,6 +71,8 @@ func GetExtraValue(key string, ctx context.Context) []string {
 		return nil
 	}
 	extra := userInfo.GetExtra()
+	marshal, _ := json.Marshal(extra)
+	log.Infof("extra '%s'", marshal)
 	if len(extra) > 0 {
 		return extra[key]
 	}
