@@ -102,6 +102,7 @@ func (Strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
 		}
 	}
 	regions := authentication.GetExtraValue("region", ctx)
+	log.Infof("regions '%v'", regions)
 	if len(regions) != 0 {
 		policy.Annotations[authz.GroupName + "/region"] = regions[0]
 	}
