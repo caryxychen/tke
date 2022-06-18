@@ -20,12 +20,15 @@ package policy
 
 import (
 	"context"
+	"encoding/json"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/apiserver/pkg/registry/generic/registry"
 	"k8s.io/apiserver/pkg/registry/rest"
 	"k8s.io/apiserver/pkg/storage/names"
+	"k8s.io/kubectl/pkg/util/rbac"
 	"tkestack.io/tke/api/authz"
+	"tkestack.io/tke/pkg/apiserver/authentication"
 	"tkestack.io/tke/pkg/util/log"
 	namesutil "tkestack.io/tke/pkg/util/names"
 )
@@ -35,6 +38,10 @@ type Strategy struct {
 	runtime.ObjectTyper
 	names.NameGenerator
 }
+
+const (
+	NamePrefix = "pol-"
+)
 
 var _ rest.RESTCreateStrategy = &Strategy{}
 var _ rest.RESTUpdateStrategy = &Strategy{}
@@ -73,12 +80,45 @@ func (Strategy) Export(ctx context.Context, obj runtime.Object, exact bool) erro
 // PrepareForCreate is invoked on create before validation to normalize
 // the object.
 func (Strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
+	username, tenantID := authentication.UsernameAndTenantID(ctx)
+	log.Infof("PrepareForCreate, username '%s', tenantID '%s'", username, tenantID)
+	policy := obj.(*authz.Policy)
+	if tenantID != "" {
+		policy.TenantID = tenantID
+	}
+	if username != "" {
+		policy.Username = username
+	}
+	if policy.Name == "" && policy.GenerateName == "" {
+		policy.GenerateName = NamePrefix
+	}
+	if len(policy.Rules) != 0 {
+		rules, err := rbac.CompactRules(policy.Rules)
+		if err != nil {
+			marshal, _ := json.Marshal(policy.Rules)
+			log.Errorf("unexpected object, rules:%s", marshal)
+		} else {
+			policy.Rules = rules
+		}
+	}
+	regions := authentication.GetExtraValue("region", ctx)
+	if len(regions) != 0 {
+		policy.Annotations[authz.GroupName + "/region"] = regions[0]
+	}
 }
 
 // PrepareForUpdate is invoked on update before validation to normalize the
 // object.
 func (Strategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
-
+	oldPolicy := old.(*authz.Policy)
+	policy, _ := obj.(*authz.Policy)
+	_, tenantID := authentication.UsernameAndTenantID(ctx)
+	if len(tenantID) != 0 {
+		if oldPolicy.TenantID != tenantID {
+			log.Panic("Unauthorized update policy information", log.String("oldTenantID", oldPolicy.TenantID), log.String("newTenantID", policy.TenantID), log.String("userTenantID", tenantID))
+		}
+		policy.TenantID = tenantID
+	}
 }
 
 // Validate validates a new configmap.

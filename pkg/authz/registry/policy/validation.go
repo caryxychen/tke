@@ -29,7 +29,6 @@ var ValidatePolicyName = apimachineryvalidation.NameIsDNSLabel
 // ValidatePolicy tests if required fields in the cluster are set.
 func ValidatePolicy(policy *authz.Policy) field.ErrorList {
 	allErrs := apimachineryvalidation.ValidateObjectMeta(&policy.ObjectMeta, true, ValidatePolicyName, field.NewPath("metadata"))
-
 	return allErrs
 }
 
@@ -38,6 +37,5 @@ func ValidatePolicy(policy *authz.Policy) field.ErrorList {
 func ValidatePolicyUpdate(policy *authz.Policy, old *authz.Policy) field.ErrorList {
 	allErrs := apimachineryvalidation.ValidateObjectMetaUpdate(&policy.ObjectMeta, &old.ObjectMeta, field.NewPath("metadata"))
 	allErrs = append(allErrs, ValidatePolicy(policy)...)
-
 	return allErrs
 }

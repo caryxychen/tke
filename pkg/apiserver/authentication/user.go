@@ -63,6 +63,18 @@ func GetUID(ctx context.Context) (uid string) {
 	return userInfo.GetUID()
 }
 
+func GetExtraValue(key string, ctx context.Context) []string {
+	userInfo, ok := request.UserFrom(ctx)
+	if !ok {
+		return nil
+	}
+	extra := userInfo.GetExtra()
+	if len(extra) > 0 {
+		return extra[key]
+	}
+	return nil
+}
+
 // IsAdministrator check whether administrator
 func IsAdministrator(ctx context.Context, privilegedUsername string) bool {
 	username, tenantID := UsernameAndTenantID(ctx)
