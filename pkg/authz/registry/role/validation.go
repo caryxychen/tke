@@ -19,8 +19,10 @@
 package role
 
 import (
+	"fmt"
 	apimachineryvalidation "k8s.io/apimachinery/pkg/api/validation"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	"k8s.io/client-go/tools/cache"
 	"tkestack.io/tke/api/authz"
 )
 
@@ -28,7 +30,20 @@ var ValidateRoleName = apimachineryvalidation.NameIsDNSLabel
 
 func ValidateRole(role *authz.Role) field.ErrorList {
 	allErrs := apimachineryvalidation.ValidateObjectMeta(&role.ObjectMeta, true, ValidateRoleName, field.NewPath("metadata"))
+	if role.Scope != authz.MultiClusterScope {
+		allErrs = append(allErrs, field.Invalid(field.NewPath("scope"), &role.ObjectMeta, "only support multicluster scope"))
+	}
 
+	for _, pol := range role.Policies {
+		polNs, _, err := cache.SplitMetaNamespaceKey(pol)
+		if err != nil {
+			allErrs = append(allErrs, field.Required(field.NewPath("spec", "policies"), fmt.Sprintf("police '%s' invalidate", pol)))
+			return allErrs
+		}
+		if polNs != "" && polNs != "default" && polNs != role.Namespace {
+			allErrs = append(allErrs, field.Required(field.NewPath("spec", "policies"), fmt.Sprintf("police '%s' invalidate", pol)))
+		}
+	}
 	return allErrs
 }
 

@@ -26,6 +26,7 @@ import (
 	"k8s.io/apiserver/pkg/registry/rest"
 	"k8s.io/apiserver/pkg/storage/names"
 	"tkestack.io/tke/api/authz"
+	"tkestack.io/tke/pkg/apiserver/authentication"
 	"tkestack.io/tke/pkg/util/log"
 	namesutil "tkestack.io/tke/pkg/util/names"
 )
@@ -35,6 +36,8 @@ type Strategy struct {
 	runtime.ObjectTyper
 	names.NameGenerator
 }
+
+const NamePrefix = "rol-"
 
 var _ rest.RESTCreateStrategy = &Strategy{}
 var _ rest.RESTUpdateStrategy = &Strategy{}
@@ -73,17 +76,45 @@ func (Strategy) Export(ctx context.Context, obj runtime.Object, exact bool) erro
 // PrepareForCreate is invoked on create before validation to normalize
 // the object.
 func (Strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
+	username, tenantID := authentication.UsernameAndTenantID(ctx)
+	log.Debugf("PrepareForCreate role, username '%s', tenantID '%s'", username, tenantID)
 	role, _ := obj.(*authz.Role)
+	if tenantID != "" {
+		role.TenantID = tenantID
+	}
+	if username != "" {
+		role.Username = username
+	}
+	if role.Name == "" && role.GenerateName == "" {
+		role.GenerateName = NamePrefix
+	}
+	region := authentication.GetExtraValue("region", ctx)
+	log.Debugf("region '%v'", region)
+	if len(region) != 0 {
+		annotations := role.Annotations
+		if len(annotations) == 0 {
+			annotations = map[string]string{}
+		}
+		annotations[authz.GroupName+"/region"] = region[0]
+		role.Annotations = annotations
+	}
 	role.Finalizers = []string{string(authz.RoleFinalize)}
 }
 
 // PrepareForUpdate is invoked on update before validation to normalize the
 // object.
 func (Strategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
+	oldRole := old.(*authz.Role)
+	role, _ := obj.(*authz.Role)
+	if role.TenantID != oldRole.TenantID {
+		log.Warnf("Unauthorized update role tenantID '%s'", oldRole.TenantID)
+		role.TenantID = oldRole.TenantID
+	}
 }
 
 // Validate validates a new configmap.
 func (Strategy) Validate(ctx context.Context, obj runtime.Object) field.ErrorList {
+	// TODO 校验policy是否存在
 	return ValidateRole(obj.(*authz.Role))
 }
 

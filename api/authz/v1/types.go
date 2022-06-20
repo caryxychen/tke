@@ -106,7 +106,8 @@ type MultiClusterRoleBinding struct {
 }
 
 type MultiClusterRoleBindingSpec struct {
-	Username string   `json:"username" protobuf:"bytes,1,name=username"`
+	TenantID string   `json:"tenantID" protobuf:"bytes,1,name=tenantID"`
+	Username string   `json:"username" protobuf:"bytes,2,name=username"`
 	RoleName string   `json:"roleName" protobuf:"bytes,3,name=roleName"`
 	Clusters []string `json:"clusters" protobuf:"bytes,4,rep,name=clusters"`
 }

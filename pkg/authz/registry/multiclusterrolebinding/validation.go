@@ -21,6 +21,7 @@ package multiclusterrolebinding
 import (
 	apimachineryvalidation "k8s.io/apimachinery/pkg/api/validation"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	"k8s.io/client-go/tools/cache"
 	"tkestack.io/tke/api/authz"
 )
 
@@ -40,6 +41,14 @@ func ValidateMultiClusterRoleBinding(mcrb *authz.MultiClusterRoleBinding) field.
 				break
 			}
 		}
+	}
+	roleNs, _, err := cache.SplitMetaNamespaceKey(mcrb.Spec.RoleName)
+	if err != nil {
+		allErrs = append(allErrs, field.Required(field.NewPath("spec", "roleName"), "roleName invalidate"))
+		return allErrs
+	}
+	if roleNs != "" && roleNs != "default" && roleNs != mcrb.Namespace {
+		allErrs = append(allErrs, field.Required(field.NewPath("spec", "roleName"), "roleName invalidate"))
 	}
 	return allErrs
 }

@@ -117,6 +117,9 @@ type MultiClusterRoleBinding struct {
 }
 
 type MultiClusterRoleBindingSpec struct {
+	// +optional
+	TenantID string
+	// +optional
 	Username string
 	// roleNamespace/roleName
 	RoleName string

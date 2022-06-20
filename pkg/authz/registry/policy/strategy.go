@@ -81,7 +81,7 @@ func (Strategy) Export(ctx context.Context, obj runtime.Object, exact bool) erro
 // the object.
 func (Strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
 	username, tenantID := authentication.UsernameAndTenantID(ctx)
-	log.Infof("PrepareForCreate, username '%s', tenantID '%s'", username, tenantID)
+	log.Debugf("PrepareForCreate policy, username '%s', tenantID '%s'", username, tenantID)
 	policy := obj.(*authz.Policy)
 	if tenantID != "" {
 		policy.TenantID = tenantID
@@ -101,10 +101,15 @@ func (Strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
 			policy.Rules = rules
 		}
 	}
-	regions := authentication.GetExtraValue("region", ctx)
-	log.Infof("regions '%v'", regions)
-	if len(regions) != 0 {
-		policy.Annotations[authz.GroupName + "/region"] = regions[0]
+	region := authentication.GetExtraValue("region", ctx)
+	log.Debugf("region '%v'", region)
+	if len(region) != 0 {
+		annotations := policy.Annotations
+		if len(annotations) == 0 {
+			annotations = map[string]string{}
+		}
+		annotations[authz.GroupName + "/region"] = region[0]
+		policy.Annotations = annotations
 	}
 }
 
@@ -113,12 +118,9 @@ func (Strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
 func (Strategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
 	oldPolicy := old.(*authz.Policy)
 	policy, _ := obj.(*authz.Policy)
-	_, tenantID := authentication.UsernameAndTenantID(ctx)
-	if len(tenantID) != 0 {
-		if oldPolicy.TenantID != tenantID {
-			log.Panic("Unauthorized update policy information", log.String("oldTenantID", oldPolicy.TenantID), log.String("newTenantID", policy.TenantID), log.String("userTenantID", tenantID))
-		}
-		policy.TenantID = tenantID
+	if policy.TenantID != oldPolicy.TenantID {
+		log.Warnf("Unauthorized update policy tenantID '%s'", oldPolicy.TenantID)
+		policy.TenantID = oldPolicy.TenantID
 	}
 }
 

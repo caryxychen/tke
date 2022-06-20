@@ -45740,6 +45740,13 @@ func schema_tke_api_authz_v1_MultiClusterRoleBindingSpec(ref common.ReferenceCal
 			SchemaProps: spec.SchemaProps{
 				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
+					"tenantID": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
 					"username": {
 						SchemaProps: spec.SchemaProps{
 							Default: "",
@@ -45769,7 +45776,7 @@ func schema_tke_api_authz_v1_MultiClusterRoleBindingSpec(ref common.ReferenceCal
 						},
 					},
 				},
-				Required: []string{"username", "roleName", "clusters"},
+				Required: []string{"tenantID", "username", "roleName", "clusters"},
 			},
 		},
 	}

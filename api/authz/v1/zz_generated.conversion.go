@@ -242,6 +242,7 @@ func Convert_authz_MultiClusterRoleBindingList_To_v1_MultiClusterRoleBindingList
 }
 
 func autoConvert_v1_MultiClusterRoleBindingSpec_To_authz_MultiClusterRoleBindingSpec(in *MultiClusterRoleBindingSpec, out *authz.MultiClusterRoleBindingSpec, s conversion.Scope) error {
+	out.TenantID = in.TenantID
 	out.Username = in.Username
 	out.RoleName = in.RoleName
 	out.Clusters = *(*[]string)(unsafe.Pointer(&in.Clusters))
@@ -254,6 +255,7 @@ func Convert_v1_MultiClusterRoleBindingSpec_To_authz_MultiClusterRoleBindingSpec
 }
 
 func autoConvert_authz_MultiClusterRoleBindingSpec_To_v1_MultiClusterRoleBindingSpec(in *authz.MultiClusterRoleBindingSpec, out *MultiClusterRoleBindingSpec, s conversion.Scope) error {
+	out.TenantID = in.TenantID
 	out.Username = in.Username
 	out.RoleName = in.RoleName
 	out.Clusters = *(*[]string)(unsafe.Pointer(&in.Clusters))

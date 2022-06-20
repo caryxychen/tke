@@ -28,6 +28,7 @@ import (
 	"k8s.io/apiserver/pkg/storage/names"
 	"k8s.io/client-go/tools/cache"
 	"tkestack.io/tke/api/authz"
+	"tkestack.io/tke/pkg/apiserver/authentication"
 	"tkestack.io/tke/pkg/authz/constant"
 	"tkestack.io/tke/pkg/util/log"
 	namesutil "tkestack.io/tke/pkg/util/names"
@@ -42,6 +43,8 @@ type Strategy struct {
 var _ rest.RESTCreateStrategy = &Strategy{}
 var _ rest.RESTUpdateStrategy = &Strategy{}
 var _ rest.RESTDeleteStrategy = &Strategy{}
+
+const NamePrefix = "mcrb-"
 
 // NewStrategy creates a strategy that is the default logic that applies when
 // creating and updating namespace set objects.
@@ -67,7 +70,19 @@ func (Strategy) Export(ctx context.Context, obj runtime.Object, exact bool) erro
 // PrepareForCreate is invoked on create before validation to normalize
 // the object.
 func (Strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
+	username, tenantID := authentication.UsernameAndTenantID(ctx)
+	log.Debugf("PrepareForCreate multiClusterRoleBinding, username '%s', tenantID '%s'", username, tenantID)
 	mcrb, _ := obj.(*authz.MultiClusterRoleBinding)
+	if tenantID != "" {
+		mcrb.Spec.TenantID = tenantID
+	}
+	if username != "" {
+		mcrb.Spec.Username = username
+	}
+	if mcrb.Name == "" && mcrb.GenerateName == "" {
+		mcrb.GenerateName = NamePrefix
+	}
+
 	roleNs, roleName, err := cache.SplitMetaNamespaceKey(mcrb.Spec.RoleName)
 	if err != nil {
 		return
@@ -88,10 +103,14 @@ func (Strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
 	if annotation == nil {
 		annotation = map[string]string{}
 	}
+	region := authentication.GetExtraValue("region", ctx)
+	log.Debugf("region '%v'", region)
+	if len(region) != 0 {
+		annotation[authz.GroupName+"/region"] = region[0]
+	}
 	bytes, _ := json.Marshal(mcrb.Spec.Clusters)
 	annotation[constant.LastDispatchedClusters] = string(bytes)
 	mcrb.Annotations = annotation
-
 	mcrb.Status.Phase = authz.BindingActive
 	mcrb.ObjectMeta.Finalizers = []string{string(authz.MultiClusterRoleBindingFinalize)}
 }
@@ -115,8 +134,8 @@ func (Strategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
 }
 
 // Validate validates a new configmap.
-// TODO
 func (Strategy) Validate(ctx context.Context, obj runtime.Object) field.ErrorList {
+	// TODO 检查Clusters、Roles是否合法
 	return ValidateMultiClusterRoleBinding(obj.(*authz.MultiClusterRoleBinding))
 }
 
