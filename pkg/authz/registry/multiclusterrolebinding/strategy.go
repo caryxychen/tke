@@ -125,11 +125,16 @@ func dispatchAllClusters(clusterIDs []string) bool {
 // PrepareForUpdate is invoked on update before validation to normalize the
 // object.
 func (Strategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
+	oldMcrb := old.(*authz.MultiClusterRoleBinding)
 	mcrb := obj.(*authz.MultiClusterRoleBinding)
 	if dispatchAllClusters(mcrb.Spec.Clusters) {
 		mcrb.Labels[constant.DispatchAllClusters] = "true"
 	} else {
 		delete(mcrb.Labels, constant.DispatchAllClusters)
+	}
+	if mcrb.Spec.TenantID != oldMcrb.Spec.TenantID {
+		log.Warnf("Unauthorized update mcrb tenantID '%s'", oldMcrb.Spec.TenantID)
+		mcrb.Spec.TenantID = oldMcrb.Spec.TenantID
 	}
 }
 
