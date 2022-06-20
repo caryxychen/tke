@@ -44,8 +44,8 @@ type Storage struct {
 }
 
 // NewStorage returns a Storage object that will work against configmap.
-func NewStorage(optsGetter genericregistry.RESTOptionsGetter) *Storage {
-	strategy := role.NewStrategy()
+func NewStorage(optsGetter genericregistry.RESTOptionsGetter, policyGetter rest.Getter) *Storage {
+	strategy := role.NewStrategy(policyGetter)
 	store := &registry.Store{
 		NewFunc:                  func() runtime.Object { return &authz.Role{} },
 		NewListFunc:              func() runtime.Object { return &authz.RoleList{} },

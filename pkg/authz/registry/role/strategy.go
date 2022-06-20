@@ -35,6 +35,7 @@ import (
 type Strategy struct {
 	runtime.ObjectTyper
 	names.NameGenerator
+	policyGetter rest.Getter
 }
 
 const NamePrefix = "rol-"
@@ -54,8 +55,8 @@ func ShouldDeleteDuringUpdate(ctx context.Context, key string, obj, existing run
 
 // NewStrategy creates a strategy that is the default logic that applies when
 // creating and updating namespace set objects.
-func NewStrategy() *Strategy {
-	return &Strategy{authz.Scheme, namesutil.Generator}
+func NewStrategy(policyGetter rest.Getter) *Strategy {
+	return &Strategy{authz.Scheme, namesutil.Generator, policyGetter}
 }
 
 // DefaultGarbageCollectionPolicy returns the default garbage collection behavior.
@@ -113,9 +114,8 @@ func (Strategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
 }
 
 // Validate validates a new configmap.
-func (Strategy) Validate(ctx context.Context, obj runtime.Object) field.ErrorList {
-	// TODO 校验policy是否存在
-	return ValidateRole(obj.(*authz.Role))
+func (s Strategy) Validate(ctx context.Context, obj runtime.Object) field.ErrorList {
+	return ValidateRole(obj.(*authz.Role), s.policyGetter)
 }
 
 // AllowCreateOnUpdate is false for persistent events
@@ -140,8 +140,8 @@ func (Strategy) Canonicalize(obj runtime.Object) {
 }
 
 // ValidateUpdate is the default update validation for an end namespace set.
-func (Strategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
-	return ValidateRoleUpdate(obj.(*authz.Role), old.(*authz.Role))
+func (s Strategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
+	return ValidateRoleUpdate(obj.(*authz.Role), old.(*authz.Role), s.policyGetter)
 }
 
 // WarningsOnUpdate returns warnings for the given update.

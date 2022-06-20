@@ -27,6 +27,7 @@ import (
 	restclient "k8s.io/client-go/rest"
 	"tkestack.io/tke/api/authz"
 	authzv1 "tkestack.io/tke/api/authz/v1"
+	platformversionedclient "tkestack.io/tke/api/client/clientset/versioned/typed/platform/v1"
 	"tkestack.io/tke/pkg/apiserver/storage"
 	configmapstorage "tkestack.io/tke/pkg/authz/registry/configmap/storage"
 	mcrbstorage "tkestack.io/tke/pkg/authz/registry/multiclusterrolebinding/storage"
@@ -39,6 +40,7 @@ import (
 type StorageProvider struct {
 	LoopbackClientConfig *restclient.Config
 	Authorizer           authorizer.Authorizer
+	PlatformClient       platformversionedclient.PlatformV1Interface
 }
 
 // Implement RESTStorageProvider
@@ -47,10 +49,9 @@ var _ storage.RESTStorageProvider = &StorageProvider{}
 // NewRESTStorage is a factory constructor to creates and returns the APIGroupInfo
 func (s *StorageProvider) NewRESTStorage(apiResourceConfigSource serverstorage.APIResourceConfigSource, restOptionsGetter generic.RESTOptionsGetter) (genericserver.APIGroupInfo, bool) {
 	apiGroupInfo := genericserver.NewDefaultAPIGroupInfo(authz.GroupName, authz.Scheme, authz.ParameterCodec, authz.Codecs)
-
 	if apiResourceConfigSource.VersionEnabled(authzv1.SchemeGroupVersion) {
 		apiGroupInfo.VersionedResourcesStorageMap[authzv1.SchemeGroupVersion.Version] =
-			s.v1Storage(apiResourceConfigSource, restOptionsGetter)
+			s.v1Storage(apiResourceConfigSource, restOptionsGetter, s.PlatformClient)
 	}
 	return apiGroupInfo, true
 }
@@ -60,13 +61,13 @@ func (*StorageProvider) GroupName() string {
 	return authz.GroupName
 }
 
-func (s *StorageProvider) v1Storage(apiResourceConfigSource serverstorage.APIResourceConfigSource, restOptionsGetter generic.RESTOptionsGetter) map[string]rest.Storage {
+func (s *StorageProvider) v1Storage(apiResourceConfigSource serverstorage.APIResourceConfigSource, restOptionsGetter generic.RESTOptionsGetter, platformClient platformversionedclient.PlatformV1Interface) map[string]rest.Storage {
 	storageMap := make(map[string]rest.Storage)
 	{
 		configmapREST := configmapstorage.NewStorage(restOptionsGetter)
 		policyREST := policystorage.NewStorage(restOptionsGetter)
-		rolestorageREST := rolestorage.NewStorage(restOptionsGetter)
-		mcrbREST := mcrbstorage.NewStorage(restOptionsGetter)
+		rolestorageREST := rolestorage.NewStorage(restOptionsGetter, policyREST.Policy)
+		mcrbREST := mcrbstorage.NewStorage(restOptionsGetter, rolestorageREST.Role, platformClient)
 
 		storageMap["policies"] = policyREST.Policy
 		storageMap["roles"] = rolestorageREST.Role

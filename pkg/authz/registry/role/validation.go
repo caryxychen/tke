@@ -21,21 +21,24 @@ package role
 import (
 	"fmt"
 	apimachineryvalidation "k8s.io/apimachinery/pkg/api/validation"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	"k8s.io/apiserver/pkg/endpoints/request"
+	"k8s.io/apiserver/pkg/registry/rest"
 	"k8s.io/client-go/tools/cache"
 	"tkestack.io/tke/api/authz"
 )
 
 var ValidateRoleName = apimachineryvalidation.NameIsDNSLabel
 
-func ValidateRole(role *authz.Role) field.ErrorList {
+func ValidateRole(role *authz.Role, policyGetter rest.Getter) field.ErrorList {
 	allErrs := apimachineryvalidation.ValidateObjectMeta(&role.ObjectMeta, true, ValidateRoleName, field.NewPath("metadata"))
 	if role.Scope != authz.MultiClusterScope {
 		allErrs = append(allErrs, field.Invalid(field.NewPath("scope"), &role.ObjectMeta, "only support multicluster scope"))
 	}
 
 	for _, pol := range role.Policies {
-		polNs, _, err := cache.SplitMetaNamespaceKey(pol)
+		polNs, polName, err := cache.SplitMetaNamespaceKey(pol)
 		if err != nil {
 			allErrs = append(allErrs, field.Required(field.NewPath("spec", "policies"), fmt.Sprintf("police '%s' invalidate", pol)))
 			return allErrs
@@ -43,15 +46,21 @@ func ValidateRole(role *authz.Role) field.ErrorList {
 		if polNs != "" && polNs != "default" && polNs != role.Namespace {
 			allErrs = append(allErrs, field.Required(field.NewPath("spec", "policies"), fmt.Sprintf("police '%s' invalidate", pol)))
 		}
+		if polNs == "" {
+			polNs = "default"
+		}
+		ctx := request.WithNamespace(request.NewContext(), polNs)
+		if _, err := policyGetter.Get(ctx, polName, &metav1.GetOptions{}); err != nil {
+			allErrs = append(allErrs, field.Required(field.NewPath("spec", "policies"), fmt.Sprintf("police '%s' not exist", pol)))
+		}
 	}
 	return allErrs
 }
 
 // ValidateRoleUpdate tests if required fields in the namespace set are
 // set during an update.
-func ValidateRoleUpdate(role *authz.Role, old *authz.Role) field.ErrorList {
+func ValidateRoleUpdate(role *authz.Role, old *authz.Role, policyGetter rest.Getter) field.ErrorList {
 	allErrs := apimachineryvalidation.ValidateObjectMetaUpdate(&role.ObjectMeta, &old.ObjectMeta, field.NewPath("metadata"))
-	allErrs = append(allErrs, ValidateRole(role)...)
-
+	allErrs = append(allErrs, ValidateRole(role, policyGetter)...)
 	return allErrs
 }

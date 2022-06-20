@@ -32,6 +32,7 @@ import (
 	storageerr "k8s.io/apiserver/pkg/storage/errors"
 	"k8s.io/apiserver/pkg/util/dryrun"
 	"tkestack.io/tke/api/authz"
+	platformversionedclient "tkestack.io/tke/api/client/clientset/versioned/typed/platform/v1"
 	apiserverutil "tkestack.io/tke/pkg/apiserver/util"
 	"tkestack.io/tke/pkg/authz/registry/multiclusterrolebinding"
 	"tkestack.io/tke/pkg/util/log"
@@ -45,8 +46,8 @@ type Storage struct {
 }
 
 // NewStorage returns a Storage object that will work against configmap.
-func NewStorage(optsGetter genericregistry.RESTOptionsGetter) *Storage {
-	strategy := multiclusterrolebinding.NewStrategy()
+func NewStorage(optsGetter genericregistry.RESTOptionsGetter, roleGetter rest.Getter, platformClient platformversionedclient.PlatformV1Interface) *Storage {
+	strategy := multiclusterrolebinding.NewStrategy(roleGetter, platformClient)
 	store := &registry.Store{
 		NewFunc:                  func() runtime.Object { return &authz.MultiClusterRoleBinding{} },
 		NewListFunc:              func() runtime.Object { return &authz.MultiClusterRoleBindingList{} },
@@ -64,13 +65,10 @@ func NewStorage(optsGetter genericregistry.RESTOptionsGetter) *Storage {
 	if err := store.CompleteWithOptions(options); err != nil {
 		log.Panic("Failed to create configmap etcd rest storage", log.Err(err))
 	}
-
 	statusStore := *store
 	statusStore.UpdateStrategy = multiclusterrolebinding.NewStatusStrategy(strategy)
-
 	finalizeStore := *store
 	finalizeStore.UpdateStrategy = multiclusterrolebinding.NewFinalizerStrategy(strategy)
-
 	return &Storage{
 		MultiClusterRoleBinding: &REST{store},
 		Status:               &StatusREST{&statusStore},

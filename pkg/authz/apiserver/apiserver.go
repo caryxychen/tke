@@ -89,6 +89,7 @@ func (c completedConfig) New(delegationTarget genericapiserver.DelegationTarget)
 		&authzrest.StorageProvider{
 			LoopbackClientConfig: c.GenericConfig.LoopbackClientConfig,
 			Authorizer:           c.GenericConfig.Authorization.Authorizer,
+			PlatformClient:       c.ExtraConfig.PlatformClient,
 		},
 	}
 	m.InstallAPIs(c.ExtraConfig.APIResourceConfigSource, c.GenericConfig.RESTOptionsGetter, restStorageProviders...)

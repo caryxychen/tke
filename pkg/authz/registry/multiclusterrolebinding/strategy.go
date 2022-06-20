@@ -28,6 +28,7 @@ import (
 	"k8s.io/apiserver/pkg/storage/names"
 	"k8s.io/client-go/tools/cache"
 	"tkestack.io/tke/api/authz"
+	platformversionedclient "tkestack.io/tke/api/client/clientset/versioned/typed/platform/v1"
 	"tkestack.io/tke/pkg/apiserver/authentication"
 	"tkestack.io/tke/pkg/authz/constant"
 	"tkestack.io/tke/pkg/util/log"
@@ -38,6 +39,8 @@ import (
 type Strategy struct {
 	runtime.ObjectTyper
 	names.NameGenerator
+	roleGetter     rest.Getter
+	platformClient platformversionedclient.PlatformV1Interface
 }
 
 var _ rest.RESTCreateStrategy = &Strategy{}
@@ -48,8 +51,8 @@ const NamePrefix = "mcrb-"
 
 // NewStrategy creates a strategy that is the default logic that applies when
 // creating and updating namespace set objects.
-func NewStrategy() *Strategy {
-	return &Strategy{authz.Scheme, namesutil.Generator}
+func NewStrategy(roleGetter rest.Getter, platformClient platformversionedclient.PlatformV1Interface) *Strategy {
+	return &Strategy{authz.Scheme, namesutil.Generator, roleGetter, platformClient}
 }
 
 // DefaultGarbageCollectionPolicy returns the default garbage collection behavior.
@@ -139,9 +142,8 @@ func (Strategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
 }
 
 // Validate validates a new configmap.
-func (Strategy) Validate(ctx context.Context, obj runtime.Object) field.ErrorList {
-	// TODO 检查Clusters、Roles是否合法
-	return ValidateMultiClusterRoleBinding(obj.(*authz.MultiClusterRoleBinding))
+func (s Strategy) Validate(ctx context.Context, obj runtime.Object) field.ErrorList {
+	return ValidateMultiClusterRoleBinding(obj.(*authz.MultiClusterRoleBinding), s.roleGetter, s.platformClient)
 }
 
 // AllowCreateOnUpdate is false for persistent events
@@ -166,8 +168,8 @@ func (Strategy) Canonicalize(obj runtime.Object) {
 }
 
 // ValidateUpdate is the default update validation for an end namespace set.
-func (Strategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
-	return ValidateMultiClusterRoleBindingUpdate(obj.(*authz.MultiClusterRoleBinding), old.(*authz.MultiClusterRoleBinding))
+func (s Strategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
+	return ValidateMultiClusterRoleBindingUpdate(obj.(*authz.MultiClusterRoleBinding), old.(*authz.MultiClusterRoleBinding), s.roleGetter, s.platformClient)
 }
 
 // WarningsOnUpdate returns warnings for the given update.
@@ -212,7 +214,7 @@ func (StatusStrategy) PrepareForUpdate(_ context.Context, obj, old runtime.Objec
 // filled in before the object is persisted.  This method should not mutate
 // the object.
 func (s *StatusStrategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
-	return ValidateMultiClusterRoleBindingUpdate(obj.(*authz.MultiClusterRoleBinding), old.(*authz.MultiClusterRoleBinding))
+	return nil
 }
 
 // FinalizeStrategy implements finalizer logic for Machine.
