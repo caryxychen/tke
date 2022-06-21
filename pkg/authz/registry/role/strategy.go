@@ -141,7 +141,7 @@ func (Strategy) Canonicalize(obj runtime.Object) {
 
 // ValidateUpdate is the default update validation for an end namespace set.
 func (s Strategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
-	return ValidateRoleUpdate(obj.(*authz.Role), old.(*authz.Role), s.policyGetter)
+	return ValidateRoleUpdate(ctx, obj.(*authz.Role), old.(*authz.Role), s.policyGetter)
 }
 
 // WarningsOnUpdate returns warnings for the given update.

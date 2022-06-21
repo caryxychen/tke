@@ -108,7 +108,7 @@ func (Strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
 		if len(annotations) == 0 {
 			annotations = map[string]string{}
 		}
-		annotations[authz.GroupName + "/region"] = region[0]
+		annotations[authz.GroupName+"/region"] = region[0]
 		policy.Annotations = annotations
 	}
 }
@@ -152,7 +152,7 @@ func (Strategy) Canonicalize(obj runtime.Object) {
 
 // ValidateUpdate is the default update validation for an end namespace set.
 func (Strategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
-	return ValidatePolicyUpdate(obj.(*authz.Policy), old.(*authz.Policy))
+	return ValidatePolicyUpdate(ctx, obj.(*authz.Policy), old.(*authz.Policy))
 }
 
 // WarningsOnUpdate returns warnings for the given update.

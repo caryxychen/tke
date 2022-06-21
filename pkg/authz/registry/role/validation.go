@@ -19,6 +19,7 @@
 package role
 
 import (
+	"context"
 	"fmt"
 	apimachineryvalidation "k8s.io/apimachinery/pkg/api/validation"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,6 +28,7 @@ import (
 	"k8s.io/apiserver/pkg/registry/rest"
 	"k8s.io/client-go/tools/cache"
 	"tkestack.io/tke/api/authz"
+	"tkestack.io/tke/pkg/apiserver/authentication"
 )
 
 var ValidateRoleName = apimachineryvalidation.NameIsDNSLabel
@@ -59,7 +61,14 @@ func ValidateRole(role *authz.Role, policyGetter rest.Getter) field.ErrorList {
 
 // ValidateRoleUpdate tests if required fields in the namespace set are
 // set during an update.
-func ValidateRoleUpdate(role *authz.Role, old *authz.Role, policyGetter rest.Getter) field.ErrorList {
+func ValidateRoleUpdate(ctx context.Context, role *authz.Role, old *authz.Role, policyGetter rest.Getter) field.ErrorList {
+	_, tenantID := authentication.UsernameAndTenantID(ctx)
+	if tenantID == "" {
+		tenantID = "default"
+	}
+	if tenantID != "default" && tenantID != role.Namespace {
+		return append(field.ErrorList{}, field.Required(field.NewPath("metadata", "namespace"), fmt.Sprintf("tenant '%s' can't update role '%s/%s'", tenantID, role.Namespace, role.Name)))
+	}
 	allErrs := apimachineryvalidation.ValidateObjectMetaUpdate(&role.ObjectMeta, &old.ObjectMeta, field.NewPath("metadata"))
 	allErrs = append(allErrs, ValidateRole(role, policyGetter)...)
 	return allErrs

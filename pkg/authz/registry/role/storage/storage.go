@@ -103,7 +103,7 @@ func (r *REST) Delete(ctx context.Context, name string, deleteValidation rest.Va
 		return nil, false, err
 	}
 	role := object.(*authz.Role)
-	if role.Namespace != tenantID {
+	if tenantID != "default" && role.Namespace != tenantID {
 		return nil, false, fmt.Errorf("tenant '%s' can't delete role '%s/%s'", tenantID, role.Namespace, role.Name)
 	}
 

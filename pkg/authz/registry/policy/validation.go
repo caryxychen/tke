@@ -19,9 +19,12 @@
 package policy
 
 import (
+	"context"
+	"fmt"
 	apimachineryvalidation "k8s.io/apimachinery/pkg/api/validation"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"tkestack.io/tke/api/authz"
+	"tkestack.io/tke/pkg/apiserver/authentication"
 )
 
 var ValidatePolicyName = apimachineryvalidation.NameIsDNSLabel
@@ -34,7 +37,14 @@ func ValidatePolicy(policy *authz.Policy) field.ErrorList {
 
 // ValidatePolicyUpdate tests if required fields in the namespace set are
 // set during an update.
-func ValidatePolicyUpdate(policy *authz.Policy, old *authz.Policy) field.ErrorList {
+func ValidatePolicyUpdate(ctx context.Context, policy *authz.Policy, old *authz.Policy) field.ErrorList {
+	_, tenantID := authentication.UsernameAndTenantID(ctx)
+	if tenantID == "" {
+		tenantID = "default"
+	}
+	if tenantID != "default" && tenantID != policy.Namespace {
+		return append(field.ErrorList{}, field.Required(field.NewPath("metadata", "namespace"), fmt.Sprintf("tenant '%s' can't update policy '%s/%s'", tenantID, policy.Namespace, policy.Name)))
+	}
 	allErrs := apimachineryvalidation.ValidateObjectMetaUpdate(&policy.ObjectMeta, &old.ObjectMeta, field.NewPath("metadata"))
 	allErrs = append(allErrs, ValidatePolicy(policy)...)
 	return allErrs

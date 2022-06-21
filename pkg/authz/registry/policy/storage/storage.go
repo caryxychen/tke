@@ -92,7 +92,7 @@ func (r *REST) Delete(ctx context.Context, name string, deleteValidation rest.Va
 		return nil, false, err
 	}
 	pol := object.(*authz.Policy)
-	if pol.Namespace != tenantID {
+	if tenantID != "default" && pol.Namespace != tenantID {
 		return nil, false, fmt.Errorf("tenant '%s' can't delete policy '%s/%s'", tenantID, pol.Namespace, pol.Name)
 	}
 	return r.Store.Delete(ctx, name, deleteValidation, options)
