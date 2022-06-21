@@ -20,12 +20,15 @@ package storage
 
 import (
 	"context"
+	"fmt"
 	metainternal "k8s.io/apimachinery/pkg/apis/meta/internalversion"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	genericregistry "k8s.io/apiserver/pkg/registry/generic"
 	"k8s.io/apiserver/pkg/registry/generic/registry"
 	"k8s.io/apiserver/pkg/registry/rest"
 	"tkestack.io/tke/api/authz"
+	"tkestack.io/tke/pkg/apiserver/authentication"
 	"tkestack.io/tke/pkg/authz/registry/policy"
 	"tkestack.io/tke/pkg/util/log"
 )
@@ -76,4 +79,21 @@ func (r *REST) ShortNames() []string {
 // List selects resources in the storage which match to the selector. 'options' can be nil.
 func (r *REST) List(ctx context.Context, options *metainternal.ListOptions) (runtime.Object, error) {
 	return r.Store.List(ctx, options)
+}
+
+// Delete enforces life-cycle rules for policy termination
+func (r *REST) Delete(ctx context.Context, name string, deleteValidation rest.ValidateObjectFunc, options *metav1.DeleteOptions) (runtime.Object, bool, error) {
+	_, tenantID := authentication.UsernameAndTenantID(ctx)
+	if tenantID == "" {
+		tenantID = "default"
+	}
+	object, err := r.Get(ctx, name, &metav1.GetOptions{})
+	if err != nil {
+		return nil, false, err
+	}
+	pol := object.(*authz.Policy)
+	if pol.Namespace != tenantID {
+		return nil, false, fmt.Errorf("tenant '%s' can't delete policy '%s/%s'", tenantID, pol.Namespace, pol.Name)
+	}
+	return r.Store.Delete(ctx, name, deleteValidation, options)
 }

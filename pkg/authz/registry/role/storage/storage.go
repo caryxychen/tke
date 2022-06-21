@@ -32,6 +32,7 @@ import (
 	storageerr "k8s.io/apiserver/pkg/storage/errors"
 	"k8s.io/apiserver/pkg/util/dryrun"
 	"tkestack.io/tke/api/authz"
+	"tkestack.io/tke/pkg/apiserver/authentication"
 	apiserverutil "tkestack.io/tke/pkg/apiserver/util"
 	"tkestack.io/tke/pkg/authz/registry/role"
 	"tkestack.io/tke/pkg/util/log"
@@ -93,11 +94,18 @@ func (r *REST) List(ctx context.Context, options *metainternal.ListOptions) (run
 
 // Delete enforces life-cycle rules for policy termination
 func (r *REST) Delete(ctx context.Context, name string, deleteValidation rest.ValidateObjectFunc, options *metav1.DeleteOptions) (runtime.Object, bool, error) {
+	_, tenantID := authentication.UsernameAndTenantID(ctx)
+	if tenantID == "" {
+		tenantID = "default"
+	}
 	object, err := r.Get(ctx, name, &metav1.GetOptions{})
 	if err != nil {
 		return nil, false, err
 	}
 	role := object.(*authz.Role)
+	if role.Namespace != tenantID {
+		return nil, false, fmt.Errorf("tenant '%s' can't delete role '%s/%s'", tenantID, role.Namespace, role.Name)
+	}
 
 	// Ensure we have a UID precondition
 	if options == nil {
