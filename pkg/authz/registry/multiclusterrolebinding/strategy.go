@@ -27,6 +27,7 @@ import (
 	"k8s.io/apiserver/pkg/registry/rest"
 	"k8s.io/apiserver/pkg/storage/names"
 	"k8s.io/client-go/tools/cache"
+	"strings"
 	"tkestack.io/tke/api/authz"
 	platformversionedclient "tkestack.io/tke/api/client/clientset/versioned/typed/platform/v1"
 	"tkestack.io/tke/pkg/apiserver/authentication"
@@ -83,6 +84,7 @@ func (Strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
 		mcrb.Spec.Username = username
 	}
 	if mcrb.Name == "" && mcrb.GenerateName == "" {
+		mcrb.Name = "mcrb-" + mcrb.Spec.Username + "-" + strings.ReplaceAll(mcrb.Spec.RoleName, "/", "-")
 		mcrb.GenerateName = NamePrefix
 	}
 
