@@ -28,6 +28,7 @@ import (
 	"tkestack.io/tke/api/authz"
 	platformversionedclient "tkestack.io/tke/api/client/clientset/versioned/typed/platform/v1"
 	"tkestack.io/tke/pkg/apiserver/authentication"
+	authzprovider "tkestack.io/tke/pkg/authz/provider"
 	"tkestack.io/tke/pkg/util/log"
 	namesutil "tkestack.io/tke/pkg/util/names"
 )
@@ -36,7 +37,7 @@ import (
 type Strategy struct {
 	runtime.ObjectTyper
 	names.NameGenerator
-	policyGetter rest.Getter
+	policyGetter   rest.Getter
 	platformClient platformversionedclient.PlatformV1Interface
 }
 
@@ -117,7 +118,14 @@ func (Strategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
 
 // Validate validates a new configmap.
 func (s Strategy) Validate(ctx context.Context, obj runtime.Object) field.ErrorList {
-	return ValidateRole(obj.(*authz.Role), s.policyGetter, s.platformClient)
+	role := obj.(*authz.Role)
+	provider, err := authzprovider.GetProvider(role.Annotations)
+	if err == nil {
+		if fieldErr := provider.Validate(context.TODO(), role, s.platformClient); fieldErr != nil {
+			return field.ErrorList{fieldErr}
+		}
+	}
+	return ValidateRole(role, s.policyGetter, s.platformClient)
 }
 
 // AllowCreateOnUpdate is false for persistent events

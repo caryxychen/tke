@@ -30,24 +30,15 @@ import (
 	"tkestack.io/tke/api/authz"
 	platformversionedclient "tkestack.io/tke/api/client/clientset/versioned/typed/platform/v1"
 	"tkestack.io/tke/pkg/apiserver/authentication"
-	authzprovider "tkestack.io/tke/pkg/authz/provider"
 )
 
 var ValidateRoleName = apimachineryvalidation.NameIsDNSLabel
 
 func ValidateRole(role *authz.Role, policyGetter rest.Getter, platformClient platformversionedclient.PlatformV1Interface) field.ErrorList {
-	provider, err := authzprovider.GetProvider(role.Annotations)
-	if err == nil {
-		if fieldErr := provider.Validate(context.TODO(), role, platformClient); fieldErr != nil {
-			return field.ErrorList{fieldErr}
-		}
-	}
-
 	allErrs := apimachineryvalidation.ValidateObjectMeta(&role.ObjectMeta, true, ValidateRoleName, field.NewPath("metadata"))
 	if role.Scope != authz.MultiClusterScope {
 		allErrs = append(allErrs, field.Invalid(field.NewPath("scope"), &role.ObjectMeta, "only support multicluster scope"))
 	}
-
 	for _, pol := range role.Policies {
 		polNs, polName, err := cache.SplitMetaNamespaceKey(pol)
 		if err != nil {

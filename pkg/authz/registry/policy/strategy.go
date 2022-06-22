@@ -30,6 +30,7 @@ import (
 	"tkestack.io/tke/api/authz"
 	platformversionedclient "tkestack.io/tke/api/client/clientset/versioned/typed/platform/v1"
 	"tkestack.io/tke/pkg/apiserver/authentication"
+	authzprovider "tkestack.io/tke/pkg/authz/provider"
 	"tkestack.io/tke/pkg/util/log"
 	namesutil "tkestack.io/tke/pkg/util/names"
 )
@@ -128,6 +129,13 @@ func (Strategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
 
 // Validate validates a new configmap.
 func (s Strategy) Validate(ctx context.Context, obj runtime.Object) field.ErrorList {
+	policy := obj.(*authz.Policy)
+	provider, err := authzprovider.GetProvider(policy.Annotations)
+	if err == nil {
+		if fieldErr := provider.Validate(context.TODO(), policy, s.platformClient); fieldErr != nil {
+			return field.ErrorList{fieldErr}
+		}
+	}
 	return ValidatePolicy(obj.(*authz.Policy), s.platformClient)
 }
 

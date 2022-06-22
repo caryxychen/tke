@@ -32,6 +32,7 @@ import (
 	platformversionedclient "tkestack.io/tke/api/client/clientset/versioned/typed/platform/v1"
 	"tkestack.io/tke/pkg/apiserver/authentication"
 	"tkestack.io/tke/pkg/authz/constant"
+	authzprovider "tkestack.io/tke/pkg/authz/provider"
 	"tkestack.io/tke/pkg/util/log"
 	namesutil "tkestack.io/tke/pkg/util/names"
 )
@@ -145,6 +146,13 @@ func (Strategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
 
 // Validate validates a new configmap.
 func (s Strategy) Validate(ctx context.Context, obj runtime.Object) field.ErrorList {
+	mcrb := obj.(*authz.MultiClusterRoleBinding)
+	provider, err := authzprovider.GetProvider(mcrb.Annotations)
+	if err == nil {
+		if fieldErr := provider.Validate(context.TODO(), mcrb, s.platformClient); fieldErr != nil {
+			return field.ErrorList{fieldErr}
+		}
+	}
 	return ValidateMultiClusterRoleBinding(obj.(*authz.MultiClusterRoleBinding), s.roleGetter, s.platformClient)
 }
 
