@@ -39,17 +39,18 @@ func ValidateMultiClusterRoleBinding(mcrb *authz.MultiClusterRoleBinding, roleGe
 	clusters := mcrb.Spec.Clusters
 	if len(clusters) == 0 {
 		allErrs = append(allErrs, field.Required(field.NewPath("spec", "clusters"), "empty clusters"))
+		return allErrs
 	}
-	if len(clusters) > 1 {
-		for _, cls := range clusters {
-			if cls == "*" {
+	for _, cls := range clusters {
+		if cls == "*" {
+			if len(clusters) != 1 {
 				allErrs = append(allErrs, field.Required(field.NewPath("spec", "clusters"), "cluster '*' is invalidate"))
 				return allErrs
-			} else {
-				if _, err := platformClient.Clusters().Get(context.TODO(), cls, metav1.GetOptions{}); err != nil {
-					allErrs = append(allErrs, field.Required(field.NewPath("spec", "clusters"), fmt.Sprintf("get cluster '%s' failed, err '%v'", cls, err)))
-					return allErrs
-				}
+			}
+		} else {
+			if _, err := platformClient.Clusters().Get(context.TODO(), cls, metav1.GetOptions{ResourceVersion: "0"}); err != nil {
+				allErrs = append(allErrs, field.Required(field.NewPath("spec", "clusters"), fmt.Sprintf("get cluster '%s' failed, err '%v'", cls, err)))
+				return allErrs
 			}
 		}
 	}

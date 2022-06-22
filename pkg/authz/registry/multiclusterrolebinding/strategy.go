@@ -153,7 +153,7 @@ func (s Strategy) Validate(ctx context.Context, obj runtime.Object) field.ErrorL
 			return field.ErrorList{fieldErr}
 		}
 	}
-	return ValidateMultiClusterRoleBinding(obj.(*authz.MultiClusterRoleBinding), s.roleGetter, s.platformClient)
+	return ValidateMultiClusterRoleBinding(mcrb, s.roleGetter, s.platformClient)
 }
 
 // AllowCreateOnUpdate is false for persistent events

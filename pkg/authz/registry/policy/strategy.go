@@ -136,7 +136,7 @@ func (s Strategy) Validate(ctx context.Context, obj runtime.Object) field.ErrorL
 			return field.ErrorList{fieldErr}
 		}
 	}
-	return ValidatePolicy(obj.(*authz.Policy), s.platformClient)
+	return ValidatePolicy(policy, s.platformClient)
 }
 
 // AllowCreateOnUpdate is false for persistent events
