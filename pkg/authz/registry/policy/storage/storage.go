@@ -28,6 +28,7 @@ import (
 	"k8s.io/apiserver/pkg/registry/generic/registry"
 	"k8s.io/apiserver/pkg/registry/rest"
 	"tkestack.io/tke/api/authz"
+	platformversionedclient "tkestack.io/tke/api/client/clientset/versioned/typed/platform/v1"
 	"tkestack.io/tke/pkg/apiserver/authentication"
 	"tkestack.io/tke/pkg/authz/registry/policy"
 	"tkestack.io/tke/pkg/util/log"
@@ -39,8 +40,8 @@ type Storage struct {
 }
 
 // NewStorage returns a Storage object that will work against configmap.
-func NewStorage(optsGetter genericregistry.RESTOptionsGetter) *Storage {
-	strategy := policy.NewStrategy()
+func NewStorage(optsGetter genericregistry.RESTOptionsGetter, platformClient platformversionedclient.PlatformV1Interface) *Storage {
+	strategy := policy.NewStrategy(platformClient)
 	store := &registry.Store{
 		NewFunc:                  func() runtime.Object { return &authz.Policy{} },
 		NewListFunc:              func() runtime.Object { return &authz.PolicyList{} },

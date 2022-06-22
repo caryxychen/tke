@@ -28,12 +28,21 @@ import (
 	"k8s.io/apiserver/pkg/registry/rest"
 	"k8s.io/client-go/tools/cache"
 	"tkestack.io/tke/api/authz"
+	platformversionedclient "tkestack.io/tke/api/client/clientset/versioned/typed/platform/v1"
 	"tkestack.io/tke/pkg/apiserver/authentication"
+	authzprovider "tkestack.io/tke/pkg/authz/provider"
 )
 
 var ValidateRoleName = apimachineryvalidation.NameIsDNSLabel
 
-func ValidateRole(role *authz.Role, policyGetter rest.Getter) field.ErrorList {
+func ValidateRole(role *authz.Role, policyGetter rest.Getter, platformClient platformversionedclient.PlatformV1Interface) field.ErrorList {
+	provider, err := authzprovider.GetProvider(role.Annotations)
+	if err == nil {
+		if fieldErr := provider.Validate(context.TODO(), role, platformClient); fieldErr != nil {
+			return field.ErrorList{fieldErr}
+		}
+	}
+
 	allErrs := apimachineryvalidation.ValidateObjectMeta(&role.ObjectMeta, true, ValidateRoleName, field.NewPath("metadata"))
 	if role.Scope != authz.MultiClusterScope {
 		allErrs = append(allErrs, field.Invalid(field.NewPath("scope"), &role.ObjectMeta, "only support multicluster scope"))
@@ -61,7 +70,7 @@ func ValidateRole(role *authz.Role, policyGetter rest.Getter) field.ErrorList {
 
 // ValidateRoleUpdate tests if required fields in the namespace set are
 // set during an update.
-func ValidateRoleUpdate(ctx context.Context, role *authz.Role, old *authz.Role, policyGetter rest.Getter) field.ErrorList {
+func ValidateRoleUpdate(ctx context.Context, role *authz.Role, old *authz.Role, policyGetter rest.Getter, platformClient platformversionedclient.PlatformV1Interface) field.ErrorList {
 	_, tenantID := authentication.UsernameAndTenantID(ctx)
 	if tenantID == "" {
 		tenantID = "default"
@@ -70,6 +79,6 @@ func ValidateRoleUpdate(ctx context.Context, role *authz.Role, old *authz.Role, 
 		return append(field.ErrorList{}, field.Required(field.NewPath("metadata", "namespace"), fmt.Sprintf("tenant '%s' can't update role '%s/%s'", tenantID, role.Namespace, role.Name)))
 	}
 	allErrs := apimachineryvalidation.ValidateObjectMetaUpdate(&role.ObjectMeta, &old.ObjectMeta, field.NewPath("metadata"))
-	allErrs = append(allErrs, ValidateRole(role, policyGetter)...)
+	allErrs = append(allErrs, ValidateRole(role, policyGetter, platformClient)...)
 	return allErrs
 }

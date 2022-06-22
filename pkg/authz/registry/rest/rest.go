@@ -65,8 +65,8 @@ func (s *StorageProvider) v1Storage(apiResourceConfigSource serverstorage.APIRes
 	storageMap := make(map[string]rest.Storage)
 	{
 		configmapREST := configmapstorage.NewStorage(restOptionsGetter)
-		policyREST := policystorage.NewStorage(restOptionsGetter)
-		rolestorageREST := rolestorage.NewStorage(restOptionsGetter, policyREST.Policy)
+		policyREST := policystorage.NewStorage(restOptionsGetter, platformClient)
+		rolestorageREST := rolestorage.NewStorage(restOptionsGetter, policyREST.Policy, platformClient)
 		mcrbREST := mcrbstorage.NewStorage(restOptionsGetter, rolestorageREST.Role, platformClient)
 
 		storageMap["policies"] = policyREST.Policy

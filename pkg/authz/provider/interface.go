@@ -5,6 +5,8 @@ import (
 	"fmt"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 	authzv1 "tkestack.io/tke/api/authz/v1"
 	platformversionedclient "tkestack.io/tke/api/client/clientset/versioned/typed/platform/v1"
 	apiplatformv1 "tkestack.io/tke/api/platform/v1"
@@ -14,6 +16,7 @@ import (
 type Provider interface {
 	Name() string
 	OnFilter(ctx context.Context, annotations map[string]string) bool
+	Validate(ctx context.Context, obj runtime.Object, platformClient platformversionedclient.PlatformV1Interface) *field.Error
 	InitContext(param interface{}) context.Context
 	GetTenantClusters(ctx context.Context, platformClient platformversionedclient.PlatformV1Interface, tenantID string) ([]string, error)
 	GetSubject(ctx context.Context, userName string, cluster *platformv1.Cluster) (*rbacv1.Subject, error)
@@ -30,6 +33,10 @@ type DelegateProvider struct {
 
 func (p *DelegateProvider) OnFilter(todo context.Context, annotations map[string]string) bool {
 	return true
+}
+
+func (p *DelegateProvider) Validate(ctx context.Context, obj runtime.Object, platformClient platformversionedclient.PlatformV1Interface) *field.Error {
+	return nil
 }
 
 func (p *DelegateProvider) Name() string {

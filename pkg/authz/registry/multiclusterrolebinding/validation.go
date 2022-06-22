@@ -29,12 +29,19 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"tkestack.io/tke/api/authz"
 	platformversionedclient "tkestack.io/tke/api/client/clientset/versioned/typed/platform/v1"
+	authzprovider "tkestack.io/tke/pkg/authz/provider"
 )
 
 var ValidateMultiClusterRoleBindingName = apimachineryvalidation.NameIsDNSLabel
 
 // ValidateMultiClusterRoleBinding tests if required fields in the cluster are set.
 func ValidateMultiClusterRoleBinding(mcrb *authz.MultiClusterRoleBinding, roleGetter rest.Getter, platformClient platformversionedclient.PlatformV1Interface) field.ErrorList {
+	provider, err := authzprovider.GetProvider(mcrb.Annotations)
+	if err == nil {
+		if fieldErr := provider.Validate(context.TODO(), mcrb, platformClient); fieldErr != nil {
+			return field.ErrorList{fieldErr}
+		}
+	}
 	allErrs := apimachineryvalidation.ValidateObjectMeta(&mcrb.ObjectMeta, true, ValidateMultiClusterRoleBindingName, field.NewPath("metadata"))
 	clusters := mcrb.Spec.Clusters
 	if len(clusters) == 0 {

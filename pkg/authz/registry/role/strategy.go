@@ -26,6 +26,7 @@ import (
 	"k8s.io/apiserver/pkg/registry/rest"
 	"k8s.io/apiserver/pkg/storage/names"
 	"tkestack.io/tke/api/authz"
+	platformversionedclient "tkestack.io/tke/api/client/clientset/versioned/typed/platform/v1"
 	"tkestack.io/tke/pkg/apiserver/authentication"
 	"tkestack.io/tke/pkg/util/log"
 	namesutil "tkestack.io/tke/pkg/util/names"
@@ -36,6 +37,7 @@ type Strategy struct {
 	runtime.ObjectTyper
 	names.NameGenerator
 	policyGetter rest.Getter
+	platformClient platformversionedclient.PlatformV1Interface
 }
 
 const NamePrefix = "rol-"
@@ -55,8 +57,8 @@ func ShouldDeleteDuringUpdate(ctx context.Context, key string, obj, existing run
 
 // NewStrategy creates a strategy that is the default logic that applies when
 // creating and updating namespace set objects.
-func NewStrategy(policyGetter rest.Getter) *Strategy {
-	return &Strategy{authz.Scheme, namesutil.Generator, policyGetter}
+func NewStrategy(policyGetter rest.Getter, platformClient platformversionedclient.PlatformV1Interface) *Strategy {
+	return &Strategy{authz.Scheme, namesutil.Generator, policyGetter, platformClient}
 }
 
 // DefaultGarbageCollectionPolicy returns the default garbage collection behavior.
@@ -115,7 +117,7 @@ func (Strategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
 
 // Validate validates a new configmap.
 func (s Strategy) Validate(ctx context.Context, obj runtime.Object) field.ErrorList {
-	return ValidateRole(obj.(*authz.Role), s.policyGetter)
+	return ValidateRole(obj.(*authz.Role), s.policyGetter, s.platformClient)
 }
 
 // AllowCreateOnUpdate is false for persistent events
@@ -141,7 +143,7 @@ func (Strategy) Canonicalize(obj runtime.Object) {
 
 // ValidateUpdate is the default update validation for an end namespace set.
 func (s Strategy) ValidateUpdate(ctx context.Context, obj, old runtime.Object) field.ErrorList {
-	return ValidateRoleUpdate(ctx, obj.(*authz.Role), old.(*authz.Role), s.policyGetter)
+	return ValidateRoleUpdate(ctx, obj.(*authz.Role), old.(*authz.Role), s.policyGetter, s.platformClient)
 }
 
 // WarningsOnUpdate returns warnings for the given update.
