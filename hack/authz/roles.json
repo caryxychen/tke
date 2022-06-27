@@ -1,32 +1,74 @@
 [
   {
-    "metadata": {
-      "name": "cluster-admin",
-      "namespace": "default",
-      "creationTimestamp": null
+    "metadata":{
+      "name":"rol-admin",
+      "namespace":"default",
+      "annotations":{
+        "authz.tkestack.io/region":"ap-guangzhou",
+        "authz.tkestack.io/provider-name":"clusternet"
+      }
     },
-    "displayName": "cluster-admin",
-    "description": "对所有命名空间下资源的读写权限，拥有集群节点、存储卷、命名空间、配额的读写权限",
-    "scope": "MultiCluster",
-    "tenantID": "default",
-    "username": "default",
-    "policies": [
-      "default/cluster-admin"
+    "displayName":"admin",
+    "description":"对所有命名空间下资源的读写权限，拥有集群节点、存储卷、命名空间、配额的读写权限",
+    "scope":"MultiCluster",
+    "tenantID":"default",
+    "username":"admin",
+    "policies":[
+      "default/pol-admin"
     ]
   },
   {
-    "metadata": {
-      "name": "cluster-viewer",
-      "namespace": "default",
-      "creationTimestamp": null
+    "metadata":{
+      "name":"rol-view",
+      "namespace":"default",
+      "annotations":{
+        "tdcc.tke.cloud.tencent.com/region":"ap-guangzhou",
+        "authz.tkestack.io/provider-name":"clusternet"
+      }
     },
-    "displayName": "cluster-viewer",
-    "description": "对所有资源拥有只读权限",
-    "scope": "MultiCluster",
-    "tenantID": "default",
-    "username": "default",
-    "policies": [
-      "default/view"
+    "displayName":"view",
+    "description":"对所有命名空间或所选命名空间下控制台可见资源的只读权限",
+    "scope":"MultiCluster",
+    "tenantID":"default",
+    "username":"admin",
+    "policies":[
+      "default/pol-view"
+    ]
+  },
+  {
+    "metadata":{
+      "name":"rol-ops",
+      "namespace":"default",
+      "annotations":{
+        "tdcc.tke.cloud.tencent.com/region":"ap-guangzhou",
+        "authz.tkestack.io/provider-name":"clusternet"
+      }
+    },
+    "displayName":"ops",
+    "description":"对所有命名空间下资源的读写权限，拥有集群节点、存储卷、命名空间、配额的读写权限",
+    "scope":"MultiCluster",
+    "tenantID":"default",
+    "username":"admin",
+    "policies":[
+      "default/pol-ops"
+    ]
+  },
+  {
+    "metadata":{
+      "name":"rol-dev",
+      "namespace":"default",
+      "annotations":{
+        "tdcc.tke.cloud.tencent.com/region":"ap-guangzhou",
+        "authz.tkestack.io/provider-name":"clusternet"
+      }
+    },
+    "displayName":"dev",
+    "description":"对所有命名空间或所选命名空间下控制台可见资源的读写权限",
+    "scope":"MultiCluster",
+    "tenantID":"default",
+    "username":"admin",
+    "policies":[
+      "default/pol-dev"
     ]
   }
 ]
