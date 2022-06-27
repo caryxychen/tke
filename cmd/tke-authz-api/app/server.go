@@ -46,28 +46,20 @@ func CreateServerChain(cfg *config.Config) (*genericapiserver.GenericAPIServer, 
 		cfg.VersionedSharedInformerFactory.Start(ctx.StopCh)
 		return nil
 	})
-	apiServer.GenericAPIServer.AddPostStartHookOrDie("init-default-policies", func(ctx genericapiserver.PostStartHookContext) error {
-		log.Infof("init default policies ...")
+	apiServer.GenericAPIServer.AddPostStartHookOrDie("init-authz-default", func(ctx genericapiserver.PostStartHookContext) error {
 		client, err := versionedclientset.NewForConfig(ctx.LoopbackClientConfig)
 		if err != nil {
 			log.Warnf("failed to generate authz client, err '%#v'", err)
 			return err
 		}
+		log.Infof("init default policies ...")
 		for _, pol := range cfg.DefaultPolicies {
 			if _, err := client.AuthzV1().Policies(pol.Namespace).Create(context.TODO(), pol, metav1.CreateOptions{}); err != nil && !errors.IsAlreadyExists(err) {
 				log.Warnf("failed to init policy '%s/%s', err '%#v'", pol.Namespace, pol.Name, err)
 				return err
 			}
 		}
-		return nil
-	})
-	apiServer.GenericAPIServer.AddPostStartHookOrDie("init-default-roles", func(ctx genericapiserver.PostStartHookContext) error {
 		log.Infof("init default roles ...")
-		client, err := versionedclientset.NewForConfig(ctx.LoopbackClientConfig)
-		if err != nil {
-			log.Warnf("failed to generate authz client, err '%#v'", err)
-			return err
-		}
 		for _, rol := range cfg.DefaultRoles {
 			if _, err := client.AuthzV1().Roles(rol.Namespace).Create(context.TODO(), rol, metav1.CreateOptions{}); err != nil && !errors.IsAlreadyExists(err) {
 				log.Warnf("failed to init role '%s/%s', err '%#v'", rol.Namespace, rol.Name, err)
@@ -76,7 +68,6 @@ func CreateServerChain(cfg *config.Config) (*genericapiserver.GenericAPIServer, 
 		}
 		return nil
 	})
-
 	return apiServer.GenericAPIServer, nil
 }
 
