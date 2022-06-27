@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	"k8s.io/apiserver/pkg/endpoints/request"
 	"k8s.io/apiserver/pkg/registry/generic/registry"
 	"k8s.io/apiserver/pkg/registry/rest"
 	"k8s.io/apiserver/pkg/storage/names"
@@ -75,20 +76,17 @@ func (Strategy) Export(ctx context.Context, obj runtime.Object, exact bool) erro
 // PrepareForCreate is invoked on create before validation to normalize
 // the object.
 func (Strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
-	username, tenantID := authentication.UsernameAndTenantID(ctx)
-	log.Debugf("PrepareForCreate multiClusterRoleBinding, username '%s', tenantID '%s'", username, tenantID)
+	tenantID := request.NamespaceValue(ctx)
+	if tenantID == "" {
+		tenantID = "default"
+	}
 	mcrb, _ := obj.(*authz.MultiClusterRoleBinding)
-	if tenantID != "" {
-		mcrb.Spec.TenantID = tenantID
-	}
-	if username != "" {
-		mcrb.Spec.Username = username
-	}
+	mcrb.Spec.TenantID = tenantID
+
 	if mcrb.Name == "" && mcrb.GenerateName == "" {
 		mcrb.Name = "mcrb-" + mcrb.Spec.Username + "-" + strings.ReplaceAll(mcrb.Spec.RoleName, "/", "-")
 		mcrb.GenerateName = NamePrefix
 	}
-
 	roleNs, roleName, err := cache.SplitMetaNamespaceKey(mcrb.Spec.RoleName)
 	if err != nil {
 		return

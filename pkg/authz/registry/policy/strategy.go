@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	"k8s.io/apiserver/pkg/endpoints/request"
 	"k8s.io/apiserver/pkg/registry/generic/registry"
 	"k8s.io/apiserver/pkg/registry/rest"
 	"k8s.io/apiserver/pkg/storage/names"
@@ -83,12 +84,14 @@ func (Strategy) Export(ctx context.Context, obj runtime.Object, exact bool) erro
 // PrepareForCreate is invoked on create before validation to normalize
 // the object.
 func (Strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
-	username, tenantID := authentication.UsernameAndTenantID(ctx)
-	log.Debugf("PrepareForCreate policy, username '%s', tenantID '%s'", username, tenantID)
-	policy := obj.(*authz.Policy)
-	if tenantID != "" {
-		policy.TenantID = tenantID
+	username, _ := authentication.UsernameAndTenantID(ctx)
+	tenantID := request.NamespaceValue(ctx)
+	if tenantID == "" {
+		tenantID = "default"
 	}
+
+	policy := obj.(*authz.Policy)
+	policy.TenantID = tenantID
 	if username != "" {
 		policy.Username = username
 	}

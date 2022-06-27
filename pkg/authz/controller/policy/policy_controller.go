@@ -262,7 +262,7 @@ func (c *Controller) updateRelatedRoles(policyName string, policyDeleted bool) e
 }
 
 func removeItem(raw []string, item string) []string {
-	result := []string{}
+	var result []string
 	for _, str := range raw {
 		if str != item {
 			result = append(result, str)

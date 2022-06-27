@@ -36,6 +36,14 @@ var ValidateMultiClusterRoleBindingName = apimachineryvalidation.NameIsDNSLabel
 // ValidateMultiClusterRoleBinding tests if required fields in the cluster are set.
 func ValidateMultiClusterRoleBinding(mcrb *authz.MultiClusterRoleBinding, roleGetter rest.Getter, platformClient platformversionedclient.PlatformV1Interface) field.ErrorList {
 	allErrs := apimachineryvalidation.ValidateObjectMeta(&mcrb.ObjectMeta, true, ValidateMultiClusterRoleBindingName, field.NewPath("metadata"))
+	if len(mcrb.Spec.TenantID) == 0 {
+		allErrs = append(allErrs, field.Required(field.NewPath("spec", "tenantID"), "empty tenantID"))
+		return allErrs
+	}
+	if len(mcrb.Spec.Username) == 0 {
+		allErrs = append(allErrs, field.Required(field.NewPath("spec", "username"), "empty username"))
+		return allErrs
+	}
 	clusters := mcrb.Spec.Clusters
 	if len(clusters) == 0 {
 		allErrs = append(allErrs, field.Required(field.NewPath("spec", "clusters"), "empty clusters"))
