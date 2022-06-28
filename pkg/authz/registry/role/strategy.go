@@ -89,7 +89,7 @@ func (Strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
 
 	role, _ := obj.(*authz.Role)
 	role.TenantID = tenantID
-	if username != "" {
+	if role.Username == "" {
 		role.Username = username
 	}
 	if role.Name == "" && role.GenerateName == "" {

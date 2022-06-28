@@ -92,7 +92,7 @@ func (Strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
 
 	policy := obj.(*authz.Policy)
 	policy.TenantID = tenantID
-	if username != "" {
+	if policy.Username == "" {
 		policy.Username = username
 	}
 	if policy.Name == "" && policy.GenerateName == "" {
