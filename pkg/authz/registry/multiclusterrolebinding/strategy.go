@@ -20,7 +20,6 @@ package multiclusterrolebinding
 
 import (
 	"context"
-	"encoding/json"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/apiserver/pkg/endpoints/request"
@@ -112,8 +111,6 @@ func (Strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
 	if len(region) != 0 {
 		annotation[authz.GroupName+"/region"] = region[0]
 	}
-	bytes, _ := json.Marshal(mcrb.Spec.Clusters)
-	annotation[constant.LastDispatchedClusters] = string(bytes)
 	mcrb.Annotations = annotation
 	mcrb.Status.Phase = authz.BindingActive
 	mcrb.ObjectMeta.Finalizers = []string{string(authz.MultiClusterRoleBindingFinalize)}

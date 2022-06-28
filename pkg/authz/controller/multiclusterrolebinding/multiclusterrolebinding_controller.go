@@ -295,6 +295,10 @@ func (c *Controller) handleActive(ctx context.Context, mcrb *apiauthzv1.MultiClu
 
 	role, err := c.roleLister.Roles(roleNs).Get(roleName)
 	if err != nil {
+		if errors.IsNotFound(err) {
+			log.Warnf("Role '%s/%s' has been deleted", roleNs, roleName)
+			return c.client.AuthzV1().MultiClusterRoleBindings(mcrb.Namespace).Delete(context.TODO(), mcrb.Name, metav1.DeleteOptions{})
+		}
 		log.Warn("Unable to retrieve Role from store",
 			log.String("namespace", roleNs),
 			log.String("name", roleName), log.Err(err))
@@ -312,9 +316,15 @@ func (c *Controller) handleActive(ctx context.Context, mcrb *apiauthzv1.MultiClu
 
 	// 获取user在各个cluster内的subject
 	clusterSubjects := map[string]*rbacv1.Subject{}
+	clusters := []string{}
 	for _, cls := range mcrb.Spec.Clusters {
 		cluster, err := clusterprovider.GetV1ClusterByName(ctx, c.platformClient, cls, mcrb.Spec.Username)
 		if err != nil {
+			if errors.IsNotFound(err) {
+				// 如果集群已经被删除，则跳过
+				log.Infof("Cluster '%s' is not exist", cls)
+				continue
+			}
 			log.Warnf("GetV1ClusterByName failed, cluster: '%s', user: '%s', err: '%#v'", cls, mcrb.Spec.Username, err)
 			return err
 		}
@@ -324,7 +334,9 @@ func (c *Controller) handleActive(ctx context.Context, mcrb *apiauthzv1.MultiClu
 			return err
 		}
 		clusterSubjects[cls] = subject
+		clusters = append(clusters, cls)
 	}
+	mcrb.Spec.Clusters = clusters
 
 	// 执行权限分发
 	if err = provider.DispatchMultiClusterRoleBinding(ctx, c.platformClient, mcrb, policies, clusterSubjects); err != nil {
@@ -333,7 +345,7 @@ func (c *Controller) handleActive(ctx context.Context, mcrb *apiauthzv1.MultiClu
 	}
 
 	// 删除已经解绑的资源
-	lastDispatchedClusters := []string{}
+	var lastDispatchedClusters []string
 	if lastStr, ok := mcrb.Annotations[constant.LastDispatchedClusters]; ok {
 		err = json.Unmarshal([]byte(lastStr), &lastDispatchedClusters)
 		if err != nil {
@@ -343,12 +355,15 @@ func (c *Controller) handleActive(ctx context.Context, mcrb *apiauthzv1.MultiClu
 	}
 	oldSet := sets.NewString(lastDispatchedClusters...)
 	newSet := sets.NewString(mcrb.Spec.Clusters...)
-	difference := oldSet.Difference(newSet)
-	if len(difference) != 0 {
-		if err = provider.DeleteUnbindingResources(ctx, c.platformClient, mcrb, difference.List()); err != nil {
+	oldDifference := oldSet.Difference(newSet)
+	newDifference := newSet.Difference(oldSet)
+	if len(oldDifference) != 0 {
+		if err = provider.DeleteUnbindingResources(ctx, c.platformClient, mcrb, oldDifference.List()); err != nil {
 			log.Warnf("DeleteUnbindingResources '%s/%s' failed', err: '%#v'", mcrb.Namespace, mcrb.Name, err)
 			return err
 		}
+	}
+	if len(oldDifference) != 0 || len(newDifference) != 0 {
 		clsBytes, _ := json.Marshal(mcrb.Spec.Clusters)
 		mcrb.Annotations[constant.LastDispatchedClusters] = string(clsBytes)
 		if mcrb.Labels[constant.DispatchAllClusters] == "true" {
