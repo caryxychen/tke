@@ -22,7 +22,7 @@
       "name":"rol-view",
       "namespace":"default",
       "annotations":{
-        "tdcc.tke.cloud.tencent.com/region":"ap-guangzhou",
+        "authz.tkestack.io/region":"ap-guangzhou",
         "authz.tkestack.io/provider-name":"clusternet"
       }
     },
@@ -40,7 +40,7 @@
       "name":"rol-ops",
       "namespace":"default",
       "annotations":{
-        "tdcc.tke.cloud.tencent.com/region":"ap-guangzhou",
+        "authz.tkestack.io/region":"ap-guangzhou",
         "authz.tkestack.io/provider-name":"clusternet"
       }
     },
@@ -58,7 +58,7 @@
       "name":"rol-dev",
       "namespace":"default",
       "annotations":{
-        "tdcc.tke.cloud.tencent.com/region":"ap-guangzhou",
+        "authz.tkestack.io/region":"ap-guangzhou",
         "authz.tkestack.io/provider-name":"clusternet"
       }
     },
