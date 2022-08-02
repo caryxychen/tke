@@ -25,7 +25,6 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -137,19 +136,6 @@ func NewController(
 	controller.mcrbLister = mcrbInformer.Lister()
 	controller.mcrbSynced = mcrbInformer.Informer().HasSynced
 	return controller
-}
-
-func (c *Controller) enqueueCluster(obj interface{}) {
-	cluster := obj.(*apiplatformv1.Cluster)
-	selector, _ := labels.Parse(fmt.Sprintf("%s=%s", constant.DispatchAllClusters, "true"))
-	list, err := c.mcrbLister.MultiClusterRoleBindings(cluster.Spec.TenantID).List(selector)
-	if err != nil {
-		log.Warnf("failed to list mcrbs for tenant '%s'", cluster.Spec.TenantID)
-		return
-	}
-	for _, item := range list {
-		c.enqueue(item)
-	}
 }
 
 func (c *Controller) enqueue(obj interface{}) {
@@ -328,13 +314,15 @@ func (c *Controller) handleActive(ctx context.Context, mcrb *apiauthzv1.MultiClu
 			log.Warnf("GetV1ClusterByName failed, cluster: '%s', user: '%s', err: '%#v'", cls, mcrb.Spec.Username, err)
 			return err
 		}
+		if cluster.Status.Phase != "Waiting" && cluster.Status.Phase != apiplatformv1.ClusterInitializing && cluster.Status.Phase != apiplatformv1.ClusterTerminating {
+			clusters = append(clusters, cls)
+		}
 		subject, err := provider.GetSubject(ctx, mcrb.Spec.Username, cluster)
 		if err != nil {
 			log.Warnf("GetSubject failed, cluster: '%s',  user: '%s', err: '%#v'", cls, mcrb.Spec.Username, err)
 			return err
 		}
 		clusterSubjects[cls] = subject
-		clusters = append(clusters, cls)
 	}
 	mcrb.Spec.Clusters = clusters
 
