@@ -137,6 +137,10 @@ func (Strategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
 		log.Warnf("Unauthorized update mcrb tenantID '%s'", oldMcrb.Spec.TenantID)
 		mcrb.Spec.TenantID = oldMcrb.Spec.TenantID
 	}
+	if mcrb.Spec.RoleName != oldMcrb.Spec.RoleName {
+		log.Warnf("Unauthorized update mcrb roleName '%s'", oldMcrb.Spec.RoleName)
+		mcrb.Spec.RoleName = oldMcrb.Spec.RoleName
+	}
 }
 
 // Validate validates a new configmap.
