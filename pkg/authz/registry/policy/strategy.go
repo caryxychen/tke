@@ -117,7 +117,8 @@ func compactRules(rules []rbacv1.PolicyRule) []rbacv1.PolicyRule {
 		for _, rule := range rules {
 			apiGroups := rule.APIGroups
 			for j, _ := range rule.APIGroups {
-				if apiGroups[j] == `'""'` {
+				log.Infof("apiGroups: %s", apiGroups[j])
+				if apiGroups[j] == "'\"\"'" {
 					apiGroups[j] = ""
 				}
 			}
