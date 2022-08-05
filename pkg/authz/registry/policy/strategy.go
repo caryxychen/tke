@@ -21,6 +21,7 @@ package policy
 import (
 	"context"
 	"encoding/json"
+	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/apiserver/pkg/endpoints/request"
@@ -98,15 +99,7 @@ func (Strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
 	if policy.Name == "" && policy.GenerateName == "" {
 		policy.GenerateName = NamePrefix
 	}
-	if len(policy.Rules) != 0 {
-		rules, err := rbac.CompactRules(policy.Rules)
-		if err != nil {
-			marshal, _ := json.Marshal(policy.Rules)
-			log.Errorf("unexpected object, rules:%s", marshal)
-		} else {
-			policy.Rules = rules
-		}
-	}
+	policy.Rules = compactRules(policy.Rules)
 	region := authentication.GetExtraValue("region", ctx)
 	log.Debugf("region '%v'", region)
 	if len(region) != 0 {
@@ -119,6 +112,27 @@ func (Strategy) PrepareForCreate(ctx context.Context, obj runtime.Object) {
 	}
 }
 
+func compactRules(rules []rbacv1.PolicyRule) []rbacv1.PolicyRule {
+	if len(rules) != 0 {
+		for _, rule := range rules {
+			apiGroups := rule.APIGroups
+			for j, _ := range rule.APIGroups {
+				if apiGroups[j] == `'""'` {
+					apiGroups[j] = ""
+				}
+			}
+		}
+		compactedRules, err := rbac.CompactRules(rules)
+		if err != nil {
+			marshal, _ := json.Marshal(rules)
+			log.Errorf("unexpected object, rules:%s", marshal)
+		} else {
+			return compactedRules
+		}
+	}
+	return rules
+}
+
 // PrepareForUpdate is invoked on update before validation to normalize the
 // object.
 func (Strategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
@@ -128,6 +142,7 @@ func (Strategy) PrepareForUpdate(ctx context.Context, obj, old runtime.Object) {
 		log.Warnf("Unauthorized update policy tenantID '%s'", oldPolicy.TenantID)
 		policy.TenantID = oldPolicy.TenantID
 	}
+	policy.Rules = compactRules(policy.Rules)
 }
 
 // Validate validates a new configmap.

@@ -33,6 +33,24 @@ var ValidatePolicyName = apimachineryvalidation.NameIsDNSLabel
 // ValidatePolicy tests if required fields in the cluster are set.
 func ValidatePolicy(policy *authz.Policy, platformClient platformversionedclient.PlatformV1Interface) field.ErrorList {
 	allErrs := apimachineryvalidation.ValidateObjectMeta(&policy.ObjectMeta, true, ValidatePolicyName, field.NewPath("metadata"))
+	for i, rule := range policy.Rules {
+		fldPath := field.NewPath("rules").Index(i)
+		if len(rule.Verbs) == 0 {
+			allErrs = append(allErrs, field.Required(fldPath.Child("verbs"), "verbs must contain at least one value"))
+		}
+		if len(rule.NonResourceURLs) > 0 {
+			if len(rule.APIGroups) > 0 || len(rule.Resources) > 0 || len(rule.ResourceNames) > 0 {
+				allErrs = append(allErrs, field.Invalid(fldPath.Child("nonResourceURLs"), rule.NonResourceURLs, "rules cannot apply to both regular resources and non-resource URLs"))
+			}
+			return allErrs
+		}
+		if len(rule.APIGroups) == 0 {
+			allErrs = append(allErrs, field.Required(fldPath.Child("apiGroups"), "resource rules must supply at least one api group"))
+		}
+		if len(rule.Resources) == 0 {
+			allErrs = append(allErrs, field.Required(fldPath.Child("resources"), "resource rules must supply at least one resource"))
+		}
+	}
 	return allErrs
 }
 
