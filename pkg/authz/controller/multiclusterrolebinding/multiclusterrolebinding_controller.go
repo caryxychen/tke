@@ -325,11 +325,12 @@ func (c *Controller) handleActive(ctx context.Context, mcrb *apiauthzv1.MultiClu
 		clusterSubjects[cls] = subject
 	}
 	mcrb.Spec.Clusters = clusters
-
-	// 执行权限分发
-	if err = provider.DispatchMultiClusterRoleBinding(ctx, c.platformClient, mcrb, policies, clusterSubjects); err != nil {
-		log.Warnf("DispatchMultiClusterRoleBinding failed, MultiClusterRoleBinding: '%s', err: '%#v'", mcrb.Name, err)
-		return err
+	if len(clusters) != 0 {
+		// 执行权限分发
+		if err = provider.DispatchMultiClusterRoleBinding(ctx, c.platformClient, mcrb, policies, clusterSubjects); err != nil {
+			log.Warnf("DispatchMultiClusterRoleBinding failed, MultiClusterRoleBinding: '%s', err: '%#v'", mcrb.Name, err)
+			return err
+		}
 	}
 
 	// 删除已经解绑的资源
@@ -351,9 +352,13 @@ func (c *Controller) handleActive(ctx context.Context, mcrb *apiauthzv1.MultiClu
 			return err
 		}
 	}
-	if len(oldDifference) != 0 || len(newDifference) != 0 {
-		clsBytes, _ := json.Marshal(mcrb.Spec.Clusters)
-		mcrb.Annotations[constant.LastDispatchedClusters] = string(clsBytes)
+	if (len(oldDifference) != 0 || len(newDifference) != 0) || len(mcrb.Spec.Clusters) == 0 {
+		if len(mcrb.Spec.Clusters) == 0 {
+			delete(mcrb.Annotations, constant.LastDispatchedClusters)
+		} else {
+			clsBytes, _ := json.Marshal(mcrb.Spec.Clusters)
+			mcrb.Annotations[constant.LastDispatchedClusters] = string(clsBytes)
+		}
 		if mcrb.Labels[constant.DispatchAllClusters] == "true" {
 			mcrb.Spec.Clusters = []string{"*"}
 		}
