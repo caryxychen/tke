@@ -9,7 +9,7 @@
       }
     },
     "displayName": "admin",
-    "description": "对所有命名空间下资源的读写权限，拥有集群节点、存储卷、命名空间、配额的读写权限",
+    "description": "集群管理员身份，对集群内所有资源具有读写权限",
     "scope": "MultiCluster",
     "tenantID": "default",
     "username": "admin",
