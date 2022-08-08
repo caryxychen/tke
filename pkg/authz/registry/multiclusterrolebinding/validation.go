@@ -45,10 +45,6 @@ func ValidateMultiClusterRoleBinding(mcrb *authz.MultiClusterRoleBinding, roleGe
 		return allErrs
 	}
 	clusters := mcrb.Spec.Clusters
-	//if len(clusters) == 0 {
-	//	allErrs = append(allErrs, field.Required(field.NewPath("spec", "clusters"), "empty clusters"))
-	//	return allErrs
-	//}
 	for _, cls := range clusters {
 		if cls == "*" {
 			if len(clusters) != 1 {

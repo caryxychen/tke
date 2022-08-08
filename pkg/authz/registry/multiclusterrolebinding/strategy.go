@@ -152,6 +152,9 @@ func (s Strategy) Validate(ctx context.Context, obj runtime.Object) field.ErrorL
 			return field.ErrorList{fieldErr}
 		}
 	}
+	if len(mcrb.Spec.Clusters) == 0 {
+		return field.ErrorList{field.Required(field.NewPath("spec", "clusters"), "empty clusters")}
+	}
 	return ValidateMultiClusterRoleBinding(mcrb, s.roleGetter, s.platformClient)
 }
 

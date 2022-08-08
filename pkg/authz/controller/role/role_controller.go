@@ -302,13 +302,9 @@ func (c *Controller) updateOrDeleteMultiClusterRoleBindings(mcrbs []*apiauthzv1.
 		}
 		if roleDeleted {
 			deleteOpt := metav1.DeletePropagationBackground
-			if err := c.client.AuthzV1().MultiClusterRoleBindings(mcrb.Namespace).Delete(context.Background(), mcrb.Name, metav1.DeleteOptions{PropagationPolicy: &deleteOpt}); err != nil {
-				if errors.IsNotFound(err) {
-					continue
-				} else {
-					log.Warnf("Unable to delete MultiClusterRoleBinding '%s/%s', err: '%v'", mcrb.Namespace, mcrb.Name, err)
-					return err
-				}
+			if err := c.client.AuthzV1().MultiClusterRoleBindings(mcrb.Namespace).Delete(context.Background(), mcrb.Name, metav1.DeleteOptions{PropagationPolicy: &deleteOpt}); err != nil && !errors.IsNotFound(err) {
+				log.Warnf("Unable to delete MultiClusterRoleBinding '%s/%s', err: '%v'", mcrb.Namespace, mcrb.Name, err)
+				return err
 			}
 		} else {
 			// 触发更新mcrb
@@ -319,13 +315,9 @@ func (c *Controller) updateOrDeleteMultiClusterRoleBindings(mcrbs []*apiauthzv1.
 			}
 			annotations[constant.UpdatedByRoleController] = time.Now().Format("2006-01-02T15:04:05")
 			deepCopy.Annotations = annotations
-			if _, err := c.client.AuthzV1().MultiClusterRoleBindings(mcrb.Namespace).Update(context.Background(), deepCopy, metav1.UpdateOptions{}); err != nil {
-				if errors.IsNotFound(err) {
-					continue
-				} else {
-					log.Warnf("Unable to delete MultiClusterRoleBinding '%s/%s', err: '%v'", mcrb.Namespace, mcrb.Name, err)
-					return err
-				}
+			if _, err := c.client.AuthzV1().MultiClusterRoleBindings(mcrb.Namespace).Update(context.Background(), deepCopy, metav1.UpdateOptions{}); err != nil && !errors.IsNotFound(err) {
+				log.Warnf("Unable to delete MultiClusterRoleBinding '%s/%s', err: '%v'", mcrb.Namespace, mcrb.Name, err)
+				return err
 			}
 		}
 	}
