@@ -63,6 +63,7 @@ func startRoleController(ctx ControllerContext) (http.Handler, bool, error) {
 	}
 	ctrl := role.NewController(
 		ctx.ClientBuilder.ClientOrDie("role-controller"),
+		ctx.PlatformClient,
 		ctx.InformerFactory.Authz().V1().Roles(),
 		ctx.InformerFactory.Authz().V1().MultiClusterRoleBindings(),
 		5*time.Minute,

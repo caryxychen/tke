@@ -31,6 +31,7 @@ import (
 	"time"
 	apiauthzv1 "tkestack.io/tke/api/authz/v1"
 	clientset "tkestack.io/tke/api/client/clientset/versioned"
+	platformversionedclient "tkestack.io/tke/api/client/clientset/versioned/typed/platform/v1"
 	authzv1informer "tkestack.io/tke/api/client/informers/externalversions/authz/v1"
 	authzv1 "tkestack.io/tke/api/client/listers/authz/v1"
 	"tkestack.io/tke/pkg/authz/constant"
@@ -47,24 +48,27 @@ const (
 )
 
 type Controller struct {
-	client     clientset.Interface
-	queue      workqueue.RateLimitingInterface
-	roleLister authzv1.RoleLister
-	roleSynced cache.InformerSynced
-	mcrbLister authzv1.MultiClusterRoleBindingLister
-	mcrbSynced cache.InformerSynced
-	stopCh     <-chan struct{}
+	client         clientset.Interface
+	platformClient platformversionedclient.PlatformV1Interface
+	queue          workqueue.RateLimitingInterface
+	roleLister     authzv1.RoleLister
+	roleSynced     cache.InformerSynced
+	mcrbLister     authzv1.MultiClusterRoleBindingLister
+	mcrbSynced     cache.InformerSynced
+	stopCh         <-chan struct{}
 }
 
 // NewController creates a new Controller object.
 func NewController(
 	client clientset.Interface,
+	platformClient platformversionedclient.PlatformV1Interface,
 	roleInformer authzv1informer.RoleInformer,
 	mcrbInformer authzv1informer.MultiClusterRoleBindingInformer,
 	resyncPeriod time.Duration) *Controller {
 	controller := &Controller{
-		client: client,
-		queue:  workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), controllerName),
+		client:         client,
+		platformClient: platformClient,
+		queue:          workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), controllerName),
 	}
 	if client != nil &&
 		client.AuthzV1().RESTClient() != nil &&
@@ -239,6 +243,12 @@ func (c *Controller) syncItem(key string) error {
 	}
 
 	if roleDeleted {
+		if role.Namespace != "default" {
+			if err := c.deleteClusterRole(role); err != nil {
+				log.Warnf("Failed to deleteClusterRole for role '%s/%s'", role.Namespace, role.Name)
+				return err
+			}
+		}
 		roleFinalize := apiauthzv1.Role{}
 		roleFinalize.ObjectMeta = role.ObjectMeta
 		roleFinalize.Finalizers = []string{}
@@ -260,6 +270,14 @@ func (c *Controller) syncItem(key string) error {
 		}
 	}
 	return nil
+}
+
+func (c *Controller) deleteClusterRole(role *apiauthzv1.Role) error {
+	provider, err := authzprovider.GetProvider(role.Annotations)
+	if err != nil {
+		return err
+	}
+	return provider.DeleteClusterRole(context.Background(), c.platformClient, role)
 }
 
 func (c *Controller) getMultiClusterRoleBindings(roleNs, roleName string) ([]*apiauthzv1.MultiClusterRoleBinding, error) {

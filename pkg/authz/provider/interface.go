@@ -22,6 +22,7 @@ type Provider interface {
 	GetSubject(ctx context.Context, userName string, cluster *platformv1.Cluster) (*rbacv1.Subject, error)
 	DispatchMultiClusterRoleBinding(ctx context.Context, platformClient platformversionedclient.PlatformV1Interface, mcrb *authzv1.MultiClusterRoleBinding, rules []rbacv1.PolicyRule, clusterSubjects map[string]*rbacv1.Subject) error
 	DeleteUnbindingResources(ctx context.Context, client platformversionedclient.PlatformV1Interface, mcrb *authzv1.MultiClusterRoleBinding, clusterIDs []string) error
+	DeleteClusterRole(ctx context.Context, platformClient platformversionedclient.PlatformV1Interface, role *authzv1.Role) error
 	DeleteMultiClusterRoleBindingResources(ctx context.Context, platformClient platformversionedclient.PlatformV1Interface, mcrb *authzv1.MultiClusterRoleBinding) error
 }
 
@@ -84,6 +85,10 @@ func (p *DelegateProvider) DispatchMultiClusterRoleBinding(ctx context.Context, 
 }
 
 func (p *DelegateProvider) DeleteUnbindingResources(ctx context.Context, client platformversionedclient.PlatformV1Interface, mcrb *authzv1.MultiClusterRoleBinding, clusterIDs []string) error {
+	return nil
+}
+
+func (p *DelegateProvider) DeleteClusterRole(ctx context.Context, platformClient platformversionedclient.PlatformV1Interface, role *authzv1.Role) error {
 	return nil
 }
 
